@@ -151,7 +151,7 @@ body[data-mode="intro"] .acts,body[data-mode="intro"] .joy,body[data-mode="resul
 .hud > *{pointer-events:auto}
 .hud-top{
   position:absolute;top:0;left:0;right:0;padding:calc(10px + env(safe-area-inset-top,0px)) calc(10px + env(safe-area-inset-right,0px)) 0 calc(10px + env(safe-area-inset-left,0px));pointer-events:none;
-  display:grid;grid-template-columns:minmax(0,1fr) minmax(90px,150px) minmax(0,1fr);gap:8px;align-items:start;
+  display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:start;
 }
 .hud-top > *{pointer-events:auto}
 .hud-left{display:flex;flex-direction:column;gap:6px;align-items:flex-start;min-width:0}
@@ -174,7 +174,9 @@ body[data-mode="intro"] .acts,body[data-mode="intro"] .joy,body[data-mode="resul
 .tasks li.fake-h{color:var(--wolf);font-weight:600}
 .tasks li.ghost-note{color:var(--ink-dim);font-size:11.5px}
 .tasks li.fake,.tasks li.fake b{color:var(--ink-dim)}
-.hud-mid{display:flex;flex-direction:column;align-items:center;gap:3px;padding-top:4px}
+.meet-pg{display:flex;align-items:center;gap:10px;margin-top:8px}
+.meet-pg .pg{flex:1;min-width:90px;max-width:240px}
+.meet-pg .pg-txt{white-space:nowrap}
 .pg{width:100%;height:10px;border-radius:6px;background:rgba(11,21,29,.82);border:1px solid var(--line);overflow:hidden}
 #pgBar{height:100%;width:0;background:var(--moss);transition:width .4s}
 .pg-txt{font-size:11.5px;color:var(--ink);text-shadow:0 1px 3px #000;font-variant-numeric:tabular-nums}
@@ -278,8 +280,8 @@ body.menu-open #menu{display:flex}
 .result-card h2{font-size:34px}
 .result-card .verdict{font-size:16px}
 .result-card ul{font-size:14px;color:var(--ink-dim);display:flex;flex-direction:column;gap:2px}
-.end{flex-direction:column;justify-content:center;align-items:center;background:rgba(9,17,25,.9)}
-.end .panel{width:100%;max-width:420px}
+.end{flex-direction:column;align-items:center;background:rgba(9,17,25,.9)}
+.end .panel{width:100%;max-width:420px;margin:auto 0}
 .end h2{font-size:44px;line-height:1.1}
 .end.vill h2{color:var(--moss)}
 .end.wolf h2{color:var(--wolf)}
@@ -302,6 +304,40 @@ body.map-open #mapOv{display:flex}
 @media (prefers-reduced-motion:reduce){*{animation:none !important;transition:none !important}}
 
 #lobbyHint{-webkit-user-select:text;user-select:text;word-break:break-all}
+
+/* ---------- 手機橫向（畫面很矮） ---------- */
+/* 直向時這幾個分組不起作用，裡面的東西照原樣往下排 */
+.lobby-col,.meet-col,.end-col{display:contents}
+@media (orientation:landscape) and (max-height:520px){
+  .screen{padding-top:calc(10px + env(safe-area-inset-top,0px));padding-bottom:calc(10px + env(safe-area-inset-bottom,0px))}
+  .panel{padding:14px;gap:9px}
+  .btn{min-height:42px;padding:6px 14px}
+  /* 首頁：標題縮小成一行，面板太高時從上面開始排、可以往下捲 */
+  .home{padding:12px calc(24px + env(safe-area-inset-right,0px)) calc(12px + env(safe-area-inset-bottom,0px)) calc(24px + env(safe-area-inset-left,0px))}
+  .title{font-size:min(84px,15vh)}
+  .subtitle{font-size:min(22px,5vh)}
+  .home-panel{align-self:flex-start;margin-top:auto;margin-bottom:auto}
+  /* 大廳：左邊是玩家和地圖，右邊是設定和開始 */
+  .lobby .panel{max-width:880px;flex-direction:row;align-items:flex-start;gap:18px;margin-top:auto;margin-bottom:auto}
+  .lobby-col{display:flex;flex-direction:column;gap:9px;flex:1;min-width:0}
+  .settings{row-gap:5px}
+  #mapPrev{width:118px}
+  .map-arrow{width:40px;height:40px;font-size:26px}
+  .lobby-head h2{font-size:20px}
+  .stepper button{width:32px;height:32px}
+  /* 開會：左邊投票，右邊聊天 */
+  .meet{flex-direction:row;gap:14px}
+  .meet-col{display:flex;flex-direction:column;gap:8px;min-width:0;min-height:0}
+  .meet-col.a{flex:1.35;overflow-y:auto}
+  .meet-col.b{flex:1}
+  .meet-head h2{font-size:22px}
+  .grid{grid-template-columns:repeat(auto-fill,minmax(128px,1fr));gap:6px}
+  .chat{min-height:0}
+  /* 結束：左邊名單，右邊按鈕 */
+  .end .panel{max-width:760px;flex-direction:row;align-items:flex-start;gap:18px}
+  .end-col{display:flex;flex-direction:column;gap:9px;flex:1;min-width:0}
+  .end h2{font-size:34px}
+}
 [hidden]{display:none !important}
 </style>
 </head>
@@ -313,10 +349,6 @@ body.map-open #mapOv{display:flex}
     <div class="hud-left">
       <div id="roleChip" class="chip">村民</div>
       <ul id="taskList" class="tasks"></ul>
-    </div>
-    <div class="hud-mid">
-      <div class="pg" role="progressbar" aria-label="全村工作進度"><div id="pgBar"></div></div>
-      <div id="pgTxt" class="pg-txt">全村工作 0/0</div>
     </div>
     <div class="hud-right">
       <button id="btnMap" class="hbtn" type="button">地圖</button>
@@ -362,6 +394,7 @@ body.map-open #mapOv{display:flex}
 
 <section id="lobby" class="screen lobby">
   <div class="panel">
+    <div class="lobby-col">
     <div class="lobby-head">
       <h2 id="lobbyTitle">房間</h2>
       <span id="lobbyCode" class="code"></span>
@@ -379,10 +412,13 @@ body.map-open #mapOv{display:flex}
       <canvas id="mapPrev" aria-hidden="true"></canvas>
       <div class="map-text"><p id="mapDesc" class="note"></p></div>
     </div>
+    </div>
+    <div class="lobby-col">
     <div id="settings" class="settings"></div>
     <button id="btnStart" class="btn primary" type="button">開始遊戲</button>
     <p id="lobbyHint" class="note"></p>
     <button id="btnLeave" class="btn" type="button">離開房間</button>
+    </div>
   </div>
 </section>
 
@@ -400,10 +436,12 @@ body.map-open #mapOv{display:flex}
 </section>
 
 <section id="meet" class="screen meet">
+  <div class="meet-col a">
   <div class="meet-head">
     <div>
       <h2 id="meetTitle">全村會議</h2>
       <p id="meetWhy"></p>
+      <div class="meet-pg"><div class="pg" role="progressbar" aria-label="全村工作進度"><div id="pgBar"></div></div><span id="pgTxt" class="pg-txt"></span></div>
     </div>
     <div id="meetTimer" class="timer">0</div>
   </div>
@@ -413,12 +451,15 @@ body.map-open #mapOv{display:flex}
     <button id="btnVote" class="btn primary" type="button" disabled>選一個人</button>
   </div>
   <p id="voteHint" class="vote-hint"></p>
+  </div>
+  <div class="meet-col b">
   <div id="chatLog" class="chat" aria-live="polite"></div>
   <div id="quick" class="quick"></div>
   <form id="chatForm" class="chat-form">
     <input id="chatIn" maxlength="40" autocomplete="off" placeholder="說點什麼" aria-label="發言">
     <button class="btn" type="submit">送出</button>
   </form>
+  </div>
 </section>
 
 <section id="result" class="veil">
@@ -432,13 +473,17 @@ body.map-open #mapOv{display:flex}
 
 <section id="end" class="screen end">
   <div class="panel">
+    <div class="end-col">
     <h2 id="endTitle"></h2>
     <p id="endWhy"></p>
     <ul id="endRoster" class="roster"></ul>
+    </div>
+    <div class="end-col">
     <button id="btnAgain" class="btn primary" type="button">再玩一局</button>
     <button id="btnToLobby" class="btn" type="button">回到大廳</button>
     <p id="endWait" class="note">等房主開始下一局。</p>
     <button id="btnEndLeave" class="btn" type="button">離開房間</button>
+    </div>
   </div>
 </section>
 
@@ -481,7 +526,7 @@ body.map-open #mapOv{display:flex}
 'use strict';
 // ===== 常數與工具 =====
 const TILE = 40, MW = 46, MH = 32, WORLD_W = MW * TILE, WORLD_H = MH * TILE;
-const SPEED = 145, BOT_SPEED = 128;   // 走路速度（每秒幾個像素）
+const SPEED = 120, BOT_SPEED = 120;   // 走路速度（每秒幾個像素）
 const VISION = 185, VISION_WOLF = 290;   // 看得清楚的半徑：村民小、狼人大（約 1.6 倍）
 const KILL_RANGE = 78, USE_RANGE = 58, REPORT_RANGE = 92, BELL_RANGE = 74;
 const MAX_PLAYERS = 10, MAX_BOTS = 8;
@@ -1957,6 +2002,39 @@ function render(now) {
   g.fillStyle = gr; g.fillRect(0, 0, cv.width, cv.height);
   if (ghostView) { g.fillStyle = 'rgba(120,150,190,.10)'; g.fillRect(0, 0, cv.width, cv.height); }
   g.setTransform(z, 0, 0, z, -cx * z, -cy * z);
+  // 視野盲區：房子擋住的地方蓋成黑的（跟 canSee 判斷看不看得到人用的是同一批房子）
+  if (playing && G.ph === 2 && !ghostView) {
+    const px = ME.x, py = ME.y, R = vis * 1.1, F = 1500;
+    let any = false; g.beginPath();
+    for (const b of BUILDINGS) {
+      // 我在房子南邊時，把屋頂凸出去的部分也算進去，免得影子蓋到屋頂
+      const l = b.X, r = b.X + b.W, t = py < b.Y ? b.Y : b.Y - (b.small ? 14 : 24), bt = b.Y + b.H;
+      if (l - px > R || px - r > R || t - py > R || py - bt > R) continue;
+      if (px > l && px < r && py > t && py < bt) continue;
+      const edges = [];
+      if (py >= t) edges.push([l, t, r, t]);      // 背對我的邊才會投出影子
+      if (py <= bt) edges.push([r, bt, l, bt]);
+      if (px >= l) edges.push([l, bt, l, t]);
+      if (px <= r) edges.push([r, t, r, bt]);
+      for (const e of edges) {
+        const ax = e[0], ay = e[1], bx = e[2], by = e[3];
+        const da = Math.hypot(ax - px, ay - py) || 1, db = Math.hypot(bx - px, by - py) || 1;
+        const a2x = ax + (ax - px) / da * F, a2y = ay + (ay - py) / da * F, b2x = bx + (bx - px) / db * F, b2y = by + (by - py) / db * F;
+        // 每一塊都用同一個繞行方向，重疊的地方才不會被挖空
+        const area = (ax * by - bx * ay) + (bx * b2y - b2x * by) + (b2x * a2y - a2x * b2y) + (a2x * ay - ax * a2y);
+        if (area >= 0) { g.moveTo(ax, ay); g.lineTo(bx, by); g.lineTo(b2x, b2y); g.lineTo(a2x, a2y); }
+        else { g.moveTo(a2x, a2y); g.lineTo(b2x, b2y); g.lineTo(bx, by); g.lineTo(ax, ay); }
+        g.closePath(); any = true;
+      }
+    }
+    if (any) {
+      // 影子的濃度要跟外圈的黑暗接得起來，所以越往外越淡
+      const comp = a => clamp(1 - (1 - dark) / (1 - a), 0, 1), sg = g.createRadialGradient(fx, fy, vis * .5, fx, fy, vis * 1.04);
+      sg.addColorStop(0, `rgba(6,11,20,${dark})`); sg.addColorStop(.37, `rgba(6,11,20,${comp(dark * .39)})`); sg.addColorStop(.74, `rgba(6,11,20,${comp(dark * .78)})`);
+      sg.addColorStop(.9, `rgba(6,11,20,${comp(dark * .915)})`); sg.addColorStop(1, 'rgba(6,11,20,0)');
+      g.fillStyle = sg; g.fill();
+    }
+  }
   if (glowCv) {
     g.globalCompositeOperation = 'lighter';
     for (let i = 0; i < LIGHTS.length; i++) {
@@ -1994,6 +2072,10 @@ let lastT = 0, uiAcc = 0;
 function frame(now) {
   requestAnimationFrame(frame);
   const dt = Math.min(.05, (now - lastT) / 1000 || 0); lastT = now;
+  // iPhone 轉向時，「視窗大小改變」的通知常常比實際排版早到，畫布就會留著舊尺寸被拉寬。
+  // 所以每一格都確認畫布和螢幕上的實際大小一致，不一致就重設。
+  const cw = cv.clientWidth, ch = cv.clientHeight;
+  if (cw > 0 && ch > 0 && (cw !== view.w || ch !== view.h || Math.min(window.devicePixelRatio || 1, 2) !== view.dpr)) resize();
   try {
     syncFromNet(now);
     if (inRoom && !isHost) {
@@ -2483,8 +2565,6 @@ function renderHud() {
     }
     if (my.dead && !my.wolf && taskMarks().length) ul.appendChild(el('li', 'ghost-note', '鬼魂每 ' + G.st.ga + ' 秒自動完成一步'));
   }
-  const pg = G.pg || [0, 0];
-  if (changed('pg', pg[0] + '/' + pg[1])) { $('pgBar').style.width = (pg[1] ? Math.round(pg[0] / pg[1] * 100) : 0) + '%'; $('pgTxt').textContent = '全村工作 ' + pg[0] + '/' + pg[1]; }
   const use = $('btnUse'), rep = $('btnReport'), kill = $('btnKill');
   const u = ctxA.use;
   const ul = u ? (u.k === 'task' ? '工作' : '敲鐘') : '使用';
@@ -2671,6 +2751,9 @@ function renderMeet() {
     $('meetWhy').textContent = mt.body >= 0 ? nameIdx(mt.by) + ' 發現 ' + nameIdx(mt.body) + ' 倒在地上。' : nameIdx(mt.by) + ' 敲響了村鐘。';
   }
   $('meetTimer').textContent = Math.max(0, G.rem);
+  // 全村的工作進度只在開會時公布
+  const pg = G.pg || [0, 0];
+  if (changed('pg', pg[0] + '/' + pg[1])) { $('pgBar').style.width = (pg[1] ? Math.round(pg[0] / pg[1] * 100) : 0) + '%'; $('pgTxt').textContent = '全村工作進度 ' + pg[0] + ' / ' + pg[1]; }
   const voted = myVoted();
   let s = mt.no + '|' + meetSel + '|' + voted + '|' + my.dead + '|';
   for (let i = 0; i < G.ro.length; i++) { const p = uiP(G.ro[i]); s += (G.dd[i] === '1' || G.lf[i] === '1' ? 'x' : 'a') + (p && Array.isArray(p.v) && p.v[0] === mt.no ? 'v' : '-') + (p ? p.n + p.c : '?') + ';'; }
@@ -2839,6 +2922,8 @@ function bindUI() {
   window.addEventListener('keyup', e => input.keys.delete(e.key.toLowerCase()));
   window.addEventListener('blur', () => { input.keys.clear(); });
   window.addEventListener('resize', resize);
+  window.addEventListener('orientationchange', () => { resize(); setTimeout(resize, 150); setTimeout(resize, 600); });
+  if (window.visualViewport) window.visualViewport.addEventListener('resize', resize);
 }
 
 function main() {
@@ -2859,7 +2944,7 @@ function main() {
   requestAnimationFrame(frame);
   window.__lw = {
     get G() { return G; }, get H() { return H; }, ME, my, players, get BOTS() { return BOTS; }, Net, get STATIONS() { return STATIONS; }, SPAWNS, grid, MAPS, loadMap, applyMap, canSee, paintMiniMap, tget, boxFree, get curMap() { return curMap; },
-    findPath, startPractice, createRoom, joinRoom, invite, inviteLink, intro, hostStart, hostKill, hostReport, hostTick, setBotCount, castVote, sendChat, finishTask, openTask, leaveRoom, uiMode, parseTasks, dealTasks, taskCur, taskMarks, get CHAINS() { return CHAINS; }, get taskState() { return taskState; }, get hs() { return hs; },
+    findPath, startPractice, createRoom, joinRoom, invite, inviteLink, intro, hostStart, hostKill, hostReport, hostTick, setBotCount, castVote, sendChat, finishTask, openTask, leaveRoom, uiMode, parseTasks, dealTasks, taskCur, taskMarks, get CHAINS() { return CHAINS; }, get taskState() { return taskState; }, get hs() { return hs; }, get BUILDINGS() { return BUILDINGS; },
     get ctx() { return ctxA; }, get inRoom() { return inRoom; }, get isHost() { return isHost; }, get code() { return code; }
   };
 }
