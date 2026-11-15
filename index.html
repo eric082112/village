@@ -1732,7 +1732,7 @@ function botLine(b, idx) {
   return pick(lines);
 }
 // ===== 玩家端：同步、移動、動作 =====
-const view = { w: 0, h: 0, dpr: 1, z: 1, cx: 23.5 * TILE, cy: 15.5 * TILE, vis: 0 };
+const view = { w: 0, h: 0, dpr: 1, z: 1, cx: 23.5 * TILE, cy: 15.5 * TILE, vis: 0, lo: 0 };
 let fogA = null, fogB = null;   // 畫霧用的小畫布
 // 換地圖：重建地形與地面圖。在大廳時順便把人放回新地圖的鐘旁邊。
 function applyMap(i) {
@@ -2054,12 +2054,15 @@ function render(now) {
   const playing = inRoom && G && G.ph >= 1 && G.ph <= 4 && my.idx >= 0;
   let fx, fy, vis, dark;
   if (playing) {
-    fx = ME.x; fy = ME.y - 16; dark = my.dead ? .45 : .86;
+    fx = ME.x; fy = ME.y - 16;
+    // 燈被吹熄：村民的畫面明顯變暗；狼人也會暗一點，但比村民亮
+    const loT = G.lo && G.ph === 2 && !my.dead ? 1 : 0; view.lo += (loT - view.lo) * .1; if (Math.abs(loT - view.lo) < .01) view.lo = loT;
+    dark = my.dead ? .45 : .86 + (my.wolf ? .04 : .1) * view.lo;
     const want = my.wolf ? VISION_WOLF : VISION * (G.lo && G.ph === 2 && !my.dead ? LIGHTS_OUT : 1);
     view.vis = view.vis ? view.vis + (want - view.vis) * .1 : want; if (Math.abs(view.vis - want) < .5) view.vis = want;
     vis = view.vis;
   }
-  else { fx = BELL.wx + (inRoom ? 0 : Math.sin(now / 9000) * 150); fy = BELL.wy - 22 + (inRoom ? 0 : Math.cos(now / 12000) * 80); vis = 330; dark = .9; }
+  else { view.lo = 0; fx = BELL.wx + (inRoom ? 0 : Math.sin(now / 9000) * 150); fy = BELL.wy - 22 + (inRoom ? 0 : Math.cos(now / 12000) * 80); vis = 330; dark = .9; }
   view.cx = vw >= WORLD_W ? WORLD_W / 2 : clamp(fx, vw / 2, WORLD_W - vw / 2);
   view.cy = vh >= WORLD_H ? WORLD_H / 2 : clamp(fy, vh / 2, WORLD_H - vh / 2);
   const cx = view.cx - vw / 2, cy = view.cy - vh / 2;
@@ -2135,12 +2138,14 @@ function render(now) {
   // 夜色與燈光
   const psx = (fx - cx) * z, psy = (fy - cy) * z, rad = vis * z;
   if (glowCv && !ghostView) { g.globalCompositeOperation = 'lighter'; g.globalAlpha = .13; g.drawImage(glowCv, fx - vis, fy - vis, vis * 2, vis * 2); g.globalAlpha = 1; g.globalCompositeOperation = 'source-over'; }
+  // 燈熄的時候，連看得到的範圍也整個暗下來
+  if (playing && view.lo > 0) { g.setTransform(1, 0, 0, 1, 0, 0); g.fillStyle = 'rgba(5,8,13,' + (my.wolf ? .15 : .36) * view.lo + ')'; g.fillRect(0, 0, cv.width, cv.height); }
   // 看不到的地方蓋一層霧：遊戲中是半透明的深灰色，邊緣是柔的；首頁和大廳維持原本的夜色
   {
     const M = Math.max(4, Math.round(6 * view.dpr)), mw = Math.ceil(cv.width / M / 2) * 2 + 2, mh = Math.ceil(cv.height / M / 2) * 2 + 2;
     if (!fogA) { fogA = document.createElement('canvas'); fogB = document.createElement('canvas'); }
     if (fogA.width !== mw || fogA.height !== mh) { fogA.width = mw; fogA.height = mh; fogB.width = mw / 2; fogB.height = mh / 2; }
-    const fogCol = playing ? '#262b33' : '#060b14', m = fogA.getContext('2d');
+    const fogCol = playing ? (view.lo > 0 ? hexMix('#262b33', my.wolf ? '#1c2027' : '#0f1217', view.lo) : '#262b33') : '#060b14', m = fogA.getContext('2d');
     m.setTransform(1, 0, 0, 1, 0, 0); m.globalAlpha = 1; m.globalCompositeOperation = 'source-over';
     m.fillStyle = fogCol; m.fillRect(0, 0, mw, mh);
     // 自己周圍挖一個邊緣漸層的洞
@@ -2191,11 +2196,11 @@ function render(now) {
     g.globalCompositeOperation = 'lighter';
     for (let i = 0; i < LIGHTS.length; i++) {
       const l = LIGHTS[i], lr = l.beam ? 470 : l.r; if (l.x + lr < x0 || l.x - lr > x1 || l.y + lr < y0 || l.y - lr > y1) continue;
-      g.globalAlpha = .5 + .08 * Math.sin(now / 420 + i * 1.7);
+      g.globalAlpha = (.5 + .08 * Math.sin(now / 420 + i * 1.7)) * (1 - .88 * view.lo);   // 路燈也跟著熄掉
       g.drawImage(glowCv, l.x - l.r, l.y - l.r, l.r * 2, l.r * 2);
       if (l.beam) {   // 燈塔會轉的光束
         const an = now / 1500;
-        g.globalAlpha = .13; g.fillStyle = '#ffe9a8'; g.beginPath(); g.moveTo(l.x, l.y);
+        g.globalAlpha = .13 * (1 - .88 * view.lo); g.fillStyle = '#ffe9a8'; g.beginPath(); g.moveTo(l.x, l.y);
         g.lineTo(l.x + Math.cos(an - .17) * 460, l.y + Math.sin(an - .17) * 300); g.lineTo(l.x + Math.cos(an + .17) * 460, l.y + Math.sin(an + .17) * 300); g.closePath(); g.fill();
       }
     }
@@ -2302,144 +2307,192 @@ function drawHoe(g, px, py, ang, hands) {
 }
 
 // ----- 村民：白天在田裡工作 -----
-function sceneVillager(g, t, col) {
-  const sky = g.createLinearGradient(0, 0, 0, 215); sky.addColorStop(0, '#86c0e2'); sky.addColorStop(1, '#fdeab8');
-  g.fillStyle = sky; g.fillRect(-30, -30, 380, 260);
-  g.fillStyle = 'rgba(255,244,200,.38)'; circ(g, 250, 60, 46); g.fillStyle = '#fff7d6'; circ(g, 250, 60, 25);
-  const cloud = (x, y, s) => { g.fillStyle = 'rgba(255,255,255,.85)'; g.beginPath(); g.ellipse(x, y, 30 * s, 11 * s, 0, 0, 6.2832); g.ellipse(x - 16 * s, y + 4 * s, 20 * s, 9 * s, 0, 0, 6.2832); g.ellipse(x + 18 * s, y + 4 * s, 22 * s, 9 * s, 0, 0, 6.2832); g.fill(); };
-  cloud(52 + t * 5, 46, 1); cloud(150 + t * 3, 94, .7);
-  g.strokeStyle = '#4c5f6e'; g.lineWidth = 1.6; g.lineCap = 'round';
-  for (let i = 0; i < 2; i++) {
-    const bx = 306 - t * 17 - i * 26, by = 112 + i * 11 + Math.sin(t * 2 + i) * 4, fl = Math.sin(t * 9 + i * 2) * 4;
-    g.beginPath(); g.moveTo(bx - 7, by - fl); g.quadraticCurveTo(bx - 3, by - 2, bx, by + 1); g.quadraticCurveTo(bx + 3, by - 2, bx + 7, by - fl); g.stroke();
-  }
-  g.fillStyle = '#93c078'; g.beginPath(); g.ellipse(60, 224, 180, 62, 0, 0, 6.2832); g.fill();
-  g.fillStyle = '#7dae66'; g.beginPath(); g.ellipse(282, 232, 160, 56, 0, 0, 6.2832); g.fill();
-  // 遠處的磨坊
-  const wx = 64, wy = 140;
-  g.fillStyle = '#e4d8bd'; g.beginPath(); g.moveTo(wx - 10, wy + 36); g.lineTo(wx + 10, wy + 36); g.lineTo(wx + 5.5, wy); g.lineTo(wx - 5.5, wy); g.closePath(); g.fill();
-  g.fillStyle = '#8f3d36'; g.beginPath(); g.moveTo(wx - 8.5, wy + 1); g.lineTo(wx, wy - 10); g.lineTo(wx + 8.5, wy + 1); g.closePath(); g.fill();
-  g.fillStyle = '#5a4630'; g.fillRect(wx - 2.5, wy + 24, 5, 12);
+// ===== 全螢幕場景 =====
+// (sx, sy) 是主角腳下的位置，u 是 1 個單位在螢幕上的大小；背景一律畫滿整個螢幕
+const FX = { ready: false };
+function fxInit() {
+  if (FX.ready) return; FX.ready = true; const r = mulberry32(11);
+  FX.stars = Array.from({ length: 34 }, () => [r(), r(), .5 + r() * 1.3, r() * 6.28]);
+  FX.motes = Array.from({ length: 26 }, () => [r(), r(), r() * 6.28, .4 + r()]);
+  FX.wheat = Array.from({ length: 150 }, () => [r(), r(), r() * 6.28, .7 + r() * .6]);
+  FX.grass = Array.from({ length: 46 }, () => [r(), r() * 6.28, .6 + r() * .9]);
+}
+function hexMix(a, b, p) {
+  const pa = parseInt(a.slice(1), 16), pb = parseInt(b.slice(1), 16), ch = sh => Math.round(lerp(pa >> sh & 255, pb >> sh & 255, p));
+  return 'rgb(' + ch(16) + ',' + ch(8) + ',' + ch(0) + ')';
+}
+function fsVillager(g, W, H, sx, sy, u, t, col) {
+  fxInit();
+  const hz = sy - 96 * u, dawn = smooth(t / 5), E = (x, y, rx, ry) => { g.beginPath(); g.ellipse(x, y, rx, ry, 0, 0, 6.2832); g.fill(); };
+  // --- 天空：從清晨慢慢變亮 ---
+  const sky = g.createLinearGradient(0, 0, 0, hz);
+  sky.addColorStop(0, hexMix('#4f7fb6', '#74b6e4', dawn)); sky.addColorStop(.62, hexMix('#f2b58c', '#c4e3f0', dawn)); sky.addColorStop(1, hexMix('#ffd49a', '#fff1c8', dawn));
+  g.fillStyle = sky; g.fillRect(0, 0, W, hz + 2);
+  const sunX = sx + 118 * u, sunY = hz - 20 * u - 62 * u * smooth(t / 7);
+  g.save(); g.translate(sunX, sunY); g.rotate(t * .06);
+  for (let i = 0; i < 14; i++) { g.rotate(6.2832 / 14); g.fillStyle = 'rgba(255,242,196,' + (i % 2 ? .07 : .11) + ')'; g.beginPath(); g.moveTo(0, 0); g.lineTo(-13 * u, -420 * u); g.lineTo(13 * u, -420 * u); g.closePath(); g.fill(); }
+  g.restore();
+  g.fillStyle = 'rgba(255,240,190,.28)'; circ(g, sunX, sunY, 58 * u); g.fillStyle = 'rgba(255,246,208,.5)'; circ(g, sunX, sunY, 40 * u); g.fillStyle = '#fff8dc'; circ(g, sunX, sunY, 27 * u);
+  const cloud = (x, y, k, a) => { g.fillStyle = 'rgba(255,255,255,' + a + ')'; E(x, y, 34 * k * u, 12 * k * u); E(x - 20 * k * u, y + 5 * k * u, 22 * k * u, 9 * k * u); E(x + 22 * k * u, y + 4 * k * u, 24 * k * u, 9 * k * u); E(x + 4 * k * u, y - 8 * k * u, 18 * k * u, 10 * k * u); };
+  const wrap = (x, span) => ((x % span) + span) % span;
+  cloud(wrap(W * .12 + t * 9 * u, W + 160 * u) - 80 * u, hz - 150 * u, 1.15, .9); cloud(wrap(W * .62 + t * 5 * u, W + 160 * u) - 80 * u, hz - 104 * u, .8, .8);
+  cloud(wrap(W * .86 + t * 13 * u, W + 160 * u) - 80 * u, hz - 205 * u, 1.4, .7); cloud(wrap(W * .35 + t * 4 * u, W + 160 * u) - 80 * u, hz - 62 * u, .6, .7);
+  // 飛鳥
+  g.strokeStyle = '#3f5262'; g.lineWidth = 1.8 * u; g.lineCap = 'round';
   for (let i = 0; i < 4; i++) {
-    const an = t * .9 + i * Math.PI / 2, ex = wx + Math.cos(an) * 24, ey = wy + 2 + Math.sin(an) * 24;
-    const pxx = Math.cos(an + Math.PI / 2) * 6, pyy = Math.sin(an + Math.PI / 2) * 6, mx = wx + Math.cos(an) * 8, my2 = wy + 2 + Math.sin(an) * 8;
-    g.fillStyle = 'rgba(250,244,226,.95)'; g.beginPath(); g.moveTo(mx, my2); g.lineTo(ex, ey); g.lineTo(ex + pxx, ey + pyy); g.lineTo(mx + pxx, my2 + pyy); g.closePath(); g.fill();
-    g.strokeStyle = '#5a4630'; g.lineWidth = 1.6; g.beginPath(); g.moveTo(wx, wy + 2); g.lineTo(ex, ey); g.stroke();
+    const bx = wrap(W * (.1 + i * .23) + t * (16 + i * 5) * u, W + 60 * u) - 30 * u, by = hz - (128 + i * 22) * u + Math.sin(t * 1.3 + i * 2) * 6 * u, fl = Math.sin(t * 9 + i * 1.7) * 4 * u, wsp = (6.5 - i * .7) * u;
+    g.beginPath(); g.moveTo(bx - wsp, by - fl); g.quadraticCurveTo(bx - wsp * .4, by - 3 * u, bx, by); g.quadraticCurveTo(bx + wsp * .4, by - 3 * u, bx + wsp, by - fl); g.stroke();
   }
-  // 遠處的小屋
-  g.fillStyle = '#e9dfc6'; g.fillRect(252, 168, 36, 20); g.fillStyle = '#b56d3e'; g.beginPath(); g.moveTo(247, 170); g.lineTo(270, 153); g.lineTo(293, 170); g.closePath(); g.fill();
-  g.fillStyle = '#5a4630'; g.fillRect(266, 176, 8, 12);
-  // 後排的麥子
-  for (let i = 0; i < 20; i++) {
-    const x = i * 18 - 8, sw = Math.sin(t * 1.7 + i * .8) * 3.2;
-    g.strokeStyle = '#c9a23c'; g.lineWidth = 2; g.beginPath(); g.moveTo(x, 214); g.quadraticCurveTo(x + sw * .4, 200, x + sw, 188); g.stroke();
-    g.fillStyle = '#e3c15a'; g.beginPath(); g.ellipse(x + sw, 184, 3, 7, sw * .04, 0, 6.2832); g.fill();
-  }
-  // 田
-  g.fillStyle = '#6a9a55'; g.fillRect(-30, 208, 380, 14);
-  g.fillStyle = '#7a5433'; g.fillRect(-30, 218, 380, 140);
-  for (let i = 0; i < 6; i++) { g.fillStyle = i % 2 ? '#86603a' : '#6d4a2c'; g.fillRect(-30, 228 + i * 18, 380, 7); }
-
-  const T0 = .7, N = 4, k = clamp(Math.floor(t - T0), 0, N), working = t >= T0 && k < N, c = working ? t - T0 - k : 0;
-  let xv = 262 - 28 * Math.min(k, N - 1), hop = 0, walking = false;
-  if (working && k < N - 1 && c > .72) { const p = smooth((c - .72) / .26); xv -= 28 * p; hop = Math.sin(p * Math.PI) * 4; walking = true; }
-  let p = 1;
-  if (working) { if (c < .5) p = 1 - smooth(c / .5); else if (c < .62) { const q = (c - .5) / .12; p = q * q; } }
-  else if (k >= N) p = 1 - smooth((t - (T0 + N)) / .5);
-  const dip = working ? 2.6 * Math.max(0, 1 - Math.abs(c - .64) / .09) : 0;
-  const fy = 274 - hop + dip;
-  g.save(); g.translate(xv, fy); g.scale(2.5, 2.5);
-  drawVillager(g, 0, 0, col, { f: -1, phase: walking ? t * 14 : t * 2, moving: walking });
-  g.restore();
-  drawHoe(g, xv - 18, fy - 36, lerp(-72, -218, p) * DEG, true);
-  // 擦汗
-  const wp = t - (T0 + N + .35);
-  if (wp > 0 && wp < .9) { g.fillStyle = '#f0d2b0'; circ(g, xv - 9 + Math.sin(wp * 16) * 5, fy - 70, 4.4); }
-  // 每鋤一下，長出一株苗
-  for (let j = 0; j < N; j++) {
-    const ts = T0 + j + .62, xs = 262 - 28 * j - 62;
-    const gr = smooth((t - ts) / .4);
-    if (gr > 0) {
-      g.save(); g.translate(xs, 290); g.scale(gr, gr);
-      g.strokeStyle = '#4f9a45'; g.lineWidth = 2.6; g.lineCap = 'round'; g.beginPath(); g.moveTo(0, 0); g.lineTo(0, -15); g.stroke();
-      g.fillStyle = '#74c860'; g.beginPath(); g.ellipse(-6, -15, 7, 3.4, -.5, 0, 6.2832); g.fill(); g.beginPath(); g.ellipse(6, -17, 7, 3.4, .5, 0, 6.2832); g.fill();
-      g.restore();
-    }
-    const u = (t - ts) / .45;
-    if (u > 0 && u < 1) for (let i = -1; i <= 1; i++) { g.fillStyle = `rgba(190,150,100,${.55 * (1 - u)})`; circ(g, xs + i * (6 + 12 * u), 284 - 10 * u - Math.abs(i) * -3, 3 + 6 * u); }
-    const s = (t - (T0 + j + .16)) / .5, hx = 262 - 28 * j, hy = 274 - 2.5 * 30;
-    if (s > 0 && s < 1) { g.fillStyle = `rgba(150,215,255,${1 - s})`; circ(g, hx + 16 + 16 * s, hy - 6 - 16 * s + 34 * s * s, 2.4); circ(g, hx + 9 + 9 * s, hy - 12 - 20 * s + 34 * s * s, 2); }
-  }
-}
-
-// ----- 狼人：夜裡在家，拿起桌上的刀再回頭 -----
-function sceneWolf(g, t, col) {
-  g.fillStyle = '#2c2119'; g.fillRect(-30, -30, 380, 300);
-  for (let x = -10; x < 350; x += 38) { g.fillStyle = 'rgba(0,0,0,.24)'; g.fillRect(x, -30, 2.2, 300); }
-  g.fillStyle = 'rgba(0,0,0,.16)'; [[70, 30], [196, 118], [286, 44], [134, 240]].forEach(q => { g.beginPath(); g.ellipse(q[0], q[1], 4, 2.4, 0, 0, 6.2832); g.fill(); });
-  g.fillStyle = '#1b130e'; g.fillRect(-30, 264, 380, 100);
-  g.fillStyle = 'rgba(255,255,255,.035)'; for (let i = 0; i < 4; i++) g.fillRect(-30, 277 + i * 16, 380, 1.5);
-  g.fillStyle = '#120c08'; g.fillRect(-30, 262, 380, 4);
-  // 窗外的月亮
-  const wx = 30, wy = 46;
-  g.fillStyle = '#4c3828'; rr(g, wx - 5, wy - 5, 92, 104, 5); g.fill();
-  const ng = g.createLinearGradient(0, wy, 0, wy + 94); ng.addColorStop(0, '#12263a'); ng.addColorStop(1, '#234863'); g.fillStyle = ng; g.fillRect(wx, wy, 82, 94);
-  g.fillStyle = 'rgba(244,227,173,.22)'; circ(g, wx + 56, wy + 30, 24); g.fillStyle = '#f4e3ad'; circ(g, wx + 56, wy + 30, 14);
-  g.fillStyle = 'rgba(236,229,211,.8)'; [[12, 16], [26, 58], [70, 72], [18, 80], [34, 26]].forEach(q => circ(g, wx + q[0], wy + q[1], 1.1));
-  g.fillStyle = '#4c3828'; g.fillRect(wx + 39, wy, 4, 94); g.fillRect(wx, wy + 45, 82, 4);
-  g.fillStyle = 'rgba(150,195,235,.07)'; g.beginPath(); g.moveTo(wx, wy + 94); g.lineTo(wx + 82, wy + 94); g.lineTo(wx + 190, 345); g.lineTo(wx + 30, 345); g.closePath(); g.fill();
-  // 牆上的架子
-  g.fillStyle = '#4c3828'; g.fillRect(218, 84, 86, 5);
-  g.fillStyle = '#7a4a35'; rr(g, 228, 66, 16, 18, 4); g.fill(); g.fillStyle = '#5f6b4a'; rr(g, 254, 70, 14, 14, 4); g.fill(); g.fillStyle = '#8a7b5a'; rr(g, 278, 62, 14, 22, 4); g.fill();
-  // 回頭之後，牆上的影子變成狼
-  const sh = smooth((t - 3.2) / 1.1);
-  if (sh > 0) {
-    g.save(); g.translate(178, 148 - sh * 6); const sc = 1.65 + sh * .45; g.scale(sc, sc);
-    g.globalAlpha = .84 * sh; g.fillStyle = '#060303'; wolfShape(g); g.fill();
-    g.globalAlpha = sh * (.62 + .25 * Math.sin(t * 5)); g.fillStyle = '#e8392e'; wolfEyes(g);
-    g.restore();
-  }
-  // 燭光
-  const fl = 1 + Math.sin(t * 13) * .06 + Math.sin(t * 7.3) * .05, lean = 4 * Math.exp(-Math.pow(t - 3.15, 2) / .06);
-  const cg = g.createRadialGradient(116, 184, 2, 116, 184, 96 * fl); cg.addColorStop(0, 'rgba(255,196,110,.44)'); cg.addColorStop(1, 'rgba(255,170,80,0)');
-  g.fillStyle = cg; g.fillRect(10, 80, 212, 212);
-  // 桌子
-  g.fillStyle = 'rgba(0,0,0,.3)'; g.beginPath(); g.ellipse(168, 270, 88, 8, 0, 0, 6.2832); g.fill();
-  g.fillStyle = '#4a3323'; g.fillRect(100, 222, 9, 46); g.fillRect(228, 222, 9, 46);
-  g.fillStyle = '#6d4c35'; rr(g, 90, 210, 158, 13, 3); g.fill(); g.fillStyle = 'rgba(255,255,255,.08)'; g.fillRect(92, 211, 154, 2);
-  g.fillStyle = '#8a7b5a'; g.fillRect(109, 206, 14, 4); g.fillStyle = '#efe6cf'; g.fillRect(112, 190, 8, 17);
-  g.fillStyle = '#ffb23e'; g.beginPath(); g.ellipse(116 + Math.sin(t * 11) * .8 + lean, 183, 3.6, 7 * fl, lean * .08, 0, 6.2832); g.fill();
-  g.fillStyle = '#fff1b0'; g.beginPath(); g.ellipse(116 + lean * .5, 185.5, 1.6, 3.4, 0, 0, 6.2832); g.fill();
-
-  // 時間軸：伸手 → 拿刀 → 收回 → 轉身 → 舉刀
-  const vx = 166, vy = 298, reach = smooth((t - .9) / .8), pull = smooth((t - 1.95) / .65), tu = clamp((t - 2.85) / .6, 0, 1), raise = smooth((t - 3.55) / .5);
-  const sxv = Math.cos(tu * Math.PI), front = tu >= .5, held = t >= 1.7;
-  let hx = lerp(192, 210, reach), hy = lerp(268, 208, reach);
-  hx = lerp(hx, 199, pull); hy = lerp(hy, 238, pull);
-  hx = lerp(hx, 203, raise); hy = lerp(hy, 220, raise);
-  const handX = vx + (hx - vx) * sxv, shX = vx + 20 * sxv, ka = front ? (-90 - 10 * raise) * DEG : lerp(0, -90, pull) * DEG;
-  const drawArm = () => {
-    g.strokeStyle = col; g.lineWidth = 8; g.lineCap = 'round'; g.beginPath(); g.moveTo(shX, 256); g.lineTo(handX, hy); g.stroke();
-    if (held) drawKnife(g, handX + Math.cos(ka) * 6.5, hy + Math.sin(ka) * 6.5, ka, 1.15);
-    g.fillStyle = '#f0d2b0'; circ(g, handX, hy, 5.2);
+  // --- 遠山、風車、農舍 ---
+  const hill = (base, amp, len, ph, c) => { g.fillStyle = c; g.beginPath(); g.moveTo(0, H); for (let x = 0; x <= W + 8; x += 8) g.lineTo(x, base - (Math.sin(x / (len * u) + ph) * .5 + .5) * amp * u - Math.sin(x / (len * .37 * u) + ph * 2) * amp * .12 * u); g.lineTo(W, H); g.closePath(); g.fill(); };
+  hill(hz + 4 * u, 46, 150, 1.2, '#b9d8a4'); hill(hz + 12 * u, 30, 96, 3.4, '#9fcb86');
+  const mx = sx - 128 * u, my = hz - 12 * u;
+  g.fillStyle = '#e9dfc8'; g.beginPath(); g.moveTo(mx - 11 * u, my + 30 * u); g.lineTo(mx - 6.5 * u, my - 20 * u); g.lineTo(mx + 6.5 * u, my - 20 * u); g.lineTo(mx + 11 * u, my + 30 * u); g.closePath(); g.fill();
+  g.fillStyle = '#9a4a3a'; g.beginPath(); g.moveTo(mx - 9 * u, my - 19 * u); g.lineTo(mx, my - 33 * u); g.lineTo(mx + 9 * u, my - 19 * u); g.closePath(); g.fill();
+  g.fillStyle = '#5b4636'; g.fillRect(mx - 3 * u, my + 14 * u, 6 * u, 16 * u);
+  g.save(); g.translate(mx, my - 20 * u); g.rotate(t * .9);
+  for (let i = 0; i < 4; i++) { g.rotate(Math.PI / 2); g.fillStyle = '#6b4a34'; g.fillRect(-1.2 * u, -36 * u, 2.4 * u, 36 * u); g.fillStyle = 'rgba(245,238,222,.92)'; g.fillRect(1.2 * u, -35 * u, 8 * u, 24 * u); }
+  g.restore(); g.fillStyle = '#3a2b22'; circ(g, mx, my - 20 * u, 2.6 * u);
+  const house = (hx, hy, k, roof) => {
+    g.fillStyle = '#f2e7cf'; g.fillRect(hx - 22 * k * u, hy - 20 * k * u, 44 * k * u, 22 * k * u);
+    g.fillStyle = roof; g.beginPath(); g.moveTo(hx - 28 * k * u, hy - 19 * k * u); g.lineTo(hx, hy - 42 * k * u); g.lineTo(hx + 28 * k * u, hy - 19 * k * u); g.closePath(); g.fill();
+    g.fillStyle = '#5a3d28'; g.fillRect(hx - 4 * k * u, hy - 12 * k * u, 8 * k * u, 14 * k * u); g.fillStyle = '#8fc4e0'; g.fillRect(hx + 9 * k * u, hy - 13 * k * u, 7 * k * u, 6 * k * u);
+    g.fillStyle = '#7a5a46'; g.fillRect(hx + 11 * k * u, hy - 40 * k * u, 6 * k * u, 14 * k * u);
+    for (let i = 0; i < 5; i++) { const p = ((t * .35 + i * .2) % 1), a = (1 - p) * .5; g.fillStyle = 'rgba(255,255,255,' + a + ')'; circ(g, hx + 14 * k * u + Math.sin(p * 5 + i) * 5 * k * u + p * 10 * k * u, hy - 42 * k * u - p * 46 * k * u, (3 + p * 7) * k * u); }
   };
-  if (!held) drawKnife(g, 216, 207, 0, 1.15);
-  if (!front) drawArm();
-  const glow = smooth((t - 3.15) / .35) * (.8 + .2 * Math.sin(t * 6));
-  g.save(); g.translate(vx, vy); g.scale(2.6 * Math.max(.05, Math.abs(sxv)), 2.6);
-  drawVillager(g, 0, 0, col, { f: 0, back: !front, eye: front ? '#ff3b2f' : null, glow: front ? glow : 0, phase: t * 2, moving: false });
+  house(sx + 150 * u, hz + 10 * u, 1, '#b4553f'); house(sx + 232 * u, hz + 6 * u, .72, '#8a6a4a'); house(sx - 236 * u, hz + 8 * u, .8, '#a8644a');
+  // --- 麥田：一排排隨風擺動 ---
+  const fieldTop = hz + 14 * u, fieldBot = sy - 34 * u;
+  const fg = g.createLinearGradient(0, fieldTop, 0, fieldBot); fg.addColorStop(0, '#e2c66a'); fg.addColorStop(1, '#c9a646'); g.fillStyle = fg; g.fillRect(0, fieldTop, W, fieldBot - fieldTop + 2);
+  g.lineCap = 'round';
+  for (const w of FX.wheat) {
+    const d = w[1], x = w[0] * (W + 40 * u) - 20 * u, y = lerp(fieldTop + 6 * u, fieldBot + 4 * u, d), hgt = (9 + d * 16) * w[3] * u, sway = Math.sin(t * 1.9 + w[2] + x / (60 * u)) * (2 + d * 4) * u;
+    g.strokeStyle = d > .5 ? '#a8862c' : '#bd9c3c'; g.lineWidth = (1.1 + d * 1.3) * u; g.beginPath(); g.moveTo(x, y); g.quadraticCurveTo(x + sway * .4, y - hgt * .6, x + sway, y - hgt); g.stroke();
+    g.fillStyle = d > .5 ? '#f0d477' : '#f6e08f'; g.beginPath(); g.ellipse(x + sway, y - hgt - 2.5 * u, (1.6 + d * 1.6) * u, (3.4 + d * 3) * u, sway * .02, 0, 6.2832); g.fill();
+  }
+  // 木柵欄
+  g.fillStyle = '#8a6a44';
+  for (let x = -((t * 0) % 1); x < W + 30 * u; x += 34 * u) g.fillRect(x, fieldBot - 16 * u, 4 * u, 20 * u);
+  g.fillRect(0, fieldBot - 12 * u, W, 2.6 * u); g.fillRect(0, fieldBot - 4 * u, W, 2.6 * u);
+  // --- 近處的田地 ---
+  const soil = g.createLinearGradient(0, fieldBot, 0, H); soil.addColorStop(0, '#8a5a36'); soil.addColorStop(.5, '#74482a'); soil.addColorStop(1, '#55331c'); g.fillStyle = soil; g.fillRect(0, fieldBot, W, H - fieldBot);
+  for (let i = 0; i < 9; i++) { const yy = fieldBot + 6 * u + i * i * 3.4 * u + i * 9 * u; if (yy > H) break; g.fillStyle = 'rgba(40,22,10,.26)'; g.fillRect(0, yy, W, (2.2 + i * .9) * u); g.fillStyle = 'rgba(255,220,170,.06)'; g.fillRect(0, yy - 2.4 * u, W, 1.6 * u); }
+  // 已經種好的小苗：一棵一棵冒出來
+  const sprout = (x, y, p) => { if (p <= 0) return; const k = smooth(p) * u; g.strokeStyle = '#3f8a3c'; g.lineWidth = 2.4 * k; g.beginPath(); g.moveTo(x, y); g.lineTo(x, y - 12 * k); g.stroke(); g.fillStyle = '#62b24e'; g.beginPath(); g.ellipse(x - 5 * k, y - 13 * k, 6.5 * k, 3.2 * k, -.5, 0, 6.2832); g.fill(); g.beginPath(); g.ellipse(x + 5 * k, y - 14 * k, 6.5 * k, 3.2 * k, .5, 0, 6.2832); g.fill(); };
+  for (let i = 0; i < 6; i++) sprout(sx - (262 - i * 19) * u, sy + (9 + (i % 2) * 5) * u, (t - .7 - i * .62) / .5);
+  // 田裡的稻草人
+  { const kx = sx + 196 * u, ky = fieldBot + 2 * u, sw = Math.sin(t * 1.3) * .05;
+    g.save(); g.translate(kx, ky); g.rotate(sw);
+    g.fillStyle = '#6b4a34'; g.fillRect(-2 * u, -62 * u, 4 * u, 62 * u); g.fillRect(-24 * u, -46 * u, 48 * u, 3.6 * u);
+    g.fillStyle = '#b7603f'; g.beginPath(); g.moveTo(-17 * u, -47 * u); g.lineTo(17 * u, -47 * u); g.lineTo(11 * u, -16 * u); g.lineTo(-11 * u, -16 * u); g.closePath(); g.fill();
+    g.fillStyle = '#e6c98a'; circ(g, 0, -56 * u, 9 * u); g.fillStyle = '#2a1f1a'; circ(g, -3 * u, -57 * u, 1.2 * u); circ(g, 3 * u, -57 * u, 1.2 * u);
+    g.fillStyle = '#caa24e'; g.beginPath(); g.moveTo(-15 * u, -62 * u); g.lineTo(0, -78 * u); g.lineTo(15 * u, -62 * u); g.closePath(); g.fill();
+    g.strokeStyle = '#e2c66a'; g.lineWidth = 1.6 * u; for (let i = -1; i <= 1; i += 2) for (let j = 0; j < 3; j++) { g.beginPath(); g.moveTo(i * 24 * u, -44.5 * u); g.lineTo(i * (29 + j * 2) * u, (-40 + j * 4) * u); g.stroke(); }
+    g.restore(); }
+  // 一隻雞在旁邊啄地
+  { const cx2 = sx + 92 * u + Math.sin(t * .6) * 10 * u, cy2 = sy + 22 * u, peck = Math.max(0, Math.sin(t * 5.2)) ** 6;
+    g.fillStyle = 'rgba(0,0,0,.25)'; E(cx2, cy2 + 1 * u, 13 * u, 4 * u);
+    g.strokeStyle = '#d9902f'; g.lineWidth = 1.8 * u; g.beginPath(); g.moveTo(cx2 - 3 * u, cy2 - 6 * u); g.lineTo(cx2 - 3 * u, cy2); g.moveTo(cx2 + 3 * u, cy2 - 6 * u); g.lineTo(cx2 + 3 * u, cy2); g.stroke();
+    g.fillStyle = '#fbf6ea'; E(cx2, cy2 - 13 * u, 12 * u, 9.5 * u); g.beginPath(); g.moveTo(cx2 + 9 * u, cy2 - 16 * u); g.lineTo(cx2 + 19 * u, cy2 - 26 * u); g.lineTo(cx2 + 12 * u, cy2 - 9 * u); g.closePath(); g.fill();
+    const hx2 = cx2 - 11 * u - peck * 3 * u, hy2 = cy2 - 22 * u + peck * 15 * u; g.fillStyle = '#fbf6ea'; circ(g, hx2, hy2, 6 * u);
+    g.fillStyle = '#d8453a'; E(hx2 + 1 * u, hy2 - 6 * u, 3.4 * u, 2.6 * u); g.fillStyle = '#e8a23a'; g.beginPath(); g.moveTo(hx2 - 5 * u, hy2 - 1 * u); g.lineTo(hx2 - 11 * u, hy2 + 1.5 * u); g.lineTo(hx2 - 5 * u, hy2 + 3 * u); g.closePath(); g.fill(); g.fillStyle = '#2a1f1a'; circ(g, hx2 - 2 * u, hy2 - 1 * u, 1.1 * u); }
+  // --- 主角：鋤地 → 擦汗 → 繼續 ---
+  const rest = smooth((t - 3.5) / .3) * (1 - smooth((t - 4.7) / .3)), cyc = (t * 1.15) % 1;
+  const lift = rest > 0 ? 0 : cyc < .5 ? smooth(cyc / .5) : 1 - smooth((cyc - .5) / .16), hit = rest > 0 ? 0 : Math.max(0, 1 - Math.abs(cyc - .68) / .1);
+  g.save(); g.translate(sx, sy); g.scale(3.1 * u, 3.1 * u);
+  g.fillStyle = 'rgba(40,20,8,.35)'; E(2, 2, 22, 5.5);
+  g.save(); g.translate(0, hit * 1.6); drawVillager(g, 0, 0, col, { f: -1, phase: t * 2, moving: false });
+  if (rest > 0) {   // 擦汗
+    g.strokeStyle = col; g.lineWidth = 4; g.lineCap = 'round'; g.beginPath(); g.moveTo(-6, -15); g.quadraticCurveTo(-14, -20, -9 + Math.sin(t * 9) * 2, -30); g.stroke(); g.fillStyle = '#f0d2b0'; circ(g, -9 + Math.sin(t * 9) * 2, -30, 3);
+    g.save(); g.translate(12, 1); g.scale(.8, .8); drawHoe(g, 0, 0, -Math.PI / 2 + .1, false); g.restore(); g.fillStyle = '#f0d2b0'; circ(g, 12.6, -15, 3);
+  } else { g.save(); g.translate(-7, -13); g.scale(.8, .8); drawHoe(g, 0, 0, Math.PI + lerp(-.28, 1.05, lift), true); g.restore(); }
   g.restore();
-  if (front) drawArm();
-  drawGlint(g, 226, 205, 9, 1 - Math.abs(t - 1.78) / .22);
-  if (front) drawGlint(g, handX - 7, hy - 41, 12, 1 - Math.abs(t - 4.1) / .32);
-  // 紅光與暗角
-  const red = .2 * smooth((t - 3.1) / .9);
-  if (red > 0) { g.fillStyle = `rgba(150,20,20,${red})`; g.fillRect(-30, -30, 380, 380); }
-  const vg = g.createRadialGradient(160, 190, 90, 160, 190, 250); vg.addColorStop(0, 'rgba(0,0,0,0)'); vg.addColorStop(1, 'rgba(0,0,0,.6)');
-  g.fillStyle = vg; g.fillRect(-30, -30, 380, 380);
+  // 汗珠
+  for (let i = 0; i < 2; i++) { const p = ((t * .9 + i * .5) % 1); g.fillStyle = 'rgba(160,215,255,' + (1 - p) * .9 + ')'; g.beginPath(); g.ellipse(6 + i * 5 + p * 5, -32 + p * 12, 1.3, 2, 0, 0, 6.2832); g.fill(); }
+  // 鋤下去揚起的土
+  if (hit > 0 || (cyc > .68 && cyc < .95 && rest <= 0)) { const p = clamp((cyc - .66) / .28, 0, 1); for (let i = 0; i < 6; i++) { const an = -2.6 + i * .36; g.fillStyle = 'rgba(120,78,44,' + (1 - p) * .8 + ')'; circ(g, -53 + Math.cos(an) * p * 13, 1 + Math.sin(an) * p * 12 + p * p * 8, 1.9 - p * .8); } }
+  g.restore();
+  // 蝴蝶
+  for (let i = 0; i < 3; i++) { const bx = sx + (-60 + i * 70) * u + Math.sin(t * .9 + i * 2.1) * 34 * u, by = sy - (46 + i * 26) * u + Math.cos(t * 1.4 + i) * 16 * u, fl = Math.abs(Math.sin(t * 16 + i * 2)); g.fillStyle = ['#ffd257', '#ff9ec4', '#fff'][i]; g.beginPath(); g.ellipse(bx - 3 * u * fl, by, 3.6 * u * fl + .4, 4.4 * u, -.4, 0, 6.2832); g.fill(); g.beginPath(); g.ellipse(bx + 3 * u * fl, by, 3.6 * u * fl + .4, 4.4 * u, .4, 0, 6.2832); g.fill(); }
+  // 前景的草，增加景深
+  for (const gr of FX.grass) { const x = gr[0] * W, sway = Math.sin(t * 1.6 + gr[1]) * 7 * u, hgt = 34 * gr[2] * u; g.fillStyle = 'rgba(46,92,40,.9)'; g.beginPath(); g.moveTo(x - 5 * u, H + 2); g.quadraticCurveTo(x + sway * .5, H - hgt * .6, x + sway, H - hgt); g.quadraticCurveTo(x + sway * .5 + 4 * u, H - hgt * .5, x + 6 * u, H + 2); g.closePath(); g.fill(); }
+  // 整體的晨光
+  const warm = g.createRadialGradient(sunX, sunY, 10 * u, sunX, sunY, Math.max(W, H)); warm.addColorStop(0, 'rgba(255,226,150,' + (.22 * dawn) + ')'); warm.addColorStop(1, 'rgba(255,226,150,0)'); g.fillStyle = warm; g.fillRect(0, 0, W, H);
 }
-
-// ----- 身分卡（原創設計，用遊戲自己的斗笠村民）-----
+function fsWolf(g, W, H, sx, sy, u, t, col) {
+  fxInit();
+  const E = (x, y, rx, ry) => { g.beginPath(); g.ellipse(x, y, rx, ry, 0, 0, 6.2832); g.fill(); };
+  const out = smooth((t - 2.75) / .22), turned = t > 3.12, flash = clamp(1 - (t - 3.12) / .5, 0, 1) * (t > 3.12 ? 1 : 0);   // out = 蠟燭熄了
+  const fl = .86 + .14 * Math.sin(t * 17) * Math.sin(t * 7.3) + (t > 2.2 && t < 2.8 ? Math.sin(t * 60) * .25 : 0), lit = (1 - out) * fl;
+  const floorY = sy + 8 * u;
+  // --- 木板牆和地板 ---
+  const wg = g.createLinearGradient(0, 0, 0, floorY); wg.addColorStop(0, '#221a18'); wg.addColorStop(1, '#3a2a22'); g.fillStyle = wg; g.fillRect(0, 0, W, floorY);
+  for (let x = (sx % (44 * u)) - 44 * u, i = 0; x < W; x += 44 * u, i++) { g.fillStyle = 'rgba(0,0,0,.28)'; g.fillRect(x, 0, 2 * u, floorY); g.fillStyle = 'rgba(255,220,180,.03)'; g.fillRect(x + 2 * u, 0, 1.4 * u, floorY); g.fillStyle = 'rgba(0,0,0,.14)'; E(x + 22 * u, ((i * 137) % 300 + 40) * u, 3 * u, 5 * u); }
+  g.fillStyle = '#2a1d17'; g.fillRect(0, floorY - 10 * u, W, 10 * u);
+  const fg = g.createLinearGradient(0, floorY, 0, H); fg.addColorStop(0, '#3b281d'); fg.addColorStop(1, '#1c120d'); g.fillStyle = fg; g.fillRect(0, floorY, W, H - floorY);
+  for (let i = 0; i < 9; i++) { const yy = floorY + i * i * 3.2 * u + i * 10 * u; if (yy > H) break; g.fillStyle = 'rgba(0,0,0,.3)'; g.fillRect(0, yy, W, (1.6 + i * .5) * u); }
+  for (let i = -8; i <= 8; i++) { g.strokeStyle = 'rgba(0,0,0,.16)'; g.lineWidth = 1.4 * u; g.beginPath(); g.moveTo(sx + i * 46 * u, floorY); g.lineTo(sx + i * 150 * u, H + 40 * u); g.stroke(); }
+  // --- 窗戶：月亮、飄過的雲、星星 ---
+  const wx = sx - 118 * u, wy = sy - 176 * u, ww = 84 * u, wh = 96 * u;
+  g.fillStyle = '#14100e'; rr(g, wx - 7 * u, wy - 7 * u, ww + 14 * u, wh + 14 * u, 5 * u); g.fill();
+  g.save(); rr(g, wx, wy, ww, wh, 3 * u); g.clip();
+  const ng = g.createLinearGradient(0, wy, 0, wy + wh); ng.addColorStop(0, '#0e1a36'); ng.addColorStop(1, '#27406a'); g.fillStyle = ng; g.fillRect(wx, wy, ww, wh);
+  for (const st of FX.stars) { g.fillStyle = 'rgba(255,255,255,' + (.35 + .5 * Math.abs(Math.sin(t * 1.6 + st[3]))) + ')'; circ(g, wx + st[0] * ww, wy + st[1] * wh, st[2] * .8 * u); }
+  const mnx = wx + ww * .62, mny = wy + wh * .36; g.fillStyle = 'rgba(230,236,255,.2)'; circ(g, mnx, mny, 26 * u); g.fillStyle = '#f2f0dc'; circ(g, mnx, mny, 16 * u); g.fillStyle = 'rgba(190,190,170,.5)'; circ(g, mnx - 5 * u, mny - 4 * u, 3.4 * u); circ(g, mnx + 5 * u, mny + 5 * u, 2.4 * u);
+  g.fillStyle = 'rgba(40,52,84,.82)'; const cl = wx - 60 * u + ((t * 13 * u) % (ww + 120 * u)); E(cl, mny + 3 * u, 36 * u, 9 * u); E(cl + 22 * u, mny - 5 * u, 22 * u, 8 * u);
+  if (flash > 0) { g.fillStyle = 'rgba(255,255,255,' + flash * .8 + ')'; g.fillRect(wx, wy, ww, wh); }
+  g.restore();
+  g.fillStyle = '#14100e'; g.fillRect(wx + ww / 2 - 2 * u, wy, 4 * u, wh); g.fillRect(wx, wy + wh / 2 - 2 * u, ww, 4 * u); g.fillStyle = '#231a16'; g.fillRect(wx - 12 * u, wy + wh + 6 * u, ww + 24 * u, 6 * u);
+  // 月光斜斜照在地上
+  g.fillStyle = 'rgba(170,196,255,' + (.07 + .05 * out) + ')'; g.beginPath(); g.moveTo(wx, wy + wh); g.lineTo(wx + ww, wy + wh); g.lineTo(wx + ww + 150 * u, H + 20 * u); g.lineTo(wx + 26 * u, H + 20 * u); g.closePath(); g.fill();
+  for (const mo of FX.motes) { const p = ((t * .05 * mo[3] + mo[1]) % 1), x = wx + ww * mo[0] + p * 110 * u + Math.sin(t * .7 + mo[2]) * 8 * u, y = wy + wh + p * (H - wy - wh); g.fillStyle = 'rgba(210,225,255,' + (.28 * Math.sin(p * Math.PI)) + ')'; circ(g, x, y, 1.3 * u); }
+  // --- 架子、掛著的東西、門 ---
+  const shx = sx + 86 * u, shy = sy - 150 * u;
+  g.fillStyle = '#1b1310'; g.fillRect(shx, shy, 120 * u, 5 * u); g.fillRect(shx + 8 * u, shy + 5 * u, 4 * u, 12 * u); g.fillRect(shx + 108 * u, shy + 5 * u, 4 * u, 12 * u);
+  [['#7c5a44', 0, 18], ['#58705e', 26, 24], ['#8a4d40', 52, 15], ['#6a6a7c', 76, 21], ['#7c5a44', 98, 13]].forEach(j => { g.fillStyle = j[0]; rr(g, shx + (8 + j[1]) * u, shy - j[2] * u, 15 * u, j[2] * u, 3 * u); g.fill(); g.fillStyle = 'rgba(255,255,255,.1)'; g.fillRect(shx + (10 + j[1]) * u, shy - (j[2] - 3) * u, 2.4 * u, (j[2] - 6) * u); });
+  for (let i = 0; i < 3; i++) { const hx = sx - (10 - i * 26) * u, hy = sy - 214 * u, sw = Math.sin(t * 1.1 + i) * 2 * u; g.strokeStyle = '#1b1310'; g.lineWidth = 1.5 * u; g.beginPath(); g.moveTo(hx, hy); g.lineTo(hx + sw, hy + 22 * u); g.stroke(); g.fillStyle = ['#5d6b3a', '#e9e2cf', '#8a4034'][i]; E(hx + sw, hy + 30 * u, 6 * u, 10 * u); }
+  g.fillStyle = '#1a1210'; rr(g, sx + 236 * u, sy - 132 * u, 66 * u, 142 * u, 4 * u); g.fill(); g.fillStyle = '#2b1e19'; rr(g, sx + 242 * u, sy - 126 * u, 54 * u, 134 * u, 3 * u); g.fill(); g.fillStyle = '#b08a4a'; circ(g, sx + 250 * u, sy - 54 * u, 3 * u);
+  // 地毯和牆角的蜘蛛網
+  g.fillStyle = 'rgba(96,34,30,.55)'; g.beginPath(); g.ellipse(sx + 20 * u, sy + 30 * u, 128 * u, 22 * u, 0, 0, 6.2832); g.fill(); g.strokeStyle = 'rgba(190,150,90,.35)'; g.lineWidth = 2 * u; g.beginPath(); g.ellipse(sx + 20 * u, sy + 30 * u, 112 * u, 17 * u, 0, 0, 6.2832); g.stroke();
+  g.strokeStyle = 'rgba(210,215,225,.16)'; g.lineWidth = 1 * u;
+  for (let i = 0; i < 6; i++) { const an = i * .3; g.beginPath(); g.moveTo(0, 0); g.lineTo(Math.cos(an) * 120 * u, Math.sin(an) * 120 * u); g.stroke(); }
+  for (let r2 = 26; r2 <= 110; r2 += 21) { g.beginPath(); for (let i = 0; i < 6; i++) { const an = i * .3, x = Math.cos(an) * r2 * u, y = Math.sin(an) * r2 * u; if (i) g.quadraticCurveTo(Math.cos(an - .15) * r2 * .9 * u, Math.sin(an - .15) * r2 * .9 * u, x, y); else g.moveTo(x, y); } g.stroke(); }
+  // --- 桌子、蠟燭、刀 ---
+  const tx = sx + 74 * u, ty = sy - 44 * u, cxn = tx + 26 * u, cyn = ty - 2 * u;
+  if (lit > 0) { const cg = g.createRadialGradient(cxn, cyn - 26 * u, 4 * u, cxn, cyn - 26 * u, 230 * u * fl); cg.addColorStop(0, 'rgba(255,190,100,' + .5 * lit + ')'); cg.addColorStop(.4, 'rgba(255,150,70,' + .2 * lit + ')'); cg.addColorStop(1, 'rgba(255,150,70,0)'); g.fillStyle = cg; g.fillRect(0, 0, W, H); }
+  g.fillStyle = 'rgba(0,0,0,.35)'; E(tx + 4 * u, sy + 12 * u, 62 * u, 8 * u);
+  g.fillStyle = '#2a1c14'; g.fillRect(tx - 50 * u, ty + 6 * u, 7 * u, 52 * u); g.fillRect(tx + 48 * u, ty + 6 * u, 7 * u, 52 * u);
+  g.fillStyle = '#5a3d28'; rr(g, tx - 58 * u, ty - 2 * u, 122 * u, 10 * u, 3 * u); g.fill(); g.fillStyle = '#6f4c33'; rr(g, tx - 58 * u, ty - 2 * u, 122 * u, 4 * u, 2 * u); g.fill();
+  g.fillStyle = '#b08a4a'; g.fillRect(cxn - 8 * u, cyn - 4 * u, 16 * u, 3 * u); g.fillStyle = '#efe6cf'; g.fillRect(cxn - 3.6 * u, cyn - 24 * u, 7.2 * u, 20 * u); g.fillStyle = '#2a1f1a'; g.fillRect(cxn - .6 * u, cyn - 28 * u, 1.2 * u, 4 * u);
+  if (lit > 0) { g.fillStyle = 'rgba(255,170,60,' + lit + ')'; g.beginPath(); g.ellipse(cxn + Math.sin(t * 13) * .8 * u, cyn - 33 * u, 3.6 * u, 7.5 * u * fl, 0, 0, 6.2832); g.fill(); g.fillStyle = 'rgba(255,244,200,' + lit + ')'; g.beginPath(); g.ellipse(cxn, cyn - 31 * u, 1.7 * u, 4 * u, 0, 0, 6.2832); g.fill(); }
+  if (out > 0 && t < 5) { for (let i = 0; i < 4; i++) { const p = clamp((t - 2.8 - i * .14) / 1.4, 0, 1); if (p <= 0 || p >= 1) continue; g.fillStyle = 'rgba(200,200,210,' + (1 - p) * .34 + ')'; circ(g, cxn + Math.sin(p * 6 + i) * 6 * u, cyn - 30 * u - p * 60 * u, (2 + p * 6) * u); } }
+  const grab = smooth((t - 1.5) / .55);   // 伸手拿刀
+  if (grab < 1) drawKnife(g, tx - 30 * u, ty - 3.5 * u, 0, 1.25 * u);
+  // --- 牆上的狼影 ---
+  const rise = smooth((t - 3.0) / .9);
+  if (rise > 0) {
+    g.save(); g.translate(sx - 6 * u, sy - 132 * u + (1 - rise) * 60 * u); const k = (1.15 + rise * .75 + Math.sin(t * 1.8) * .02) * u; g.scale(k, k);
+    g.fillStyle = 'rgba(6,3,4,' + (.82 * rise) + ')'; wolfShape(g); g.fill();
+    g.fillStyle = 'rgba(255,48,36,' + rise * (.75 + .25 * Math.sin(t * 5)) + ')'; g.shadowColor = '#ff2a1a'; g.shadowBlur = 16; wolfEyes(g); g.restore();
+  }
+  // --- 主角：走進來 → 拿刀 → 燭火熄滅 → 回頭 ---
+  const walk = smooth(t / 1.35), px = lerp(sx - 150 * u, sx, walk), walking = t < 1.35;
+  g.save(); g.translate(px, sy); g.scale(3.1 * u, 3.1 * u);
+  g.fillStyle = 'rgba(0,0,0,.45)'; E(0, 2, 20, 5);
+  const glow = turned ? clamp((t - 3.12) / .5, 0, 1) * (.75 + .25 * Math.sin(t * 5)) : 0;
+  drawVillager(g, 0, 0, col, turned ? { f: 0, eye: '#ff3b2f', glow, phase: t * 2 } : { f: 1, back: !walking && t > 2.2, phase: walking ? t * 13 : t * 2, moving: walking });
+  if (grab > 0) {   // 手裡的刀
+    const up = turned ? smooth((t - 3.12) / .35) : 0, kx = turned ? 13 : lerp(15, 12, grab), ky = lerp(-12, -16, grab) - up * 14, ka = turned ? lerp(-.5, -1.25, up) : lerp(0, -.5, grab);
+    g.fillStyle = '#f0d2b0'; circ(g, kx - 1, ky + 1, 2.8); drawKnife(g, kx, ky, ka, .62 * (turned ? 1.25 : 1));
+    drawGlint(g, kx + Math.cos(ka) * 17, ky + Math.sin(ka) * 17, 9, Math.max(clamp(1 - Math.abs(t - 2.15) / .25, 0, 1), clamp(1 - Math.abs(t - 3.45) / .3, 0, 1), turned ? Math.max(0, Math.sin(t * 2.4)) ** 14 : 0));
+  }
+  g.restore();
+  // --- 整個房間暗下來，只剩月光和紅色的心跳 ---
+  if (out > 0) { g.fillStyle = 'rgba(4,6,14,' + .5 * out + ')'; g.fillRect(0, 0, W, H); }
+  if (turned) { const beat = Math.max(0, Math.sin((t - 3.12) * 6.9)) ** 3, vg = g.createRadialGradient(W / 2, H / 2, Math.min(W, H) * .25, W / 2, H / 2, Math.max(W, H) * .75); vg.addColorStop(0, 'rgba(120,0,0,0)'); vg.addColorStop(1, 'rgba(150,10,6,' + (.34 + .22 * beat) + ')'); g.fillStyle = vg; g.fillRect(0, 0, W, H); }
+  if (flash > 0) { g.fillStyle = 'rgba(235,240,255,' + flash * flash * .4 + ')'; g.fillRect(0, 0, W, H); }
+  const vg2 = g.createRadialGradient(W / 2, H / 2, Math.min(W, H) * .3, W / 2, H / 2, Math.max(W, H) * .8); vg2.addColorStop(0, 'rgba(0,0,0,0)'); vg2.addColorStop(1, 'rgba(0,0,0,.6)'); g.fillStyle = vg2; g.fillRect(0, 0, W, H);
+}
 function drawRoleCard(g, wolf, col, t) {
   const w = 196, h = 286, x = -w / 2, y = -h / 2, ac = wolf ? '#e2584a' : '#f2b84b';
   g.fillStyle = 'rgba(0,0,0,.45)'; rr(g, x + 4, y + 8, w, h, 16); g.fill();
@@ -2498,26 +2551,29 @@ function drawIntro(now) {
   const calm = reduceMotion();
   let t = intro.fix != null ? intro.fix : (now - intro.t0) / 1000;
   t = Math.max(0, t);
-  const land = W > Hh * 1.15, VW = land ? 640 : 360, VH = land ? 360 : 640;
-  const s = Math.min(W / VW, Hh / VH), ox = (W - VW * s) / 2, oy = (Hh - VH * s) / 2;
-  const L = land ? { sx: 24, sy: 20, tx: 492, ty: 128, sub: 182, mt: 214, ft: 318 } : { sx: 20, sy: 54, tx: 180, ty: 446, sub: 496, mt: 528, ft: 602 };
-  g.setTransform(d, 0, 0, d, 0, 0); g.globalAlpha = 1; g.globalCompositeOperation = 'source-over';
+  // 版面：直向時場景在上、字在下；橫向時場景在左、字在右。場景本身畫滿整個螢幕。
+  const land = W > Hh * 1.15, u = land ? Math.min(Hh / 360, W / 700) : Math.min(W / 360, Hh / 700);
+  const sx = land ? W * .31 : W / 2, sy = land ? Hh * .7 : Hh * .5;
+  const tx = land ? W * .715 : W / 2, ty = land ? Hh * .4 : Hh * .735, cardX = sx, cardY = land ? Hh * .5 : Hh * .385;
+  g.setTransform(d, 0, 0, d, 0, 0); g.globalAlpha = 1; g.globalCompositeOperation = 'source-over'; g.shadowBlur = 0;
   g.fillStyle = '#070c12'; g.fillRect(0, 0, W, Hh);
-  g.setTransform(s * d, 0, 0, s * d, ox * d, oy * d);
-  // 場景
-  g.save(); rr(g, L.sx, L.sy, 320, 320, 18); g.clip(); g.translate(L.sx, L.sy);
-  const zoom = calm ? 1 : 1 + Math.min(t, 8) * .011; g.translate(160, 180); g.scale(zoom, zoom); g.translate(-160, -180);
-  (wolf ? sceneWolf : sceneVillager)(g, t, col);
+  // 場景：鏡頭慢慢推近
+  g.save();
+  const zoom = calm ? 1 : 1.04 + Math.min(t, 8) * .012; g.translate(sx, sy - 40 * u); g.scale(zoom, zoom); g.translate(-sx, -(sy - 40 * u));
+  (wolf ? fsWolf : fsVillager)(g, W, Hh, sx, sy, u, t, col);
   g.restore();
-  const cardP = smooth((t - 5.25) / .7);
-  if (cardP > 0) { g.save(); rr(g, L.sx, L.sy, 320, 320, 18); g.clip(); g.fillStyle = `rgba(4,7,12,${.62 * cardP})`; g.fillRect(L.sx, L.sy, 320, 320); g.restore(); }
-  g.strokeStyle = wolf ? 'rgba(226,88,74,.75)' : 'rgba(242,184,75,.75)'; g.lineWidth = 2; rr(g, L.sx, L.sy, 320, 320, 18); g.stroke();
+  // 字後面墊一層漸層，確保看得清楚
+  const sc = land ? g.createLinearGradient(W * .44, 0, W * .68, 0) : g.createLinearGradient(0, Hh * .52, 0, Hh * .72);
+  sc.addColorStop(0, 'rgba(5,8,13,0)'); sc.addColorStop(1, 'rgba(5,8,13,' + (wolf ? .74 : .66) + ')');
+  g.fillStyle = sc; if (land) g.fillRect(W * .44, 0, W * .56, Hh); else g.fillRect(0, Hh * .52, W, Hh * .48);
   // 身分卡翻進來
+  const cardP = smooth((t - 5.25) / .7);
   if (cardP > 0) {
-    const cx = L.sx + 160, cy = L.sy + 160 + (1 - cardP) * 26 + (!calm && t > 6 ? Math.sin((t - 6) * 2.2) * 2.2 : 0);
-    const gl = g.createRadialGradient(cx, cy, 30, cx, cy, 190); gl.addColorStop(0, wolf ? `rgba(226,88,74,${.4 * cardP})` : `rgba(242,184,75,${.4 * cardP})`); gl.addColorStop(1, 'rgba(0,0,0,0)');
-    g.save(); rr(g, L.sx, L.sy, 320, 320, 18); g.clip(); g.fillStyle = gl; g.fillRect(L.sx, L.sy, 320, 320); g.restore();
-    g.save(); g.translate(cx, cy); g.scale(Math.max(.03, Math.sin(cardP * Math.PI / 2)), 1);
+    g.fillStyle = `rgba(4,7,12,${.58 * cardP})`; g.fillRect(0, 0, W, Hh);
+    const cy = cardY + (1 - cardP) * 26 * u + (!calm && t > 6 ? Math.sin((t - 6) * 2.2) * 2.2 * u : 0);
+    const gl = g.createRadialGradient(cardX, cy, 30 * u, cardX, cy, 230 * u); gl.addColorStop(0, wolf ? `rgba(226,88,74,${.42 * cardP})` : `rgba(242,184,75,${.42 * cardP})`); gl.addColorStop(1, 'rgba(0,0,0,0)');
+    g.fillStyle = gl; g.fillRect(0, 0, W, Hh);
+    g.save(); g.translate(cardX, cy); g.scale(u * Math.max(.03, Math.sin(cardP * Math.PI / 2)), u);
     drawRoleCard(g, wolf, col, t);
     const sp = (t - 6.15) / .75;
     if (sp > 0 && sp < 1) {
@@ -2532,23 +2588,26 @@ function drawIntro(now) {
   const tA = wolf ? 3.15 : .9, a = clamp((t - tA) / .5, 0, 1);
   g.textAlign = 'center'; g.textBaseline = 'middle';
   if (a > 0) {
-    const el = t - tA, shake = wolf && !calm && el < .5 ? (Math.random() - .5) * 7 * (1 - el / .5) : 0;
-    g.save(); g.globalAlpha = a; g.font = '700 58px ' + FONT_DISP;
-    g.shadowColor = wolf ? 'rgba(226,88,74,.75)' : 'rgba(134,194,102,.55)'; g.shadowBlur = 22 * s * d;
-    g.fillStyle = wolf ? '#e2584a' : '#8fcb6c'; g.fillText(wolf ? '你是狼人' : '你是村民', L.tx + shake, L.ty + (1 - smooth(a)) * 14);
+    const el2 = t - tA, shake = wolf && !calm && el2 < .5 ? (Math.random() - .5) * 8 * u * (1 - el2 / .5) : 0, pop = wolf ? 1 + (1 - smooth(el2 / .3)) * .35 : 1;
+    g.save(); g.globalAlpha = a; g.translate(tx + shake, ty + (1 - smooth(a)) * 14 * u); g.scale(pop, pop); g.font = '700 ' + Math.round(62 * u) + 'px ' + FONT_DISP;
+    g.lineJoin = 'round'; g.strokeStyle = 'rgba(4,7,12,.85)'; g.lineWidth = 7 * u; g.strokeText(wolf ? '你是狼人' : '你是村民', 0, 0);
+    g.shadowColor = wolf ? 'rgba(226,88,74,.8)' : 'rgba(134,194,102,.6)'; g.shadowBlur = 24 * u * d;
+    g.fillStyle = wolf ? '#e2584a' : '#93d06f'; g.fillText(wolf ? '你是狼人' : '你是村民', 0, 0);
     g.restore();
   }
+  const sub = ty + 56 * u, mt = ty + 90 * u;
   if (wolf) {   // 揭曉之前先有一句鋪陳
-    const pa = clamp((t - .6) / .5, 0, 1) * (1 - clamp((t - 2.75) / .3, 0, 1));
-    if (pa > 0) { g.globalAlpha = pa; g.font = '700 22px ' + FONT_DISP; g.fillStyle = '#9db0bf'; g.fillText('夜深了，你一個人回到家……', L.tx, L.ty); g.globalAlpha = 1; }
+    const pa = clamp((t - .5) / .5, 0, 1) * (1 - clamp((t - 2.75) / .3, 0, 1));
+    if (pa > 0) { g.globalAlpha = pa; g.font = '700 ' + Math.round(22 * u) + 'px ' + FONT_DISP; g.lineJoin = 'round'; g.strokeStyle = 'rgba(4,7,12,.8)'; g.lineWidth = 5 * u; g.strokeText('夜深了，你一個人回到家……', tx, ty); g.fillStyle = '#c3d0db'; g.fillText('夜深了，你一個人回到家……', tx, ty); g.globalAlpha = 1; }
   }
   const line = wolf ? '別被發現，趁沒人看見時下手' : '努力完成任務，找出狼人', nch = Math.floor((t - tA - .8) / .065);
-  if (nch > 0) { g.font = '600 18px ' + FONT_BODY; g.fillStyle = '#ece5d3'; g.fillText(line.slice(0, nch), L.tx, L.sub); }
-  if (wolf && intro.mates) { const ma = clamp((t - tA - 2) / .5, 0, 1); if (ma > 0) { g.globalAlpha = ma; g.font = '600 14px ' + FONT_BODY; g.fillStyle = '#f08a7e'; g.fillText('你的同伴：' + intro.mates, L.tx, L.mt); g.globalAlpha = 1; } }
-  if (t > 6.4) { g.globalAlpha = .55 + .35 * Math.sin(t * 4); g.font = '500 13px ' + FONT_BODY; g.fillStyle = '#9db0bf'; g.fillText('遊戲即將開始', L.tx, L.ft); g.globalAlpha = 1; }
-  // 開頭從黑畫面淡入
-  const fade = 1 - smooth(t / .5);
-  if (fade > 0) { g.setTransform(d, 0, 0, d, 0, 0); g.fillStyle = `rgba(7,12,18,${fade})`; g.fillRect(0, 0, W, Hh); }
+  if (nch > 0) { g.font = '600 ' + Math.round(19 * u) + 'px ' + FONT_BODY; g.lineJoin = 'round'; g.strokeStyle = 'rgba(4,7,12,.8)'; g.lineWidth = 4.5 * u; g.strokeText(line.slice(0, nch), tx, sub); g.fillStyle = '#f3ecda'; g.fillText(line.slice(0, nch), tx, sub); }
+  if (wolf && intro.mates) { const ma = clamp((t - tA - 2) / .5, 0, 1); if (ma > 0) { g.globalAlpha = ma; g.font = '600 ' + Math.round(15 * u) + 'px ' + FONT_BODY; g.fillStyle = '#ff9d90'; g.fillText('你的同伴：' + intro.mates, tx, mt); g.globalAlpha = 1; } }
+  if (t > 6.4) { g.globalAlpha = .55 + .35 * Math.sin(t * 4); g.font = '500 ' + Math.round(13.5 * u) + 'px ' + FONT_BODY; g.fillStyle = '#b8c6d2'; g.fillText('遊戲即將開始', tx, land ? Hh * .86 : Hh - 46 * u); g.globalAlpha = 1; }
+  // 上下各一條黑邊，像電影一樣；開頭從黑畫面淡入
+  const bar = (land ? 16 : 30) * u * smooth(t / .8) * (1 - .5 * cardP); g.fillStyle = '#04070b'; g.fillRect(0, 0, W, bar); g.fillRect(0, Hh - bar, W, bar);
+  const fade = 1 - smooth(t / .6);
+  if (fade > 0) { g.fillStyle = `rgba(7,12,18,${fade})`; g.fillRect(0, 0, W, Hh); }
 }
 // ===== 介面 =====
 let toastTimer = 0;
