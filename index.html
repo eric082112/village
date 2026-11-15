@@ -164,6 +164,9 @@ body[data-mode="intro"] .acts,body[data-mode="intro"] .joy,body[data-mode="resul
 }
 .chip.wolf{border-color:var(--wolf);color:var(--wolf)}
 .chip.ghost{border-color:var(--ink-dim);color:var(--ink-dim)}
+.alert{background:rgba(120,38,22,.9);border:1px solid #ff7a45;color:#ffd9c7;font-weight:700;font-size:13px;padding:4px 10px;border-radius:10px;width:max-content;max-width:min(74vw,300px);animation:alertPulse 1.2s ease-in-out infinite}
+.alert[hidden]{display:none}
+@keyframes alertPulse{50%{background:rgba(160,52,28,.95)}}
 .tasks{
   background:rgba(11,21,29,.74);border-radius:10px;padding:6px 10px;font-size:12.5px;line-height:1.5;
   width:max-content;max-width:min(74vw,300px);display:flex;flex-direction:column;gap:1px;
@@ -206,6 +209,7 @@ body[data-mode="intro"] .acts,body[data-mode="intro"] .joy,body[data-mode="resul
 .act-use{grid-column:2;width:84px;height:84px;font-size:19px;background:var(--lantern);border-color:var(--lantern);color:var(--lantern-ink)}
 .act-kill{grid-column:1;grid-row:1;border-color:var(--wolf);color:var(--wolf)}
 .act-report{grid-column:2;grid-row:1}
+.act-blow{grid-column:1;grid-row:2;align-self:center;border-color:var(--wolf);color:var(--wolf)}
 .act-use{grid-row:2}
 .act[hidden]{display:none}
 
@@ -308,6 +312,14 @@ body.map-open #mapOv{display:flex}
 
 #lobbyHint{-webkit-user-select:text;user-select:text;word-break:break-all}
 
+.set-groups{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.set-groups[hidden]{display:none}
+.set-btn{min-height:52px;padding:8px 10px}
+.set-btn small{font-size:11.5px;line-height:1.3}
+.modal{position:absolute;inset:0;display:none;align-items:flex-start;justify-content:center;z-index:40;background:rgba(5,10,16,.66);
+  padding:calc(16px + env(safe-area-inset-top,0px)) calc(16px + env(safe-area-inset-right,0px)) calc(16px + env(safe-area-inset-bottom,0px)) calc(16px + env(safe-area-inset-left,0px));overflow-y:auto}
+.modal .panel{width:100%;max-width:400px;margin:auto}
+body.set-open #setSheet{display:flex}
 /* ---------- 手機橫向（畫面很矮） ---------- */
 /* 直向時這幾個分組不起作用，裡面的東西照原樣往下排 */
 .lobby-col,.meet-col,.end-col{display:contents}
@@ -351,6 +363,7 @@ body.map-open #mapOv{display:flex}
   <div class="hud-top">
     <div class="hud-left">
       <div id="roleChip" class="chip">村民</div>
+      <div id="alert" class="alert" role="status" hidden></div>
       <ul id="taskList" class="tasks"></ul>
     </div>
     <div class="hud-right">
@@ -361,6 +374,7 @@ body.map-open #mapOv{display:flex}
   <div id="joy" class="joy"><div id="joyKnob" class="joy-knob"></div></div>
   <div class="acts">
     <button id="btnKill" class="act act-kill" type="button" hidden>襲擊<small id="killCd"></small></button>
+    <button id="btnBlow" class="act act-blow" type="button" hidden>吹燈<small id="blowCd"></small></button>
     <button id="btnReport" class="act act-report" type="button" disabled>舉報</button>
     <button id="btnUse" class="act act-use" type="button" disabled>使用</button>
   </div>
@@ -390,6 +404,7 @@ body.map-open #mapOv{display:flex}
         <li>狼人混在村民裡，靠近落單的人按「襲擊」。狼人數量追上村民，狼人獲勝。</li>
         <li>看到有人倒下就按「舉報」，或到廣場敲鐘。全員開會，投票放逐一個人。</li>
         <li>出局的人變成鬼魂。村民的鬼魂會定時自動完成工作，也可以自己動手做。</li>
+        <li>狼人可以「吹燈」讓村民看不遠。任何一位活著的人走到提示的地點點蠟燭，視野就會恢復。</li>
       </ol>
     </details>
   </div>
@@ -418,6 +433,10 @@ body.map-open #mapOv{display:flex}
     </div>
     <div class="lobby-col">
     <div id="settings" class="settings"></div>
+    <div id="setGroups" class="set-groups">
+      <button id="btnSetWolf" class="btn set-btn" type="button">狼人設定<small id="sumWolf"></small></button>
+      <button id="btnSetTask" class="btn set-btn" type="button">任務設定<small id="sumTask"></small></button>
+    </div>
     <button id="btnStart" class="btn primary" type="button">開始遊戲</button>
     <p id="lobbyHint" class="note"></p>
     <button id="btnLeave" class="btn" type="button">離開房間</button>
@@ -508,6 +527,14 @@ body.map-open #mapOv{display:flex}
   </div>
 </section>
 
+<section id="setSheet" class="modal">
+  <div class="panel">
+    <div class="sheet-head"><h3 id="setTitle">設定</h3></div>
+    <p id="setNote" class="note"></p>
+    <div id="setBox" class="settings"></div>
+    <button id="btnSetClose" class="btn primary" type="button">完成</button>
+  </div>
+</section>
 <div id="toast" role="status"></div>
 <!-- Firebase JavaScript SDK 10.12.2 (app-compat + database-compat), Apache-2.0 -->
 <script>
@@ -565,6 +592,9 @@ function tfill(x0, y0, x1, y1, t, onlyGrass) {
 // type: mash 連點 / scatter 點掉散落物 / hold 按住 / timing 抓時機 / seq 依序點
 let BUILDINGS = [], OBJECTS = [], STATIONS = [], AREAS = [], LAMPS = [];
 let CHAINS = [];   // 長任務：要照順序跑好幾個工作點
+let CANDLE = null, candleS = 0;   // 燈被吹熄後，要到這個工作點的位置點蠟燭
+const LIGHTS_OUT = .45;           // 燈熄的時候，村民的視野剩下幾成
+function killRangeOf(st) { return [58, 78, 104][st && st.kr != null ? st.kr : 1] || 78; }   // 襲擊範圍：短／中／長
 const BELL = { x: 23, y: 15, wx: 0, wy: 0 };
 const SPAWNS = [], TREES = [], LIGHTS = [], STATIC = [];
 let curMap = -1;
@@ -620,6 +650,7 @@ function buildVillage() {
     stn('撿雞蛋', '雞舍', 25, 26, 'scatter', '🥚', '把雞蛋全部撿起來', 6),
     stn('打鐵', '鐵匠鋪', 33, 26, 'timing', '🔨', '指針進到綠色區再敲，成功 3 次', 3)
   ];
+  candleS = 1;   // 祠堂
   CHAINS = [
     { name: '做麵包', steps: [6, 2, 4] },
     { name: '灌溉農田', steps: [5, 7] },
@@ -687,6 +718,7 @@ function buildHarbor() {
     stn('撿貝殼', '東沙灘', 29, 20, 'pairs', '🐚', '翻開沙堆，把一樣的貝殼配成對', '🐚🦀⭐🐟🦐🐙'),
     stn('洗魚箱', '魚市廣場', 28, 14, 'hold', '💧', '按住不放，把魚箱沖乾淨')
   ];
+  candleS = 4;   // 燈塔
   CHAINS = [
     { name: '出海捕魚', steps: [2, 6, 0] },
     { name: '做魚乾', steps: [5, 11, 8] },
@@ -749,6 +781,7 @@ function buildOldStreet() {
     stn('餵貓', '後院', 19, 26, 'scatter', '🐱', '每隻貓都點一下，餵完為止', 5),
     stn('掛燈籠', '牌樓', 22, 23, 'timing', '🏮', '指針進到綠色區再掛，成功 3 次', 3)
   ];
+  candleS = 2;   // 廟
   CHAINS = [
     { name: '做新衣', steps: [1, 7] },
     { name: '廟會準備', steps: [8, 2, 11] },
@@ -823,6 +856,7 @@ function loadMap(i) {
   for (const b of BUILDINGS) tfill(b.x0, b.y0, b.x1, b.y1, T_BLD);
   for (const o of OBJECTS) if (!o.ns) tset(o.x, o.y, T_OBJ);
   for (const s of STATIONS) { s.wx = s.x * TILE + 20; s.wy = s.y * TILE + 22; }
+  { const cs = STATIONS[candleS] || STATIONS[0]; CANDLE = { s: STATIONS.indexOf(cs), x: cs.x, y: cs.y, wx: cs.wx, wy: cs.wy, area: cs.area }; }
   // 出生點：圍著鐘一圈
   SPAWNS.length = 0;
   for (let k = 0; k < MAX_PLAYERS; k++) {
@@ -1316,16 +1350,16 @@ const Net = {
     this.val = null; this.roomRef = null; this.meRef = null;
   }
 };
-function mePresence() { return { n: ME.n, c: ME.c, x: Math.round(ME.x), y: Math.round(ME.y), f: ME.f, m: ME.m, td: ME.td, k: ME.k, r: ME.r, v: ME.v, ch: ME.ch }; }
+function mePresence() { return { n: ME.n, c: ME.c, x: Math.round(ME.x), y: Math.round(ME.y), f: ME.f, m: ME.m, td: ME.td, k: ME.k, r: ME.r, bl: ME.bl, fx: ME.fx, v: ME.v, ch: ME.ch }; }
 
 // ===== 共用狀態 =====
-const ME = { id: '', n: '', c: 0, x: 0, y: 0, f: 1, m: 0, td: [0, 0], k: null, r: null, v: null, ch: [] };
+const ME = { id: '', n: '', c: 0, x: 0, y: 0, f: 1, m: 0, td: [0, 0], k: null, r: null, bl: null, fx: null, v: null, ch: [] };
 let code = '', inRoom = false, isHost = false, practice = false;
 let H = null, hs = null, BOTS = [], hostDirty = false;   // 房主才有
 let G = null;                                            // 目前看到的遊戲狀態（房主時 G === H）
 const players = new Map();                               // 其他人與電腦玩家
-const my = { idx: -1, wolf: false, dead: false, tasks: [], cd: 0, em: false };
-const seen = { gn: -1, ph: -1, dead: false };
+const my = { idx: -1, wolf: false, dead: false, tasks: [], cd: 0, bcd: 0, em: false };
+const seen = { gn: -1, ph: -1, dead: false, lo: 0 };
 let hostSeenAt = 0;
 
 const isBotId = id => typeof id === 'string' && id.length < 5;
@@ -1337,8 +1371,8 @@ function nameOfId(id) { const p = pubOf(id); return p ? p.n : '某人'; }
 
 // ===== 房主：遊戲規則 =====
 function hostCreate() {
-  H = { gn: 0, ph: 0, st: { w: 1, tl: 2, ts: 2, ga: 8, kc: 25, mt: 90, map: Math.max(0, curMap) }, ro: [], wf: '', dd: '', lf: '', ta: [], ga: [], bd: [], mt: null, rs: null, pg: [0, 0], win: 0, why: 0, rem: 0 };
-  hs = { lastK: {}, lastR: {}, em: {}, meetNo: 0, acc: 0, absent: {} };
+  H = { gn: 0, ph: 0, st: { w: 1, tl: 2, ts: 2, ga: 8, kc: 25, kr: 1, bl: 45, mt: 90, map: Math.max(0, curMap) }, ro: [], wf: '', dd: '', lf: '', ta: [], ga: [], lo: 0, bd: [], mt: null, rs: null, pg: [0, 0], win: 0, why: 0, rem: 0 };
+  hs = { lastK: {}, lastR: {}, lastB: {}, lastF: {}, em: {}, meetNo: 0, acc: 0, absent: {} };
   BOTS = []; G = H; hostDirty = true;
 }
 function usedColors() { const u = new Set([ME.c]); for (const p of players.values()) u.add(p.c); for (const b of BOTS) u.add(b.c); return u; }
@@ -1372,30 +1406,48 @@ function hostStart() {
   hs.steps = H.ta.map(taskStepCount); hs.stepsGn = H.gn;
   let tot = 0; for (let i = 0; i < n; i++) if (!wolves.has(i)) tot += hs.steps[i];
   H.bd = []; H.mt = null; H.rs = null; H.win = 0; H.why = 0; H.pg = [0, tot]; H.ph = 1; H.rem = 9;
-  hs.lastK = {}; hs.lastR = {}; hs.em = {}; hs.meetNo = 0; hs.absent = {}; hs.acc = 0;
-  for (const [id, p] of players) { if (p.bot) continue; hs.lastK[id] = Array.isArray(p.k) ? p.k[0] : undefined; hs.lastR[id] = Array.isArray(p.r) ? p.r[0] : undefined; }
+  hs.lastK = {}; hs.lastR = {}; hs.lastB = {}; hs.lastF = {}; hs.em = {}; hs.meetNo = 0; hs.absent = {}; hs.acc = 0; hs.fixer = null; H.lo = 0;
+  for (const [id, p] of players) { if (p.bot) continue; hs.lastK[id] = Array.isArray(p.k) ? p.k[0] : undefined; hs.lastR[id] = Array.isArray(p.r) ? p.r[0] : undefined; hs.lastB[id] = Array.isArray(p.bl) ? p.bl[0] : undefined; hs.lastF[id] = Array.isArray(p.fx) ? p.fx[0] : undefined; }
   for (const b of BOTS) {
     const i = ids.indexOf(b.id), sp = SPAWNS[Math.max(0, i)];
     b.x = sp.x; b.y = sp.y; b.m = 0; b.td = [H.gn, 0]; b.v = null; b.ch = []; b.know = null; b.path = null; b.pi = 0; b.goalJ = -1;
-    b.wait = rnd(.4, 2.6); b.cd = rnd(14, 22); b.repAt = 0; b.stalkAt = 0; b.said = false;
+    b.wait = rnd(.4, 2.6); b.cd = rnd(14, 22); b.repAt = 0; b.stalkAt = 0; b.said = false; b.bcd = 15 + rnd(5, 25); b.fix = 0; b.fixT = 0;
   }
   hostDirty = true; return true;
 }
-function hostToLobby() { if (!H) return; H.ph = 0; H.bd = []; H.mt = null; H.rs = null; H.win = 0; for (const b of BOTS) { b.m = 0; b.path = null; b.v = null; b.ch = []; } hostDirty = true; }
+function hostToLobby() { if (!H) return; H.ph = 0; H.bd = []; H.mt = null; H.rs = null; H.win = 0; H.lo = 0; for (const b of BOTS) { b.m = 0; b.path = null; b.v = null; b.ch = []; } hostDirty = true; }
 
 function hostKill(kid, vid) {
   const ki = H.ro.indexOf(kid), vi = H.ro.indexOf(vid);
   if (H.ph !== 2 || ki < 0 || vi < 0 || ki === vi) return false;
   if (H.wf[ki] !== '1' || !aliveIdx(ki) || !aliveIdx(vi) || H.wf[vi] === '1') return false;
   const kp = posOf(kid), vp = posOf(vid); if (!kp || !vp) return false;
-  if (dist(kp.x, kp.y, vp.x, vp.y) > KILL_RANGE * 2.6) return false;
+  if (dist(kp.x, kp.y, vp.x, vp.y) > killRangeOf(H.st) * 2.6) return false;
   H.dd = setFlag(H.dd, vi); H.bd.push([vi, Math.round(vp.x), Math.round(vp.y)]);
   for (const b of BOTS) {
     const bi = H.ro.indexOf(b.id);
     if (bi < 0 || bi === vi || bi === ki || !aliveIdx(bi) || H.wf[bi] === '1') continue;
-    if (dist(b.x, b.y, kp.x, kp.y) < 210 && canSee(b.x, b.y, kp.x, kp.y)) b.know = kid;
+    if (dist(b.x, b.y, kp.x, kp.y) < (H.lo ? 100 : 210) && canSee(b.x, b.y, kp.x, kp.y)) b.know = kid;
   }
   hostWin(); hostDirty = true; return true;
+}
+// 狼人吹燈：村民的視野變小，直到有人去點蠟燭
+function hostBlow(id) {
+  const i = H.ro.indexOf(id);
+  if (H.ph !== 2 || i < 0 || H.wf[i] !== '1' || !aliveIdx(i) || H.lo || !(H.st.bl > 0)) return false;
+  H.lo = 1; hs.fixer = null; hostDirty = true; return true;
+}
+// 任何一位還活著的人走到蠟燭旁邊就能點亮
+function hostRelight(id) {
+  const i = H.ro.indexOf(id);
+  if (H.ph !== 2 || i < 0 || !aliveIdx(i) || !H.lo) return false;
+  const p = posOf(id); if (!p || dist(p.x, p.y, CANDLE.wx, CANDLE.wy) > 150) return false;
+  hostLightsOn(); return true;
+}
+function hostLightsOn() {
+  if (!H.lo) return;
+  H.lo = 0; hs.fixer = null; hostDirty = true;
+  for (const b of BOTS) { b.bcd = (H.st.bl || 45) + rnd(0, 20); if (b.fix) { b.fix = 0; b.path = null; b.goalJ = -1; } b.fixT = 0; }
 }
 function hostReport(rid, bid) {
   const ri = H.ro.indexOf(rid);
@@ -1404,6 +1456,7 @@ function hostReport(rid, bid) {
   if (bid) { bi = H.ro.indexOf(bid); if (bi < 0 || !H.bd.some(b => b[0] === bi)) return false; }
   else { if (hs.em[rid]) return false; hs.em[rid] = 1; }
   hs.meetNo++; H.mt = { no: hs.meetNo, by: ri, body: bi }; H.rem = H.st.mt; H.ph = 3; H.rs = null;
+  hostLightsOn();   // 開會時燈自動恢復
   botsMeetInit(); H.bd = []; hostDirty = true; return true;
 }
 function voteOf(id) { const p = pubOf(id); return p ? p.v : null; }
@@ -1480,10 +1533,12 @@ function hostIntents() {
     if (p.bot) continue;
     if (Array.isArray(p.k) && p.k[0] !== hs.lastK[id]) { hs.lastK[id] = p.k[0]; hostKill(id, p.k[1]); }
     if (Array.isArray(p.r) && p.r[0] !== hs.lastR[id]) { hs.lastR[id] = p.r[0]; hostReport(id, p.r[1] === '-' ? '' : p.r[1]); }
+    if (Array.isArray(p.bl) && p.bl[0] !== hs.lastB[id]) { hs.lastB[id] = p.bl[0]; hostBlow(id); }
+    if (Array.isArray(p.fx) && p.fx[0] !== hs.lastF[id]) { hs.lastF[id] = p.fx[0]; hostRelight(id); }
   }
 }
 // 只把有變動的部分送出去，省流量
-const H_KEYS = ['gn', 'ph', 'st', 'ro', 'wf', 'dd', 'lf', 'ta', 'ga', 'bd', 'mt', 'rs', 'pg', 'win', 'why', 'rem'];
+const H_KEYS = ['gn', 'ph', 'st', 'ro', 'wf', 'dd', 'lf', 'ta', 'ga', 'lo', 'bd', 'mt', 'rs', 'pg', 'win', 'why', 'rem'];
 let pubTick = 0;
 function hostPublish() {
   if (!Net.on || !H) return;
@@ -1546,6 +1601,16 @@ function botGoTile(b, tx, ty) {
   const p = findPath(sx, sy, tx, ty); b.path = p; b.pi = 0; b.jx = rnd(-8, 8); b.jy = rnd(-7, 7); return !!p;
 }
 function botsPlay(dt, now) {
+  // 燈熄了：離蠟燭最近的電腦村民負責去點
+  if (H.lo) {
+    const cur = hs.fixer && botById(hs.fixer), ci = cur ? H.ro.indexOf(cur.id) : -1;
+    if (!cur || ci < 0 || !aliveIdx(ci)) {
+      let best = null, bd = 1e9;
+      for (const b of BOTS) { const i = H.ro.indexOf(b.id); if (i < 0 || !aliveIdx(i) || H.wf[i] === '1') continue; const d = dist(b.x, b.y, CANDLE.wx, CANDLE.wy); if (d < bd) { bd = d; best = b; } }
+      hs.fixer = best ? best.id : null;
+      if (best) { best.fix = 0; best.fixT = 0; best.fixWait = rnd(4, 8); }
+    }
+  }
   for (const b of BOTS) {
     const idx = H.ro.indexOf(b.id); if (idx < 0) continue;
     botThink(b, idx, dt, now);
@@ -1557,15 +1622,25 @@ function botThink(b, idx, dt, now) {
   if (dead) { b.m = 0; return; }   // 出局後不再走動；村民的工作由鬼魂計時自動完成
   if (!dead) {
     let near = null;
-    for (const bd of H.bd) if (dist(b.x, b.y, bd[1], bd[2]) < 135 && canSee(b.x, b.y, bd[1], bd[2])) { near = bd; break; }
+    const sight = H.lo && !wolf ? LIGHTS_OUT : 1;   // 燈熄的時候村民看不遠
+    for (const bd of H.bd) if (dist(b.x, b.y, bd[1], bd[2]) < 135 * sight && canSee(b.x, b.y, bd[1], bd[2])) { near = bd; break; }
     if (near && !wolf) {
       if (!b.repAt) b.repAt = now + rnd(600, 2000);
       else if (now >= b.repAt) { b.repAt = 0; hostReport(b.id, H.ro[near[0]]); return; }
     } else b.repAt = 0;
+    if (wolf && H.st.bl > 0 && !H.lo) { b.bcd -= dt; if (b.bcd <= 0) { b.bcd = H.st.bl + rnd(5, 25); hostBlow(b.id); } }
+    if (!wolf && H.lo && hs.fixer === b.id) {
+      // 走去點蠟燭
+      if (dist(b.x, b.y, CANDLE.wx, CANDLE.wy) < 46) { b.m = 0; b.fixT += dt; if (b.fixT > 1.2) hostRelight(b.id); return; }
+      if (b.fixWait > 0) { b.fixWait -= dt; b.m = 0; }
+      else if (!b.fix) { if (botGoTile(b, CANDLE.x, CANDLE.y)) { b.fix = 1; b.wait = 0; b.goalJ = -1; } else b.fixWait = 1; }
+      else if (botStep(b, dt, BOT_SPEED)) b.fix = 0;
+      if (b.fix || b.fixWait > 0) return;
+    }
     if (wolf) {
       b.cd -= dt;
       if (b.cd <= 0) {
-        let vic = -1, best = KILL_RANGE - 6;
+        let vic = -1, best = killRangeOf(H.st) - 6;
         for (let i = 0; i < H.ro.length; i++) {
           if (i === idx || !aliveIdx(i) || H.wf[i] === '1') continue;
           const p = posOf(H.ro[i]); if (!p) continue;
@@ -1575,7 +1650,7 @@ function botThink(b, idx, dt, now) {
           let wit = 0;
           for (let i = 0; i < H.ro.length; i++) {
             if (i === idx || i === vic || !aliveIdx(i) || H.wf[i] === '1') continue;
-            const p = posOf(H.ro[i]); if (p && dist(b.x, b.y, p.x, p.y) < 230 && canSee(p.x, p.y, b.x, b.y)) wit++;
+            const p = posOf(H.ro[i]); if (p && dist(b.x, b.y, p.x, p.y) < (H.lo ? 105 : 230) && canSee(p.x, p.y, b.x, b.y)) wit++;
           }
           if (wit === 0 && hostKill(b.id, H.ro[vic])) { b.cd = H.st.kc + rnd(0, 5); b.path = null; b.wait = 0; b.goalJ = -1; return; }
         }
@@ -1657,7 +1732,8 @@ function botLine(b, idx) {
   return pick(lines);
 }
 // ===== 玩家端：同步、移動、動作 =====
-const view = { w: 0, h: 0, dpr: 1, z: 1, cx: 23.5 * TILE, cy: 15.5 * TILE };
+const view = { w: 0, h: 0, dpr: 1, z: 1, cx: 23.5 * TILE, cy: 15.5 * TILE, vis: 0 };
+let fogA = null, fogB = null;   // 畫霧用的小畫布
 // 換地圖：重建地形與地面圖。在大廳時順便把人放回新地圖的鐘旁邊。
 function applyMap(i) {
   loadMap(i); buildGround(); sig.mapPrev = '';
@@ -1693,7 +1769,7 @@ function upsert(pr, bot, now) {
   if (!p) { p = { id: pr.id, rx: +pr.x || 0, ry: +pr.y || 0, phase: Math.random() * 6, bot }; players.set(pr.id, p); }
   p.n = cleanText(pr.n, 8) || '?'; p.c = Math.abs(pr.c | 0) % COLORS.length;
   p.x = +pr.x || 0; p.y = +pr.y || 0; p.f = pr.f === -1 ? -1 : 1; p.m = pr.m ? 1 : 0;
-  p.td = pr.td; p.k = pr.k; p.r = pr.r; p.v = pr.v; p.ch = pr.ch; p.bot = bot; p.seen = now;
+  p.td = pr.td; p.k = pr.k; p.r = pr.r; p.bl = pr.bl; p.fx = pr.fx; p.v = pr.v; p.ch = pr.ch; p.bot = bot; p.seen = now;
   return p;
 }
 const arr = x => Array.isArray(x) ? x : EMPTY;
@@ -1704,8 +1780,8 @@ const str = x => typeof x === 'string' ? x : '';
 function normG(h) {
   const st = h.st || {}, rs = h.rs, mt = h.mt;
   return {
-    gn: h.gn | 0, ph: h.ph | 0, st: { w: st.w || 1, tl: st.tl == null ? 2 : clamp(st.tl | 0, 0, 3), ts: st.ts == null ? 2 : clamp(st.ts | 0, 0, 5), ga: [8, 12, 15].includes(st.ga) ? st.ga : 8, kc: st.kc || 25, mt: st.mt || 90, map: clamp(st.map | 0, 0, MAPS.length - 1) },
-    ro: arr(h.ro), wf: str(h.wf), dd: str(h.dd), lf: str(h.lf), ta: arr(h.ta), ga: arr(h.ga), bd: arr(h.bd),
+    gn: h.gn | 0, ph: h.ph | 0, st: { w: st.w || 1, tl: st.tl == null ? 2 : clamp(st.tl | 0, 0, 3), ts: st.ts == null ? 2 : clamp(st.ts | 0, 0, 5), ga: [8, 12, 15].includes(st.ga) ? st.ga : 8, kc: st.kc || 25, kr: st.kr == null ? 1 : clamp(st.kr | 0, 0, 2), bl: [0, 30, 45, 60, 90].includes(st.bl) ? st.bl : 45, mt: st.mt || 90, map: clamp(st.map | 0, 0, MAPS.length - 1) },
+    ro: arr(h.ro), wf: str(h.wf), dd: str(h.dd), lf: str(h.lf), ta: arr(h.ta), ga: arr(h.ga), lo: h.lo ? 1 : 0, bd: arr(h.bd),
     mt: mt && typeof mt === 'object' ? { no: mt.no | 0, by: mt.by | 0, body: mt.body == null ? -1 : mt.body | 0 } : null,
     rs: rs && typeof rs === 'object' ? { ej: rs.ej == null ? -1 : rs.ej | 0, tie: rs.tie | 0, sk: rs.sk | 0, vt: arr(rs.vt) } : null,
     pg: Array.isArray(h.pg) ? h.pg : [0, 0], win: h.win | 0, why: h.why | 0, rem: h.rem | 0
@@ -1760,6 +1836,7 @@ function taskCur(tk) { for (let k = 0; k < tk.steps.length; k++) if (!(ME.td[1] 
 // 現在該去的工作點。狼人拿到的是假清單，所有地點都標出來方便裝忙。
 function taskMarks() {
   const out = [];
+  if (G && G.lo && G.ph === 2 && !my.dead && CANDLE) out.push({ s: CANDLE.s, ti: -1, candle: true });
   for (let ti = 0; ti < my.tasks.length; ti++) {
     const tk = my.tasks[ti];
     if (my.wolf) { for (const s of tk.steps) out.push({ s, ti, fake: true }); continue; }
@@ -1772,7 +1849,7 @@ function onStateChange() {
   if (!inRoom || !G) return;
   derive();
   if (G.ph >= 1 && G.gn !== seen.gn) {
-    seen.gn = G.gn; seen.dead = my.dead; my.cd = 12; my.em = false;
+    seen.gn = G.gn; seen.dead = my.dead; my.cd = 12; my.bcd = 15; my.em = false; seen.lo = 0;
     let mask = 0;
     try { const s = JSON.parse(store('lw_pg') || 'null'); if (s && s.c === code && s.g === G.gn) mask = s.m | 0; } catch (e) { }
     ME.td = [G.gn, mask]; ME.v = null; ME.ch = [];
@@ -1787,10 +1864,19 @@ function onStateChange() {
     if (taskState && !taskState.done && (ME.td[1] >> taskState.bit & 1)) closeTask();
     if (G.ph === 2) toast('鬼魂自動完成了一步工作', 1800);
   }
+  // 燈被吹熄／重新點亮
+  if (G.lo !== seen.lo) {
+    const was = seen.lo; seen.lo = G.lo;
+    if (G.ph === 2 && my.idx >= 0) {
+      if (G.lo) toast(my.wolf ? '燈吹熄了，村民現在看不遠。' : '燈被吹熄了！到「' + CANDLE.area + '」點蠟燭。', 3200);
+      else if (was) toast('燈重新亮了。', 1800);
+    }
+    if (was && !G.lo) my.bcd = G.st.bl;   // 燈亮回來之後才開始算下一次的冷卻
+  }
   if (G.ph !== seen.ph) {
     const prev = seen.ph; seen.ph = G.ph;
     closeTask(); document.body.classList.remove('map-open', 'menu-open');
-    if (G.ph === 2 && (prev === 3 || prev === 4)) { toSpawn(); my.cd = G.st.kc; }
+    if (G.ph === 2 && (prev === 3 || prev === 4)) { toSpawn(); my.cd = G.st.kc; my.bcd = Math.max(my.bcd, 15); }
     if (G.ph === 3) openMeeting();
     if (G.ph === 0 && my.idx < 0) { const sp = SPAWNS[rint(0, SPAWNS.length - 1)]; ME.x = sp.x + rnd(-14, 14); ME.y = sp.y + rnd(-10, 10); }
     uiPhase(prev);
@@ -1819,6 +1905,7 @@ function updateMe(dt) {
   } else ME.m = 0;
   mePhase += dt * (ME.m ? 13 : 2.2);
   if (my.cd > 0 && G && G.ph === 2) my.cd = Math.max(0, my.cd - dt);
+  if (my.bcd > 0 && G && G.ph === 2 && !G.lo) my.bcd = Math.max(0, my.bcd - dt);
 }
 function sendPos(now) {
   if (!Net.on || now - lastSend < 100) return;
@@ -1833,16 +1920,18 @@ function computeCtx() {
   if (!my.wolf) {
     let best = USE_RANGE;
     for (const m of taskMarks()) {
+      if (m.candle) continue;
       const st = STATIONS[m.s], d = dist(ME.x, ME.y, st.wx, st.wy);
       if (d < best) { best = d; ctxA.use = { k: 'task', ti: m.ti }; }
     }
   }
   if (my.dead) return;
+  if (G.lo && CANDLE && dist(ME.x, ME.y, CANDLE.wx, CANDLE.wy) < USE_RANGE + 14) ctxA.use = { k: 'candle' };   // 點蠟燭優先
   if (!ctxA.use && !my.em && dist(ME.x, ME.y, BELL.wx, BELL.wy) < BELL_RANGE) ctxA.use = { k: 'bell' };
   let bb = REPORT_RANGE;
   for (const b of G.bd) { const d = dist(ME.x, ME.y, b[1], b[2]); if (d < bb && canSee(ME.x, ME.y, b[1], b[2])) { bb = d; ctxA.body = b; } }
   if (my.wolf && my.cd <= 0) {
-    let bk = KILL_RANGE;
+    let bk = killRangeOf(G.st);
     for (let i = 0; i < G.ro.length; i++) {
       if (i === my.idx || G.wf[i] === '1' || G.dd[i] === '1' || G.lf[i] === '1') continue;
       const p = players.get(G.ro[i]); if (!p) continue;
@@ -1852,9 +1941,14 @@ function computeCtx() {
 }
 function sendKill(vid) { if (isHost) hostKill(ME.id, vid); else { ME.k = [Date.now(), vid]; Net.set({ k: ME.k }); } }
 function sendReport(bid) { if (isHost) hostReport(ME.id, bid); else { ME.r = [Date.now(), bid || '-']; Net.set({ r: ME.r }); } }
+function sendBlow() { if (isHost) hostBlow(ME.id); else { ME.bl = [Date.now()]; Net.set({ bl: ME.bl }); } }
+function sendFix() { if (isHost) hostRelight(ME.id); else { ME.fx = [Date.now()]; Net.set({ fx: ME.fx }); } }
+function canBlow() { return !!(G && G.ph === 2 && my.wolf && !my.dead && G.st.bl > 0 && !G.lo && my.bcd <= 0); }
+function doBlow() { if (!canBlow()) return; my.bcd = G.st.bl; sendBlow(); }
 function doUse() {
   const u = ctxA.use; if (!u) return;
   if (u.k === 'task') openTask(u.ti);
+  else if (u.k === 'candle') sendFix();
   else { my.em = true; sendReport(''); }
 }
 function doReport() { if (ctxA.body && G) sendReport(G.ro[ctxA.body[0]]); }
@@ -1865,7 +1959,7 @@ function genCode() { let s = ''; for (let i = 0; i < 4; i++) s += 'ABCDEFGHJKLMN
 function enterRoom(c, host, isPractice, rv) {
   code = c; inRoom = true; isHost = host; practice = !!isPractice;
   players.clear(); G = null; H = null; BOTS = [];
-  seen.gn = -1; seen.ph = -1; seen.dead = false; my.idx = -1; hostSeenAt = performance.now();
+  seen.gn = -1; seen.ph = -1; seen.dead = false; seen.lo = 0; my.idx = -1; hostSeenAt = performance.now();
   const sp = SPAWNS[rint(0, SPAWNS.length - 1)];
   ME.x = sp.x + rnd(-14, 14); ME.y = sp.y + rnd(-10, 10); ME.f = 1; ME.m = 0; ME.td = [0, 0]; ME.k = null; ME.r = null; ME.v = null; ME.ch = [];
   netVer = -1; botsPub = EMPTY; hostWarned = false;
@@ -1959,7 +2053,12 @@ function render(now) {
   const z = view.z * view.dpr, vw = view.w / view.z, vh = view.h / view.z;
   const playing = inRoom && G && G.ph >= 1 && G.ph <= 4 && my.idx >= 0;
   let fx, fy, vis, dark;
-  if (playing) { fx = ME.x; fy = ME.y - 16; vis = my.wolf ? VISION_WOLF : VISION; dark = my.dead ? .5 : .94; }
+  if (playing) {
+    fx = ME.x; fy = ME.y - 16; dark = my.dead ? .45 : .86;
+    const want = my.wolf ? VISION_WOLF : VISION * (G.lo && G.ph === 2 && !my.dead ? LIGHTS_OUT : 1);
+    view.vis = view.vis ? view.vis + (want - view.vis) * .1 : want; if (Math.abs(view.vis - want) < .5) view.vis = want;
+    vis = view.vis;
+  }
   else { fx = BELL.wx + (inRoom ? 0 : Math.sin(now / 9000) * 150); fy = BELL.wy - 22 + (inRoom ? 0 : Math.cos(now / 12000) * 80); vis = 330; dark = .9; }
   view.cx = vw >= WORLD_W ? WORLD_W / 2 : clamp(fx, vw / 2, WORLD_W - vw / 2);
   view.cy = vh >= WORLD_H ? WORLD_H / 2 : clamp(fy, vh / 2, WORLD_H - vh / 2);
@@ -1975,7 +2074,7 @@ function render(now) {
     const pulse = .5 + .5 * Math.sin(now / 260);
     for (const m of taskMarks()) {
       const st = STATIONS[m.s];
-      g.strokeStyle = m.fake ? 'rgba(157,176,191,.5)' : `rgba(242,184,75,${.55 + .4 * pulse})`; g.lineWidth = 2.6; g.beginPath(); g.ellipse(st.wx, st.wy, 18 + pulse * 2, 12 + pulse * 1.4, 0, 0, 6.2832); g.stroke();
+      g.strokeStyle = m.candle ? `rgba(255,122,69,${.6 + .4 * pulse})` : m.fake ? 'rgba(157,176,191,.5)' : `rgba(242,184,75,${.55 + .4 * pulse})`; g.lineWidth = 2.6; g.beginPath(); g.ellipse(st.wx, st.wy, 18 + pulse * 2, 12 + pulse * 1.4, 0, 0, 6.2832); g.stroke();
     }
     if (ctxA.kill) { g.strokeStyle = 'rgba(220,90,77,.9)'; g.lineWidth = 2.6; g.beginPath(); g.ellipse(ctxA.kill.rx, ctxA.kill.ry, 16, 7, 0, 0, 6.2832); g.stroke(); }
     if (ctxA.body) { g.strokeStyle = 'rgba(236,229,211,.8)'; g.lineWidth = 2; g.beginPath(); g.ellipse(ctxA.body[1], ctxA.body[2], 26, 9, 0, 0, 6.2832); g.stroke(); }
@@ -2028,7 +2127,7 @@ function render(now) {
     const bobm = Math.sin(now / 300) * 3;
     for (const m of taskMarks()) {
       const st = STATIONS[m.s];
-      g.fillStyle = m.fake ? '#8fa3b3' : '#f2b84b'; g.beginPath(); g.moveTo(st.wx, st.wy - 58 + bobm); g.lineTo(st.wx + 8, st.wy - 68 + bobm); g.lineTo(st.wx, st.wy - 78 + bobm); g.lineTo(st.wx - 8, st.wy - 68 + bobm); g.closePath(); g.fill();
+      g.fillStyle = m.candle ? '#ff7a45' : m.fake ? '#8fa3b3' : '#f2b84b'; g.beginPath(); g.moveTo(st.wx, st.wy - 58 + bobm); g.lineTo(st.wx + 8, st.wy - 68 + bobm); g.lineTo(st.wx, st.wy - 78 + bobm); g.lineTo(st.wx - 8, st.wy - 68 + bobm); g.closePath(); g.fill();
       g.fillStyle = '#1d1405'; g.font = '800 12px ' + FONT_BODY; g.fillText(m.fake ? '?' : '!', st.wx, st.wy - 67.5 + bobm);
     }
   }
@@ -2036,45 +2135,58 @@ function render(now) {
   // 夜色與燈光
   const psx = (fx - cx) * z, psy = (fy - cy) * z, rad = vis * z;
   if (glowCv && !ghostView) { g.globalCompositeOperation = 'lighter'; g.globalAlpha = .13; g.drawImage(glowCv, fx - vis, fy - vis, vis * 2, vis * 2); g.globalAlpha = 1; g.globalCompositeOperation = 'source-over'; }
-  g.setTransform(1, 0, 0, 1, 0, 0);
-  const gr = g.createRadialGradient(psx, psy, rad * .5, psx, psy, rad * 1.04);
-  gr.addColorStop(0, 'rgba(6,11,20,0)'); gr.addColorStop(.74, `rgba(6,11,20,${dark * .78})`); gr.addColorStop(1, `rgba(6,11,20,${dark})`);
-  g.fillStyle = gr; g.fillRect(0, 0, cv.width, cv.height);
+  // 看不到的地方蓋一層霧：遊戲中是半透明的深灰色，邊緣是柔的；首頁和大廳維持原本的夜色
+  {
+    const M = Math.max(4, Math.round(6 * view.dpr)), mw = Math.ceil(cv.width / M / 2) * 2 + 2, mh = Math.ceil(cv.height / M / 2) * 2 + 2;
+    if (!fogA) { fogA = document.createElement('canvas'); fogB = document.createElement('canvas'); }
+    if (fogA.width !== mw || fogA.height !== mh) { fogA.width = mw; fogA.height = mh; fogB.width = mw / 2; fogB.height = mh / 2; }
+    const fogCol = playing ? '#262b33' : '#060b14', m = fogA.getContext('2d');
+    m.setTransform(1, 0, 0, 1, 0, 0); m.globalAlpha = 1; m.globalCompositeOperation = 'source-over';
+    m.fillStyle = fogCol; m.fillRect(0, 0, mw, mh);
+    // 自己周圍挖一個邊緣漸層的洞
+    m.globalCompositeOperation = 'destination-out';
+    const hx = psx / M, hy = psy / M, hr = rad / M, hg = m.createRadialGradient(hx, hy, hr * .5, hx, hy, hr * 1.04);
+    hg.addColorStop(0, 'rgba(0,0,0,1)'); hg.addColorStop(.74, 'rgba(0,0,0,.22)'); hg.addColorStop(1, 'rgba(0,0,0,0)');
+    m.fillStyle = hg; m.fillRect(0, 0, mw, mh);
+    m.globalCompositeOperation = 'source-over';
+    // 視野盲區：房子、樹、圍欄擋住的地方把霧補回去（跟 canSee 判斷看不看得到人用的是同一套）
+    if (playing && G.ph === 2 && !ghostView) {
+      const px = ME.x, py = ME.y, R = vis * 1.1, F = 1500, k = z / M;
+      m.setTransform(k, 0, 0, k, -cx * k, -cy * k);
+      let any = false; m.beginPath();
+      for (const o of OCC) {
+        // 我在它南邊時，把屋頂或樹冠往上凸出去的部分也算進去，免得影子蓋到它自己
+        const l = o.l, r = o.r, t = py < o.t ? o.t : o.t - o.up, bt = o.b;
+        if (l - px > R || px - r > R || t - py > R || py - bt > R) continue;
+        if (px > l && px < r && py > t && py < bt) continue;
+        const edges = [];
+        if (py >= t) edges.push([l, t, r, t]);      // 背對我的邊才會投出影子
+        if (py <= bt) edges.push([r, bt, l, bt]);
+        if (px >= l) edges.push([l, bt, l, t]);
+        if (px <= r) edges.push([r, t, r, bt]);
+        for (const e of edges) {
+          const ax = e[0], ay = e[1], bx = e[2], by = e[3];
+          const da = Math.hypot(ax - px, ay - py) || 1, db = Math.hypot(bx - px, by - py) || 1;
+          const a2x = ax + (ax - px) / da * F, a2y = ay + (ay - py) / da * F, b2x = bx + (bx - px) / db * F, b2y = by + (by - py) / db * F;
+          // 每一塊都用同一個繞行方向，重疊的地方才不會被挖空
+          const area = (ax * by - bx * ay) + (bx * b2y - b2x * by) + (b2x * a2y - a2x * b2y) + (a2x * ay - ax * a2y);
+          if (area >= 0) { m.moveTo(ax, ay); m.lineTo(bx, by); m.lineTo(b2x, b2y); m.lineTo(a2x, a2y); }
+          else { m.moveTo(a2x, a2y); m.lineTo(b2x, b2y); m.lineTo(bx, by); m.lineTo(ax, ay); }
+          m.closePath(); any = true;
+        }
+      }
+      if (any) { m.fillStyle = fogCol; m.fill(); }
+      m.setTransform(1, 0, 0, 1, 0, 0);
+    }
+    // 先縮一半再放大回畫面，硬邊就會變成一段灰色的過渡
+    const m2 = fogB.getContext('2d');
+    m2.setTransform(1, 0, 0, 1, 0, 0); m2.globalCompositeOperation = 'copy'; m2.imageSmoothingEnabled = true; m2.drawImage(fogA, 0, 0, mw / 2, mh / 2);
+    g.setTransform(1, 0, 0, 1, 0, 0); g.imageSmoothingEnabled = true; g.globalAlpha = dark;
+    g.drawImage(fogB, 0, 0, mw / 2, mh / 2, 0, 0, mw * M, mh * M);
+    g.globalAlpha = 1;
+  }
   if (ghostView) { g.fillStyle = 'rgba(120,150,190,.10)'; g.fillRect(0, 0, cv.width, cv.height); }
   g.setTransform(z, 0, 0, z, -cx * z, -cy * z);
-  // 視野盲區：房子、樹、圍欄擋住的地方蓋成黑的（跟 canSee 判斷看不看得到人用的是同一套）
-  if (playing && G.ph === 2 && !ghostView) {
-    const px = ME.x, py = ME.y, R = vis * 1.1, F = 1500;
-    let any = false; g.beginPath();
-    for (const o of OCC) {
-      // 我在它南邊時，把屋頂或樹冠往上凸出去的部分也算進去，免得影子蓋到它自己
-      const l = o.l, r = o.r, t = py < o.t ? o.t : o.t - o.up, bt = o.b;
-      if (l - px > R || px - r > R || t - py > R || py - bt > R) continue;
-      if (px > l && px < r && py > t && py < bt) continue;
-      const edges = [];
-      if (py >= t) edges.push([l, t, r, t]);      // 背對我的邊才會投出影子
-      if (py <= bt) edges.push([r, bt, l, bt]);
-      if (px >= l) edges.push([l, bt, l, t]);
-      if (px <= r) edges.push([r, t, r, bt]);
-      for (const e of edges) {
-        const ax = e[0], ay = e[1], bx = e[2], by = e[3];
-        const da = Math.hypot(ax - px, ay - py) || 1, db = Math.hypot(bx - px, by - py) || 1;
-        const a2x = ax + (ax - px) / da * F, a2y = ay + (ay - py) / da * F, b2x = bx + (bx - px) / db * F, b2y = by + (by - py) / db * F;
-        // 每一塊都用同一個繞行方向，重疊的地方才不會被挖空
-        const area = (ax * by - bx * ay) + (bx * b2y - b2x * by) + (b2x * a2y - a2x * b2y) + (a2x * ay - ax * a2y);
-        if (area >= 0) { g.moveTo(ax, ay); g.lineTo(bx, by); g.lineTo(b2x, b2y); g.lineTo(a2x, a2y); }
-        else { g.moveTo(a2x, a2y); g.lineTo(b2x, b2y); g.lineTo(bx, by); g.lineTo(ax, ay); }
-        g.closePath(); any = true;
-      }
-    }
-    if (any) {
-      // 影子的濃度要跟外圈的黑暗接得起來，所以越往外越淡
-      const comp = a => clamp(1 - (1 - dark) / (1 - a), 0, 1), sg = g.createRadialGradient(fx, fy, vis * .5, fx, fy, vis * 1.04);
-      sg.addColorStop(0, `rgba(6,11,20,${dark})`); sg.addColorStop(.37, `rgba(6,11,20,${comp(dark * .39)})`); sg.addColorStop(.74, `rgba(6,11,20,${comp(dark * .78)})`);
-      sg.addColorStop(.9, `rgba(6,11,20,${comp(dark * .915)})`); sg.addColorStop(1, 'rgba(6,11,20,0)');
-      g.fillStyle = sg; g.fill();
-    }
-  }
   if (glowCv) {
     g.globalCompositeOperation = 'lighter';
     for (let i = 0; i < LIGHTS.length; i++) {
@@ -2091,10 +2203,11 @@ function render(now) {
   }
 
   // 畫面邊緣的工作方向箭頭
-  if (playing && G.ph === 2 && !my.wolf) {
+  if (playing && G.ph === 2) {
     g.setTransform(view.dpr, 0, 0, view.dpr, 0, 0);
     const mx = 26, top = 118, bot = view.h - 150;
     for (const m of taskMarks()) {
+      if (m.fake) continue;   // 狼人的假任務不畫箭頭，蠟燭的位置大家都有箭頭
       const st = STATIONS[m.s];
       const px = (st.wx - cx) * view.z, py = (st.wy - 30 - cy) * view.z;
       if (px > mx && px < view.w - mx && py > 60 && py < view.h - 60) continue;
@@ -2102,7 +2215,7 @@ function render(now) {
       const an = Math.atan2(py - ay, px - ax);
       g.save(); g.translate(ax, ay); g.rotate(an);
       g.fillStyle = 'rgba(11,21,29,.8)'; circ(g, 0, 0, 13);
-      g.fillStyle = '#f2b84b'; g.beginPath(); g.moveTo(9, 0); g.lineTo(-4, -7); g.lineTo(-4, 7); g.closePath(); g.fill();
+      g.fillStyle = m.candle ? '#ff7a45' : '#f2b84b'; g.beginPath(); g.moveTo(9, 0); g.lineTo(-4, -7); g.lineTo(-4, 7); g.closePath(); g.fill();
       g.restore();
     }
   }
@@ -2492,15 +2605,37 @@ function uiTick(now) {
 }
 
 // ----- 大廳 -----
+// g = 放在哪一組：base 直接顯示在大廳；wolf、task 各有一個按鈕打開
 const SETTINGS = [
-  { k: 'w', label: '狼人數量', min: 1, max: 2, step: 1, fmt: v => v + ' 隻' },
-  { k: 'tl', label: '長任務', min: 0, max: 3, step: 1, fmt: v => v + ' 個' },
-  { k: 'ts', label: '短任務', min: 0, max: 5, step: 1, fmt: v => v + ' 個' },
-  { k: 'ga', label: '鬼魂自動完成任務', opts: [8, 12, 15], fmt: v => v + ' 秒' },
-  { k: 'kc', label: '襲擊冷卻', min: 15, max: 40, step: 5, fmt: v => v + ' 秒' },
-  { k: 'mt', label: '開會時間', min: 45, max: 150, step: 15, fmt: v => v + ' 秒' },
-  { k: 'bots', label: '電腦玩家', min: 0, max: MAX_BOTS, step: 1, fmt: v => v + ' 位' }
+  { g: 'base', k: 'w', label: '狼人數量', min: 1, max: 2, step: 1, fmt: v => v + ' 隻' },
+  { g: 'base', k: 'mt', label: '開會時間', min: 45, max: 150, step: 15, fmt: v => v + ' 秒' },
+  { g: 'base', k: 'bots', label: '電腦玩家', min: 0, max: MAX_BOTS, step: 1, fmt: v => v + ' 位' },
+  { g: 'wolf', k: 'kc', label: '襲擊冷卻', min: 15, max: 40, step: 5, fmt: v => v + ' 秒' },
+  { g: 'wolf', k: 'kr', label: '襲擊範圍', opts: [0, 1, 2], fmt: v => ['短', '中', '長'][v] || '中' },
+  { g: 'wolf', k: 'bl', label: '吹燈冷卻', opts: [0, 30, 45, 60, 90], fmt: v => v ? v + ' 秒' : '關閉' },
+  { g: 'task', k: 'tl', label: '長任務', min: 0, max: 3, step: 1, fmt: v => v + ' 個' },
+  { g: 'task', k: 'ts', label: '短任務', min: 0, max: 5, step: 1, fmt: v => v + ' 個' },
+  { g: 'task', k: 'ga', label: '鬼魂自動完成任務', opts: [8, 12, 15], fmt: v => v + ' 秒' }
 ];
+const SET_GROUPS = { wolf: { title: '狼人設定', note: '襲擊範圍越長，狼人越容易得手。吹燈會讓村民的視野變小，直到有人去點蠟燭。' }, task: { title: '任務設定', note: '長任務要照順序跑兩三個地點。出局的村民會變成鬼魂，定時自動完成一步。' } };
+let setGroup = '';
+// 把一組設定畫成「名稱＋加減按鈕」
+function buildSettings(box, list) {
+  box.textContent = ''; box.classList.toggle('ro', !isHost);
+  for (const s of list) {
+    const v = settingVal(s.k);
+    box.appendChild(el('span', '', s.label));
+    const stp = el('div', 'stepper');
+    const minus = el('button', '', '−'), out = el('output', '', s.fmt(v)), plus = el('button', '', '+');
+    minus.type = plus.type = 'button'; minus.setAttribute('aria-label', s.label + '減少'); plus.setAttribute('aria-label', s.label + '增加');
+    minus.disabled = v <= setLo(s); plus.disabled = v >= setHi(s);
+    const bump = d => { if (!isHost || !H) return; const nv = setStep(s, settingVal(s.k), d); if (s.k === 'bots') setBotCount(nv); else { H.st[s.k] = nv; if (s.k === 'tl' && nv >= 3 && H.st.ts > 3) H.st.ts = 3; hostDirty = true; } };
+    minus.addEventListener('click', () => bump(-1)); plus.addEventListener('click', () => bump(1));
+    stp.appendChild(minus); stp.appendChild(out); stp.appendChild(plus); box.appendChild(stp);
+  }
+}
+function openSetSheet(gk) { setGroup = gk; sig.sset = ''; document.body.classList.add('set-open'); }
+function closeSetSheet() { setGroup = ''; document.body.classList.remove('set-open'); }
 // 長短任務至少要有一個；長任務放到 3 個時，短任務最多 3 個（不然工作點不夠分）
 function setLo(s) { const st = G.st; return s.opts ? s.opts[0] : s.k === 'ts' && st.tl === 0 ? 1 : s.k === 'tl' && st.ts === 0 ? 1 : s.min; }
 function setHi(s) { return s.opts ? s.opts[s.opts.length - 1] : s.k === 'ts' && G.st.tl >= 3 ? 3 : s.max; }
@@ -2553,18 +2688,19 @@ function renderLobby(mode) {
   const showSet = mode === 'lobby' && G;
   const st = showSet ? SETTINGS.map(s => settingVal(s.k)).join(',') + '|' + isHost : 'none';
   if (changed('lset', st)) {
-    const box = $('settings'); box.textContent = ''; box.classList.toggle('ro', !isHost);
-    if (showSet) for (const s of SETTINGS) {
-      const v = settingVal(s.k);
-      box.appendChild(el('span', '', s.label));
-      const stp = el('div', 'stepper');
-      const minus = el('button', '', '−'), out = el('output', '', s.fmt(v)), plus = el('button', '', '+');
-      minus.type = plus.type = 'button'; minus.setAttribute('aria-label', s.label + '減少'); plus.setAttribute('aria-label', s.label + '增加');
-      minus.disabled = v <= setLo(s); plus.disabled = v >= setHi(s);
-      const bump = d => { if (!isHost || !H) return; const nv = setStep(s, settingVal(s.k), d); if (s.k === 'bots') setBotCount(nv); else { H.st[s.k] = nv; if (s.k === 'tl' && nv >= 3 && H.st.ts > 3) H.st.ts = 3; hostDirty = true; } };
-      minus.addEventListener('click', () => bump(-1)); plus.addEventListener('click', () => bump(1));
-      stp.appendChild(minus); stp.appendChild(out); stp.appendChild(plus); box.appendChild(stp);
+    const box = $('settings');
+    if (showSet) buildSettings(box, SETTINGS.filter(x => x.g === 'base')); else box.textContent = '';
+    if (showSet) {
+      const v = k => { const d = SETTINGS.find(x => x.k === k); return d.fmt(settingVal(k)); };
+      $('sumWolf').textContent = '冷卻 ' + v('kc') + '・範圍 ' + v('kr') + '・吹燈 ' + v('bl');
+      $('sumTask').textContent = '長 ' + settingVal('tl') + '・短 ' + settingVal('ts') + '・鬼魂 ' + v('ga');
     }
+  }
+  $('setGroups').hidden = !showSet;
+  if (!showSet && setGroup) closeSetSheet();
+  if (setGroup && changed('sset', setGroup + '|' + st)) {
+    $('setTitle').textContent = SET_GROUPS[setGroup].title; $('setNote').textContent = SET_GROUPS[setGroup].note + (isHost ? '' : '（只有房主能改）');
+    buildSettings($('setBox'), SETTINGS.filter(x => x.g === setGroup));
   }
   const start = $('btnStart'); start.hidden = !(isHost && mode === 'lobby'); start.disabled = total < 4;
   let hint = '';
@@ -2608,13 +2744,20 @@ function renderHud() {
   }
   const use = $('btnUse'), rep = $('btnReport'), kill = $('btnKill');
   const u = ctxA.use;
-  const ul = u ? (u.k === 'task' ? '工作' : '敲鐘') : '使用';
+  const ul = u ? (u.k === 'task' ? '工作' : u.k === 'candle' ? '點蠟燭' : '敲鐘') : '使用';
   if (changed('useL', ul)) use.textContent = ul;
   use.disabled = !u; rep.disabled = !ctxA.body;
   const showKill = my.wolf && !my.dead;
   if (kill.hidden === showKill) kill.hidden = !showKill;
   if (showKill) { kill.disabled = !ctxA.kill; const cd = Math.ceil(my.cd); if (changed('cd', cd)) $('killCd').textContent = cd > 0 ? cd + ' 秒' : ''; }
   rep.hidden = my.dead;
+  // 狼人的吹燈鍵
+  const blow = $('btnBlow'), showBlow = my.wolf && !my.dead && G.st.bl > 0;
+  if (blow.hidden === showBlow) blow.hidden = !showBlow;
+  if (showBlow) { blow.disabled = !canBlow(); const bt = G.lo ? '已熄' : my.bcd > 0 ? Math.ceil(my.bcd) + ' 秒' : ''; if (changed('bcd', bt)) $('blowCd').textContent = bt; }
+  // 燈熄的時候的提示
+  const al = G.lo && G.ph === 2 ? (my.wolf ? '燈已吹熄・村民現在看不遠' : my.dead ? '燈被吹熄了' : '燈被吹熄了・到「' + CANDLE.area + '」點蠟燭') : '';
+  if (changed('alert', al)) { const e = $('alert'); e.textContent = al; e.hidden = !al; }
 }
 
 // ----- 工作小遊戲 -----
@@ -2894,7 +3037,7 @@ function drawMiniMap(now) {
   if (G && my.idx >= 0) {
     for (const mk of taskMarks()) {
       const st = STATIONS[mk.s], r = 7 / sc;
-      m.fillStyle = mk.fake ? '#8fa3b3' : '#f2b84b'; m.beginPath(); m.moveTo(st.wx, st.wy - r); m.lineTo(st.wx + r, st.wy); m.lineTo(st.wx, st.wy + r); m.lineTo(st.wx - r, st.wy); m.closePath(); m.fill();
+      m.fillStyle = mk.candle ? '#ff7a45' : mk.fake ? '#8fa3b3' : '#f2b84b'; m.beginPath(); m.moveTo(st.wx, st.wy - r); m.lineTo(st.wx + r, st.wy); m.lineTo(st.wx, st.wy + r); m.lineTo(st.wx - r, st.wy); m.closePath(); m.fill();
       m.strokeStyle = '#1d1405'; m.lineWidth = 1.5 / sc; m.stroke();
     }
     const pr = (5 + Math.sin(now / 200) * 1.5) / sc;
@@ -2926,6 +3069,11 @@ function bindUI() {
   $('btnUse').addEventListener('click', doUse);
   $('btnReport').addEventListener('click', doReport);
   $('btnKill').addEventListener('click', doKill);
+  $('btnBlow').addEventListener('click', doBlow);
+  $('btnSetWolf').addEventListener('click', () => openSetSheet('wolf'));
+  $('btnSetTask').addEventListener('click', () => openSetSheet('task'));
+  $('btnSetClose').addEventListener('click', closeSetSheet);
+  $('setSheet').addEventListener('click', e => { if (e.target === $('setSheet')) closeSetSheet(); });
   $('btnTaskClose').addEventListener('click', closeTask);
   $('btnMap').addEventListener('click', () => { mapAcc = 0; document.body.classList.add('map-open'); });
   $('btnMapClose').addEventListener('click', () => document.body.classList.remove('map-open'));
@@ -2957,7 +3105,7 @@ function bindUI() {
   window.addEventListener('keydown', e => {
     const t = e.target; if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA')) return;
     const k = e.key.toLowerCase(); input.keys.add(k);
-    if (uiMode() === 'play' && !e.repeat) { if (k === 'e' || k === ' ') { doUse(); e.preventDefault(); } else if (k === 'q') doKill(); else if (k === 'r') doReport(); else if (k === 'm') { mapAcc = 0; document.body.classList.toggle('map-open'); } }
+    if (uiMode() === 'play' && !e.repeat) { if (k === 'e' || k === ' ') { doUse(); e.preventDefault(); } else if (k === 'q') doKill(); else if (k === 'f') doBlow(); else if (k === 'r') doReport(); else if (k === 'm') { mapAcc = 0; document.body.classList.toggle('map-open'); } }
     if (k.startsWith('arrow')) e.preventDefault();
   });
   window.addEventListener('keyup', e => input.keys.delete(e.key.toLowerCase()));
@@ -2986,7 +3134,7 @@ function main() {
   requestAnimationFrame(frame);
   window.__lw = {
     get G() { return G; }, get H() { return H; }, ME, my, players, get BOTS() { return BOTS; }, Net, get STATIONS() { return STATIONS; }, SPAWNS, grid, MAPS, loadMap, applyMap, canSee, paintMiniMap, tget, boxFree, get curMap() { return curMap; },
-    findPath, startPractice, createRoom, joinRoom, invite, inviteLink, intro, hostStart, hostKill, hostReport, hostTick, setBotCount, castVote, sendChat, finishTask, openTask, leaveRoom, uiMode, parseTasks, dealTasks, taskCur, taskMarks, get CHAINS() { return CHAINS; }, get taskState() { return taskState; }, get hs() { return hs; }, get BUILDINGS() { return BUILDINGS; }, get OCC() { return OCC; }, get view() { return view; },
+    findPath, startPractice, createRoom, joinRoom, invite, inviteLink, intro, hostStart, hostKill, hostReport, hostTick, setBotCount, castVote, sendChat, finishTask, openTask, leaveRoom, uiMode, parseTasks, dealTasks, taskCur, taskMarks, get CHAINS() { return CHAINS; }, get taskState() { return taskState; }, get hs() { return hs; }, get BUILDINGS() { return BUILDINGS; }, get OCC() { return OCC; }, get view() { return view; }, get CANDLE() { return CANDLE; }, hostBlow, hostRelight, doBlow, canBlow, killRangeOf,
     get ctx() { return ctxA; }, get inRoom() { return inRoom; }, get isHost() { return isHost; }, get code() { return code; }
   };
 }
