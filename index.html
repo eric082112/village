@@ -41,6 +41,9 @@ body{
   -webkit-user-select:none;user-select:none;-webkit-touch-callout:none;
   touch-action:manipulation;overscroll-behavior:none;
 }
+/* iPhone 主畫面模式：大小由程式指定（見 fitViewport），不要跟著系統算錯的高度走 */
+html.ios-app{overflow:hidden}
+html.ios-app body{position:absolute;inset:auto;top:0;left:0;width:100%;height:100%}
 #cv{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none}
 button{font:inherit;color:inherit;cursor:pointer;border:0;background:none;padding:0;touch-action:manipulation}
 button:disabled{cursor:default}
@@ -863,6 +866,7 @@ function loadMap(i) {
     LIGHTS.push({ x: o.wx, y: o.wy - 34, r: 95 });
   }
   STATIC.sort((a, b) => a.y - b.y);
+  buildOccluders();
 }
 
 function solidAt(wx, wy) { return SOLID[tget(Math.floor(wx / TILE), Math.floor(wy / TILE))] === 1; }
@@ -872,11 +876,32 @@ function moveCollide(p, dx, dy) {
   if (dy) { const ny = p.y + dy; if (boxFree(p.x, ny)) p.y = ny; }
 }
 // 視線：兩點之間隔著房子就看不到
+// 會擋住視線的東西：房子、樹、圍欄
+function blocksSight(t) { return t === T_BLD || t === T_TREE || t === T_FENCE; }
+let OCC = [];   // 擋視線的方塊（世界座標）。up = 圖案往上凸出去多高（屋頂、樹冠）
+function buildOccluders() {
+  OCC = [];
+  for (const b of BUILDINGS) OCC.push({ l: b.X, t: b.Y, r: b.X + b.W, b: b.Y + b.H, up: b.small ? 14 : 24 });
+  // 樹和圍欄：相連的格子盡量合成大塊（橫的一排、直的一排或一整片），影子的邊才不會一格一格鋸齒狀
+  const used = new Uint8Array(MW * MH), is = (x, y, tp) => x < MW && y < MH && grid[y * MW + x] === tp && !used[y * MW + x];
+  const grow = (x, y, tp, wide) => {   // wide=true 先往右長再往下，false 先往下長再往右
+    let w = 1, h = 1;
+    if (wide) { while (is(x + w, y, tp)) w++; for (; ;) { let ok = true; for (let i = 0; i < w; i++) if (!is(x + i, y + h, tp)) { ok = false; break; } if (!ok) break; h++; } }
+    else { while (is(x, y + h, tp)) h++; for (; ;) { let ok = true; for (let i = 0; i < h; i++) if (!is(x + w, y + i, tp)) { ok = false; break; } if (!ok) break; w++; } }
+    return [w, h];
+  };
+  for (let y = 0; y < MH; y++) for (let x = 0; x < MW; x++) {
+    const tp = grid[y * MW + x]; if ((tp !== T_TREE && tp !== T_FENCE) || used[y * MW + x]) continue;
+    const a = grow(x, y, tp, true), c = grow(x, y, tp, false), d = a[0] * a[1] >= c[0] * c[1] ? a : c;
+    for (let j = 0; j < d[1]; j++) for (let i = 0; i < d[0]; i++) used[(y + j) * MW + x + i] = 1;
+    OCC.push({ l: x * TILE, t: y * TILE, r: (x + d[0]) * TILE, b: (y + d[1]) * TILE, up: tp === T_TREE ? 26 : 0 });
+  }
+}
 function canSee(ax, ay, bx, by) {
   const dx = bx - ax, dy = by - ay, d = Math.hypot(dx, dy);
   if (d < 26) return true;
   const n = Math.ceil(d / 12);
-  for (let i = 1; i < n; i++) if (tget(Math.floor((ax + dx * i / n) / TILE), Math.floor((ay + dy * i / n) / TILE)) === T_BLD) return false;
+  for (let i = 1; i < n; i++) if (blocksSight(tget(Math.floor((ax + dx * i / n) / TILE), Math.floor((ay + dy * i / n) / TILE)))) return false;
   return true;
 }
 const DIRS8 = [[1, 0], [-1, 0], [0, 1], [0, -1], [1, 1], [1, -1], [-1, 1], [-1, -1]];
@@ -1909,10 +1934,25 @@ function ambientTick(dt) {
 }
 
 // ===== 每一格畫面 =====
+// iPhone 從主畫面開啟（全螢幕）再轉成橫向時，系統有時會把網頁高度少算一截，底下留一條空白。
+// 這時改用螢幕的實際尺寸把畫面補滿。只在 iPhone / iPad 的主畫面模式下才動作。
+const IOS_APP = typeof navigator !== 'undefined' && navigator.standalone === true;
+let fitSig = '';
+function fitViewport() {
+  if (!IOS_APP) return;
+  const de = document.documentElement, w = window.innerWidth || de.clientWidth, h0 = window.innerHeight || de.clientHeight;
+  const sig = w + 'x' + h0; if (sig === fitSig) return; fitSig = sig;
+  const sShort = Math.min(screen.width, screen.height), sLong = Math.max(screen.width, screen.height), land = w > h0;
+  const fullW = land ? sLong : sShort, fullH = land ? sShort : sLong;
+  let h = h0;
+  if (Math.abs(w - fullW) <= 2 && fullH > h0 && fullH - h0 <= 70) h = fullH;   // 寬度對、高度只少一小截：就是那個狀況
+  de.style.height = h + 'px'; document.body.style.width = w + 'px'; document.body.style.height = h + 'px';
+}
 function resize() {
+  fitViewport();
   view.w = cv.clientWidth; view.h = cv.clientHeight; view.dpr = Math.min(window.devicePixelRatio || 1, 2);
   cv.width = Math.max(1, Math.round(view.w * view.dpr)); cv.height = Math.max(1, Math.round(view.h * view.dpr));
-  view.z = clamp(Math.min(view.w, view.h) / 360, 1, 1.6);
+  view.z = clamp(Math.min(view.w, view.h) / 280, 1.25, 2.2);   // 鏡頭拉近：角色比較大，看到的範圍比較小
 }
 const dyn = [];
 function render(now) {
@@ -2002,13 +2042,13 @@ function render(now) {
   g.fillStyle = gr; g.fillRect(0, 0, cv.width, cv.height);
   if (ghostView) { g.fillStyle = 'rgba(120,150,190,.10)'; g.fillRect(0, 0, cv.width, cv.height); }
   g.setTransform(z, 0, 0, z, -cx * z, -cy * z);
-  // 視野盲區：房子擋住的地方蓋成黑的（跟 canSee 判斷看不看得到人用的是同一批房子）
+  // 視野盲區：房子、樹、圍欄擋住的地方蓋成黑的（跟 canSee 判斷看不看得到人用的是同一套）
   if (playing && G.ph === 2 && !ghostView) {
     const px = ME.x, py = ME.y, R = vis * 1.1, F = 1500;
     let any = false; g.beginPath();
-    for (const b of BUILDINGS) {
-      // 我在房子南邊時，把屋頂凸出去的部分也算進去，免得影子蓋到屋頂
-      const l = b.X, r = b.X + b.W, t = py < b.Y ? b.Y : b.Y - (b.small ? 14 : 24), bt = b.Y + b.H;
+    for (const o of OCC) {
+      // 我在它南邊時，把屋頂或樹冠往上凸出去的部分也算進去，免得影子蓋到它自己
+      const l = o.l, r = o.r, t = py < o.t ? o.t : o.t - o.up, bt = o.b;
       if (l - px > R || px - r > R || t - py > R || py - bt > R) continue;
       if (px > l && px < r && py > t && py < bt) continue;
       const edges = [];
@@ -2074,6 +2114,7 @@ function frame(now) {
   const dt = Math.min(.05, (now - lastT) / 1000 || 0); lastT = now;
   // iPhone 轉向時，「視窗大小改變」的通知常常比實際排版早到，畫布就會留著舊尺寸被拉寬。
   // 所以每一格都確認畫布和螢幕上的實際大小一致，不一致就重設。
+  fitViewport();
   const cw = cv.clientWidth, ch = cv.clientHeight;
   if (cw > 0 && ch > 0 && (cw !== view.w || ch !== view.h || Math.min(window.devicePixelRatio || 1, 2) !== view.dpr)) resize();
   try {
@@ -2928,6 +2969,7 @@ function bindUI() {
 
 function main() {
   cv = $('cv'); g = cv.getContext('2d');
+  if (IOS_APP) document.documentElement.classList.add('ios-app');
   loadMap(0); loadIdentity(); ME.c = rint(0, COLORS.length - 1);
   resize(); buildGround(); makeAmbient(); bindUI();
   Net.init();
@@ -2944,7 +2986,7 @@ function main() {
   requestAnimationFrame(frame);
   window.__lw = {
     get G() { return G; }, get H() { return H; }, ME, my, players, get BOTS() { return BOTS; }, Net, get STATIONS() { return STATIONS; }, SPAWNS, grid, MAPS, loadMap, applyMap, canSee, paintMiniMap, tget, boxFree, get curMap() { return curMap; },
-    findPath, startPractice, createRoom, joinRoom, invite, inviteLink, intro, hostStart, hostKill, hostReport, hostTick, setBotCount, castVote, sendChat, finishTask, openTask, leaveRoom, uiMode, parseTasks, dealTasks, taskCur, taskMarks, get CHAINS() { return CHAINS; }, get taskState() { return taskState; }, get hs() { return hs; }, get BUILDINGS() { return BUILDINGS; },
+    findPath, startPractice, createRoom, joinRoom, invite, inviteLink, intro, hostStart, hostKill, hostReport, hostTick, setBotCount, castVote, sendChat, finishTask, openTask, leaveRoom, uiMode, parseTasks, dealTasks, taskCur, taskMarks, get CHAINS() { return CHAINS; }, get taskState() { return taskState; }, get hs() { return hs; }, get BUILDINGS() { return BUILDINGS; }, get OCC() { return OCC; }, get view() { return view; },
     get ctx() { return ctxA; }, get inRoom() { return inRoom; }, get isHost() { return isHost; }, get code() { return code; }
   };
 }
