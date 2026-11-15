@@ -2125,8 +2125,9 @@ function drawIntro(now) {
   const d = view.dpr;
   if (c.width !== Math.round(W * d) || c.height !== Math.round(Hh * d)) { c.width = Math.round(W * d); c.height = Math.round(Hh * d); }
   const g = c.getContext('2d'), wolf = intro.wolf, col = intro.col;
+  // 開場動畫一律完整播放。系統開了「減少動態效果」時，只拿掉鏡頭推近和晃動，內容照播。
+  const calm = reduceMotion();
   let t = intro.fix != null ? intro.fix : (now - intro.t0) / 1000;
-  if (reduceMotion() && intro.fix == null) t = 7.4;
   t = Math.max(0, t);
   const land = W > Hh * 1.15, VW = land ? 640 : 360, VH = land ? 360 : 640;
   const s = Math.min(W / VW, Hh / VH), ox = (W - VW * s) / 2, oy = (Hh - VH * s) / 2;
@@ -2136,7 +2137,7 @@ function drawIntro(now) {
   g.setTransform(s * d, 0, 0, s * d, ox * d, oy * d);
   // 場景
   g.save(); rr(g, L.sx, L.sy, 320, 320, 18); g.clip(); g.translate(L.sx, L.sy);
-  const zoom = 1 + Math.min(t, 8) * .011; g.translate(160, 180); g.scale(zoom, zoom); g.translate(-160, -180);
+  const zoom = calm ? 1 : 1 + Math.min(t, 8) * .011; g.translate(160, 180); g.scale(zoom, zoom); g.translate(-160, -180);
   (wolf ? sceneWolf : sceneVillager)(g, t, col);
   g.restore();
   const cardP = smooth((t - 5.25) / .7);
@@ -2144,7 +2145,7 @@ function drawIntro(now) {
   g.strokeStyle = wolf ? 'rgba(226,88,74,.75)' : 'rgba(242,184,75,.75)'; g.lineWidth = 2; rr(g, L.sx, L.sy, 320, 320, 18); g.stroke();
   // 身分卡翻進來
   if (cardP > 0) {
-    const cx = L.sx + 160, cy = L.sy + 160 + (1 - cardP) * 26 + (t > 6 ? Math.sin((t - 6) * 2.2) * 2.2 : 0);
+    const cx = L.sx + 160, cy = L.sy + 160 + (1 - cardP) * 26 + (!calm && t > 6 ? Math.sin((t - 6) * 2.2) * 2.2 : 0);
     const gl = g.createRadialGradient(cx, cy, 30, cx, cy, 190); gl.addColorStop(0, wolf ? `rgba(226,88,74,${.4 * cardP})` : `rgba(242,184,75,${.4 * cardP})`); gl.addColorStop(1, 'rgba(0,0,0,0)');
     g.save(); rr(g, L.sx, L.sy, 320, 320, 18); g.clip(); g.fillStyle = gl; g.fillRect(L.sx, L.sy, 320, 320); g.restore();
     g.save(); g.translate(cx, cy); g.scale(Math.max(.03, Math.sin(cardP * Math.PI / 2)), 1);
@@ -2162,7 +2163,7 @@ function drawIntro(now) {
   const tA = wolf ? 3.15 : .9, a = clamp((t - tA) / .5, 0, 1);
   g.textAlign = 'center'; g.textBaseline = 'middle';
   if (a > 0) {
-    const el = t - tA, shake = wolf && el < .5 ? (Math.random() - .5) * 7 * (1 - el / .5) : 0;
+    const el = t - tA, shake = wolf && !calm && el < .5 ? (Math.random() - .5) * 7 * (1 - el / .5) : 0;
     g.save(); g.globalAlpha = a; g.font = '700 58px ' + FONT_DISP;
     g.shadowColor = wolf ? 'rgba(226,88,74,.75)' : 'rgba(134,194,102,.55)'; g.shadowBlur = 22 * s * d;
     g.fillStyle = wolf ? '#e2584a' : '#8fcb6c'; g.fillText(wolf ? '你是狼人' : '你是村民', L.tx + shake, L.ty + (1 - smooth(a)) * 14);
