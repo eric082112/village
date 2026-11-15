@@ -113,6 +113,11 @@ body[data-mode="intro"] .acts,body[data-mode="intro"] .joy,body[data-mode="resul
 /* ---------- 大廳 ---------- */
 .lobby{flex-direction:column;align-items:center}
 .lobby .panel{width:100%;max-width:460px;margin-top:auto}
+.map-pick{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.map-title{text-align:center;min-width:0}
+.map-idx{font-size:12px;color:var(--ink-dim);font-variant-numeric:tabular-nums}
+.map-arrow{width:48px;height:48px;flex:none;border-radius:50%;background:var(--panel-2);border:1px solid var(--line);font-size:30px;line-height:1;padding:0 0 5px;color:var(--lantern)}
+.map-arrow:active{transform:scale(.92)}
 .map-row{display:flex;gap:12px;align-items:center}
 #mapPrev{width:150px;height:auto;flex:none;border-radius:10px;border:1px solid var(--line);display:block}
 .map-text{min-width:0;display:flex;flex-direction:column;gap:2px}
@@ -158,12 +163,16 @@ body[data-mode="intro"] .acts,body[data-mode="intro"] .joy,body[data-mode="resul
 .chip.ghost{border-color:var(--ink-dim);color:var(--ink-dim)}
 .tasks{
   background:rgba(11,21,29,.74);border-radius:10px;padding:6px 10px;font-size:12.5px;line-height:1.5;
-  max-width:100%;display:flex;flex-direction:column;gap:1px;
+  width:max-content;max-width:min(74vw,300px);display:flex;flex-direction:column;gap:1px;
 }
 .tasks li{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .tasks li.done{color:var(--ink-dim);text-decoration:line-through}
 .tasks li b{font-weight:600;color:var(--lantern)}
 .tasks li.done b{color:inherit}
+.tasks li i{font-style:normal;font-variant-numeric:tabular-nums;font-size:11px;padding:0 5px;margin:0 6px;border-radius:8px;background:rgba(242,184,75,.18);color:var(--lantern)}
+.tasks li.done i{background:none;color:inherit}
+.tasks li.fake-h{color:var(--wolf);font-weight:600}
+.tasks li.fake,.tasks li.fake b{color:var(--ink-dim)}
 .hud-mid{display:flex;flex-direction:column;align-items:center;gap:3px;padding-top:4px}
 .pg{width:100%;height:10px;border-radius:6px;background:rgba(11,21,29,.82);border:1px solid var(--line);overflow:hidden}
 #pgBar{height:100%;width:0;background:var(--moss);transition:width .4s}
@@ -210,9 +219,10 @@ body.menu-open #menu{display:flex}
 .sheet-head{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
 .sheet-head h3{font-size:22px}
 .sheet-head span{font-size:13px;color:var(--ink-dim)}
-.task-box{position:relative;height:190px;border-radius:12px;background:#0a141c;border:1px solid var(--line);overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:12px}
+.task-box{position:relative;height:214px;border-radius:12px;background:#0a141c;border:1px solid var(--line);overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:12px}
 .task-tip{font-size:13.5px;color:var(--ink-dim);text-align:center}
 .task-done{font-family:var(--display);font-size:44px;color:var(--moss)}
+.task-next{font-size:15px;color:var(--lantern);text-align:center}
 .big-tap{width:104px;height:104px;border-radius:50%;background:var(--panel-2);border:2px solid var(--lantern);font-size:44px;line-height:1}
 .big-tap:active{transform:scale(.94)}
 .count{font-variant-numeric:tabular-nums;font-weight:700;font-size:18px}
@@ -222,9 +232,13 @@ body.menu-open #menu{display:flex}
 .bar-zone{position:absolute;top:0;bottom:0;background:rgba(134,194,102,.75)}
 .bar-mark{position:absolute;top:-3px;bottom:-3px;width:5px;margin-left:-2.5px;background:var(--ink);border-radius:3px}
 .hold-btn,.hit-btn{min-width:150px;min-height:56px;border-radius:14px;background:var(--lantern);color:var(--lantern-ink);font-weight:700;font-size:17px;padding:0 20px}
-.seq-grid{display:grid;grid-template-columns:repeat(3,56px);gap:10px}
-.seq-btn{width:56px;height:56px;border-radius:12px;background:var(--panel-2);border:1px solid var(--line);font-size:22px;font-weight:700;font-variant-numeric:tabular-nums}
+.bar.thin{height:10px;border-radius:5px}
+.seq-grid{display:grid;grid-template-columns:repeat(4,54px);gap:9px;justify-content:center}
+.seq-btn{width:54px;height:54px;border-radius:12px;background:var(--panel-2);border:1px solid var(--line);font-size:22px;font-weight:700;font-variant-numeric:tabular-nums}
 .seq-btn.ok{background:var(--moss);color:#0c1a08;border-color:var(--moss)}
+.seq-btn.pair{font-size:26px;color:var(--ink-dim)}
+.seq-btn.pair.up{background:var(--panel);border-color:var(--lantern);color:inherit}
+.seq-btn.pair.ok{background:rgba(134,194,102,.3);border-color:var(--moss)}
 .shake{animation:shake .28s}
 @keyframes shake{25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
 
@@ -355,9 +369,14 @@ body.map-open #mapOv{display:flex}
     <button id="btnInvite" class="btn" type="button" hidden>邀請朋友</button>
     <ul id="lobbyPlayers" class="plist"></ul>
     <div id="swatches" class="swatches" role="group" aria-label="選擇顏色"></div>
+    <div class="map-pick">
+      <button id="mapPrevBtn" class="map-arrow" type="button" aria-label="上一張地圖">‹</button>
+      <div class="map-title"><div id="mapName" class="map-name" aria-live="polite"></div><div id="mapIdx" class="map-idx"></div></div>
+      <button id="mapNextBtn" class="map-arrow" type="button" aria-label="下一張地圖">›</button>
+    </div>
     <div class="map-row">
       <canvas id="mapPrev" aria-hidden="true"></canvas>
-      <div class="map-text"><div id="mapName" class="map-name"></div><p id="mapDesc" class="note"></p></div>
+      <div class="map-text"><p id="mapDesc" class="note"></p></div>
     </div>
     <div id="settings" class="settings"></div>
     <button id="btnStart" class="btn primary" type="button">開始遊戲</button>
@@ -496,6 +515,7 @@ function tfill(x0, y0, x1, y1, t, onlyGrass) {
 }
 // type: mash 連點 / scatter 點掉散落物 / hold 按住 / timing 抓時機 / seq 依序點
 let BUILDINGS = [], OBJECTS = [], STATIONS = [], AREAS = [], LAMPS = [];
+let CHAINS = [];   // 長任務：要照順序跑好幾個工作點
 const BELL = { x: 23, y: 15, wx: 0, wy: 0 };
 const SPAWNS = [], TREES = [], LIGHTS = [], STATIC = [];
 let curMap = -1;
@@ -541,15 +561,23 @@ function buildVillage() {
     stn('劈柴', '伐木場', 8, 5, 'mash', '🪓', '連點 8 下把木頭劈開', 8),
     stn('點燈', '祠堂', 23, 7, 'seq', '🏮', '照 1 到 5 的順序點亮燈籠', 5),
     stn('磨麵粉', '磨坊', 37, 7, 'hold', '🌾', '按住不放，磨到滿'),
-    stn('整理貨物', '倉庫', 29, 9, 'seq', '📦', '照 1 到 6 的順序把箱子排好', 6),
-    stn('烤麵包', '麵包坊', 13, 14, 'timing', '🍞', '指針進到綠色區再按，成功 3 次', 3),
+    stn('整理貨物', '倉庫', 29, 9, 'pairs', '📦', '翻開箱子，把一樣的貨物配成對', '📦🧺🧵🔨🥕🌽'),
+    stn('烤麵包', '麵包坊', 13, 14, 'balance', '🍞', '按住加溫、放開降溫，讓火候留在綠色區'),
     stn('打水', '水井', 6, 15, 'hold', '💧', '按住不放，把水桶拉上來'),
     stn('收成', '農田', 35, 14, 'scatter', '🌾', '把麥子全部收起來', 6),
     stn('澆水', '農田', 40, 17, 'hold', '💧', '按住不放，把田澆透'),
-    stn('釣魚', '池塘', 9, 24, 'timing', '🐟', '指針進到綠色區再拉竿，成功 2 次', 2),
+    stn('釣魚', '池塘', 9, 24, 'balance', '🐟', '按住收線、放開放線，讓魚留在綠色區'),
     stn('餵雞', '雞舍', 20, 26, 'scatter', '🐔', '每隻雞都點一下，餵完為止', 5),
     stn('撿雞蛋', '雞舍', 25, 26, 'scatter', '🥚', '把雞蛋全部撿起來', 6),
     stn('打鐵', '鐵匠鋪', 33, 26, 'timing', '🔨', '指針進到綠色區再敲，成功 3 次', 3)
+  ];
+  CHAINS = [
+    { name: '做麵包', steps: [6, 2, 4] },
+    { name: '灌溉農田', steps: [5, 7] },
+    { name: '修理農具', steps: [0, 11] },
+    { name: '準備祭品', steps: [10, 3, 1] },
+    { name: '煮魚湯', steps: [8, 5, 0] },
+    { name: '補充飼料', steps: [3, 9] }
   ];
   AREAS = [
     area('廣場', 23.5, 15.5, 20.15, 12.55), area('祠堂', 23.5, 6, 23.5, 2.0), area('伐木場', 8, 6, 8.5, 7.6),
@@ -602,13 +630,21 @@ function buildHarbor() {
     stn('整理漁具', '漁具倉', 32, 10, 'seq', '🎣', '照 1 到 5 的順序把漁具歸位', 5),
     stn('修船', '造船棚', 13, 16, 'timing', '🔨', '指針進到綠色區再敲，成功 3 次', 3),
     stn('點亮燈塔', '燈塔', 41, 14, 'hold', '💡', '按住不放，把燈點亮'),
-    stn('釣魚', '西碼頭', 7, 27, 'timing', '🐟', '指針進到綠色區再拉竿，成功 2 次', 2),
+    stn('釣魚', '西碼頭', 7, 27, 'balance', '🐟', '按住收線、放開放線，讓魚留在綠色區'),
     stn('拉漁網', '中碼頭', 24, 28, 'hold', '🐟', '按住不放，把漁網拉上來'),
     stn('卸貨', '東碼頭', 37, 26, 'scatter', '📦', '把貨箱全部搬下船', 6),
     stn('曬魚乾', '曬魚場', 15, 6, 'scatter', '🐟', '把魚一條條掛上去', 6),
     stn('補漁網', '西沙灘', 16, 20, 'seq', '🧵', '照 1 到 6 的順序把破洞補好', 6),
-    stn('撿貝殼', '東沙灘', 29, 20, 'scatter', '🐚', '把貝殼全部撿起來', 6),
+    stn('撿貝殼', '東沙灘', 29, 20, 'pairs', '🐚', '翻開沙堆，把一樣的貝殼配成對', '🐚🦀⭐🐟🦐🐙'),
     stn('洗魚箱', '魚市廣場', 28, 14, 'hold', '💧', '按住不放，把魚箱沖乾淨')
+  ];
+  CHAINS = [
+    { name: '出海捕魚', steps: [2, 6, 0] },
+    { name: '做魚乾', steps: [5, 11, 8] },
+    { name: '整修漁船', steps: [3, 9] },
+    { name: '引船入港', steps: [4, 7] },
+    { name: '冰鎮漁獲', steps: [7, 1] },
+    { name: '海邊大掃除', steps: [10, 11] }
   ];
   AREAS = [
     area('魚市廣場', 23.5, 11.5, 20.6, 9.55), area('魚市', 23.5, 7, 23.5, 3.0), area('冰庫', 7.5, 9, 7.5, 5.0),
@@ -651,10 +687,10 @@ function buildOldStreet() {
     { k: 'gate', x: 22, y: 22, ns: true }
   ];
   STATIONS = [
-    stn('泡茶', '茶行', 5, 8, 'hold', '🍵', '按住不放，把茶泡開'),
+    stn('泡茶', '茶行', 5, 8, 'balance', '🍵', '按住加熱、放開降溫，讓水溫留在綠色區'),
     stn('裁布', '布莊', 12, 8, 'timing', '🧵', '指針進到綠色區再剪，成功 3 次', 3),
     stn('上香', '廟', 23, 8, 'seq', '🏮', '照 1 到 4 的順序上香', 4),
-    stn('抓藥', '藥鋪', 33, 8, 'seq', '🌿', '照 1 到 6 的順序把藥材抓齊', 6),
+    stn('抓藥', '藥鋪', 33, 8, 'pairs', '🌿', '翻開藥櫃，把一樣的藥材配成對', '🌿🍄🌰🌸🍂🌾'),
     stn('打水', '古井', 40, 6, 'hold', '💧', '按住不放，把水桶拉上來'),
     stn('蒸包子', '包子舖', 12, 14, 'hold', '🥟', '按住不放，蒸到熟'),
     stn('寫春聯', '書齋', 34, 15, 'seq', '🖌️', '照 1 到 5 的順序把字寫完', 5),
@@ -663,6 +699,14 @@ function buildOldStreet() {
     stn('收攤', '市集', 13, 19, 'scatter', '📦', '把攤上的貨全部收好', 6),
     stn('餵貓', '後院', 19, 26, 'scatter', '🐱', '每隻貓都點一下，餵完為止', 5),
     stn('掛燈籠', '牌樓', 22, 23, 'timing', '🏮', '指針進到綠色區再掛，成功 3 次', 3)
+  ];
+  CHAINS = [
+    { name: '做新衣', steps: [1, 7] },
+    { name: '廟會準備', steps: [8, 2, 11] },
+    { name: '煎藥', steps: [3, 4] },
+    { name: '過年佈置', steps: [6, 11] },
+    { name: '早點生意', steps: [5, 0, 9] },
+    { name: '夜市收尾', steps: [9, 10] }
   ];
   AREAS = [
     area('廟埕', 23.5, 12.5, 26.6, 10.55), area('廟', 23.5, 7, 23.5, 2.05), area('茶行', 6, 7, 6, 3.05), area('布莊', 13, 7, 13, 3.05),
@@ -678,9 +722,51 @@ const MAPS = [
   { name: '燈籠老街', desc: '巷弄交錯的老街。房子會擋住視線，轉角常常遇到人。', bank: '#56644c', build: buildOldStreet }
 ];
 
+// 任務字串：用 . 分開；「*2」是第 2 個長任務，其他是單一工作點（36 進位）
+function parseTasks(str) {
+  const out = []; let off = 0;
+  if (typeof str !== 'string') return out;
+  for (const tok of str.split('.')) {
+    if (!tok) continue;
+    let c = -1, name, steps;
+    if (tok[0] === '*') { c = parseInt(tok.slice(1), 36); const ch = CHAINS[c]; if (!ch) continue; name = ch.name; steps = ch.steps.slice(); }
+    else { const k = parseInt(tok, 36); if (!STATIONS[k]) continue; name = STATIONS[k].name; steps = [k]; }
+    out.push({ c, name, steps, off, long: c >= 0 }); off += steps.length;
+  }
+  return out;
+}
+function taskStepCount(str) { let n = 0; for (const t of parseTasks(str)) n += t.steps.length; return n; }
+// 發任務：像發牌一樣輪流發，讓每個人拿到的組合盡量不一樣，同一個人不會重複去同一個工作點
+function dealTasks(n, t) {
+  const nl = Math.min(CHAINS.length, t >> 1), ns = t - nl, out = [];
+  let cDeck = [], sDeck = [];
+  const draw = (deck, all, ok) => {
+    for (let pass = 0; pass < 2; pass++) {
+      const k = deck.findIndex(ok); if (k >= 0) return deck.splice(k, 1)[0];
+      for (const x of shuffle(all.slice())) deck.push(x);
+    }
+    return deck.length ? deck.shift() : all[0];
+  };
+  const allC = CHAINS.map((_, i) => i), allS = STATIONS.map((_, i) => i);
+  const seen = new Set();
+  for (let i = 0; i < n; i++) {
+    for (let tries = 0; ; tries++) {
+      const used = new Set(), mine = [], shorts = [], toks = [];
+      for (let k = 0; k < nl; k++) {
+        const c = draw(cDeck, allC, c => !mine.includes(c) && CHAINS[c].steps.every(x => !used.has(x)));
+        mine.push(c); CHAINS[c].steps.forEach(x => used.add(x)); toks.push('*' + c.toString(36));
+      }
+      for (let k = 0; k < ns; k++) { const x = draw(sDeck, allS, x => !used.has(x)); used.add(x); shorts.push(x); toks.push(x.toString(36)); }
+      const key = toks.slice().sort().join('.');
+      if (seen.has(key) && tries < 8) { for (const c of mine) cDeck.push(c); for (const x of shorts) sDeck.push(x); continue; }   // 跟別人整組一樣就重抽
+      seen.add(key); out.push(toks.join('.')); break;
+    }
+  }
+  return out;
+}
 function loadMap(i) {
   i = clamp(i | 0, 0, MAPS.length - 1); curMap = i;
-  grid.fill(T_GRASS); BUILDINGS = []; OBJECTS = []; STATIONS = []; AREAS = []; LAMPS = [];
+  grid.fill(T_GRASS); BUILDINGS = []; OBJECTS = []; STATIONS = []; AREAS = []; LAMPS = []; CHAINS = [];
   MAPS[i].build();
   OBJECTS.unshift({ k: 'bell', x: BELL.x, y: BELL.y });
   BELL.wx = (BELL.x + .5) * TILE; BELL.wy = (BELL.y + 1) * TILE;
@@ -1210,8 +1296,10 @@ function hostStart() {
   H.gn++; H.ro = ids;
   H.wf = ids.map((_, i) => wolves.has(i) ? '1' : '0').join('');
   H.dd = '0'.repeat(n); H.lf = '0'.repeat(n);
-  H.ta = ids.map(() => shuffle(STATIONS.map((_, i) => i)).slice(0, H.st.t).map(i => i.toString(36)).join(''));
-  H.bd = []; H.mt = null; H.rs = null; H.win = 0; H.why = 0; H.pg = [0, (n - w) * H.st.t]; H.ph = 1; H.rem = 9;
+  H.ta = dealTasks(n, H.st.t);   // 每個人各自一組；狼人拿到的是假清單
+  hs.steps = H.ta.map(taskStepCount); hs.stepsGn = H.gn;
+  let tot = 0; for (let i = 0; i < n; i++) if (!wolves.has(i)) tot += hs.steps[i];
+  H.bd = []; H.mt = null; H.rs = null; H.win = 0; H.why = 0; H.pg = [0, tot]; H.ph = 1; H.rem = 9;
   hs.lastK = {}; hs.lastR = {}; hs.em = {}; hs.meetNo = 0; hs.absent = {}; hs.acc = 0;
   for (const [id, p] of players) { if (p.bot) continue; hs.lastK[id] = Array.isArray(p.k) ? p.k[0] : undefined; hs.lastR[id] = Array.isArray(p.r) ? p.r[0] : undefined; }
   for (const b of BOTS) {
@@ -1277,11 +1365,13 @@ function hostWin() {
   return win;
 }
 function hostProgress() {
-  let done = 0, total = 0; const mask = (1 << H.st.t) - 1;
+  // 進度以「步驟」計算：長任務有幾步就算幾格
+  if (!hs.steps || hs.stepsGn !== H.gn) { hs.steps = H.ta.map(taskStepCount); hs.stepsGn = H.gn; }
+  let done = 0, total = 0;
   for (let i = 0; i < H.ro.length; i++) {
     if (H.wf[i] === '1' || H.lf[i] === '1') continue;
-    total += H.st.t; const p = pubOf(H.ro[i]), td = p && p.td;
-    if (Array.isArray(td) && td[0] === H.gn) done += popcount(td[1] & mask);
+    const n = hs.steps[i] | 0; total += n; const p = pubOf(H.ro[i]), td = p && p.td;
+    if (Array.isArray(td) && td[0] === H.gn) done += popcount(td[1] & ((1 << n) - 1));
   }
   if (done !== H.pg[0] || total !== H.pg[1]) { H.pg = [done, total]; hostDirty = true; }
 }
@@ -1413,20 +1503,21 @@ function botThink(b, idx, dt, now) {
     return;
   }
   if (b.path && b.pi < b.path.length) {
-    if (botStep(b, dt, BOT_SPEED)) { b.m = 0; b.wait = wolf ? rnd(1.2, 3.5) : (b.goalJ >= 0 ? rnd(6, 10) : rnd(2, 5)); }
+    if (botStep(b, dt, BOT_SPEED)) { b.m = 0; b.wait = wolf ? rnd(1.2, 3.5) : (b.goalJ >= 0 ? (b.heavy ? rnd(9, 13) : rnd(5, 8)) : rnd(2, 5)); }
     return;
   }
   let s = -1; b.goalJ = -1;
   if (!wolf && b.stroll) b.stroll = false;
   else if (!wolf) {
-    const tasks = H.ta[idx] || '', mask = b.td[0] === H.gn ? b.td[1] : 0, und = [];
-    for (let j = 0; j < tasks.length; j++) if (!(mask >> j & 1)) und.push(j);
-    if (und.length) { const j = pick(und); b.goalJ = j; s = parseInt(tasks[j], 36); }
+    const mask = b.td[0] === H.gn ? b.td[1] : 0, und = [], mid = [];
+    for (const tk of parseTasks(H.ta[idx])) for (let k = 0; k < tk.steps.length; k++) if (!(mask >> (tk.off + k) & 1)) { (k > 0 ? mid : und).push([tk.off + k, tk.steps[k], tk.long]); break; }
+    const u = mid.length ? pick(mid) : und.length ? pick(und) : null;   // 做到一半的長任務先接著做
+    if (u) { b.goalJ = u[0]; s = u[1]; b.heavy = u[2]; }
   }
   if (s < 0 || !STATIONS[s]) { s = rint(0, STATIONS.length - 1); b.goalJ = -1; }
   const st = STATIONS[s];
   if (!botGoTile(b, st.x, st.y)) { b.wait = 1; b.goalJ = -1; }
-  else if (!b.path.length) { b.wait = wolf ? rnd(1.2, 3) : (b.goalJ >= 0 ? rnd(6, 10) : rnd(2, 4)); }
+  else if (!b.path.length) { b.wait = wolf ? rnd(1.2, 3) : (b.goalJ >= 0 ? (b.heavy ? rnd(9, 13) : rnd(5, 8)) : rnd(2, 4)); }
 }
 function botsMeetInit() {
   const now = performance.now();
@@ -1569,7 +1660,19 @@ function derive() {
   my.idx = idx;
   my.wolf = idx >= 0 && G.wf[idx] === '1';
   my.dead = idx >= 0 && (G.dd[idx] === '1' || G.lf[idx] === '1');
-  my.tasks = idx >= 0 && typeof G.ta[idx] === 'string' ? G.ta[idx].split('').map(c => parseInt(c, 36)).filter(s => STATIONS[s]) : [];
+  my.tasks = idx >= 0 ? parseTasks(G.ta[idx]) : [];
+}
+// 這個任務做到第幾步（-1 表示整個做完）
+function taskCur(tk) { for (let k = 0; k < tk.steps.length; k++) if (!(ME.td[1] >> (tk.off + k) & 1)) return k; return -1; }
+// 現在該去的工作點。狼人拿到的是假清單，所有地點都標出來方便裝忙。
+function taskMarks() {
+  const out = [];
+  for (let ti = 0; ti < my.tasks.length; ti++) {
+    const tk = my.tasks[ti];
+    if (my.wolf) { for (const s of tk.steps) out.push({ s, ti, fake: true }); continue; }
+    const k = taskCur(tk); if (k >= 0) out.push({ s: tk.steps[k], ti });
+  }
+  return out;
 }
 function toSpawn() { const sp = SPAWNS[Math.max(0, my.idx) % SPAWNS.length]; ME.x = sp.x; ME.y = sp.y; ME.m = 0; }
 function onStateChange() {
@@ -1628,10 +1731,9 @@ function computeCtx() {
   if (!(G && G.ph === 2 && my.idx >= 0)) return;
   if (!my.wolf) {
     let best = USE_RANGE;
-    for (let j = 0; j < my.tasks.length; j++) {
-      if (ME.td[1] >> j & 1) continue;
-      const st = STATIONS[my.tasks[j]], d = dist(ME.x, ME.y, st.wx, st.wy);
-      if (d < best) { best = d; ctxA.use = { k: 'task', j, s: my.tasks[j] }; }
+    for (const m of taskMarks()) {
+      const st = STATIONS[m.s], d = dist(ME.x, ME.y, st.wx, st.wy);
+      if (d < best) { best = d; ctxA.use = { k: 'task', ti: m.ti }; }
     }
   }
   if (my.dead) return;
@@ -1651,7 +1753,7 @@ function sendKill(vid) { if (isHost) hostKill(ME.id, vid); else { ME.k = [Date.n
 function sendReport(bid) { if (isHost) hostReport(ME.id, bid); else { ME.r = [Date.now(), bid || '-']; Net.set({ r: ME.r }); } }
 function doUse() {
   const u = ctxA.use; if (!u) return;
-  if (u.k === 'task') openTask(u.j, u.s);
+  if (u.k === 'task') openTask(u.ti);
   else { my.em = true; sendReport(''); }
 }
 function doReport() { if (ctxA.body && G) sendReport(G.ro[ctxA.body[0]]); }
@@ -1755,9 +1857,9 @@ function render(now) {
   // 地面記號：我的工作點、可襲擊的對象
   if (playing && G.ph === 2) {
     const pulse = .5 + .5 * Math.sin(now / 260);
-    if (!my.wolf) for (let j = 0; j < my.tasks.length; j++) {
-      if (ME.td[1] >> j & 1) continue; const st = STATIONS[my.tasks[j]];
-      g.strokeStyle = `rgba(242,184,75,${.55 + .4 * pulse})`; g.lineWidth = 2.6; g.beginPath(); g.ellipse(st.wx, st.wy, 18 + pulse * 2, 12 + pulse * 1.4, 0, 0, 6.2832); g.stroke();
+    for (const m of taskMarks()) {
+      const st = STATIONS[m.s];
+      g.strokeStyle = m.fake ? 'rgba(157,176,191,.5)' : `rgba(242,184,75,${.55 + .4 * pulse})`; g.lineWidth = 2.6; g.beginPath(); g.ellipse(st.wx, st.wy, 18 + pulse * 2, 12 + pulse * 1.4, 0, 0, 6.2832); g.stroke();
     }
     if (ctxA.kill) { g.strokeStyle = 'rgba(220,90,77,.9)'; g.lineWidth = 2.6; g.beginPath(); g.ellipse(ctxA.kill.rx, ctxA.kill.ry, 16, 7, 0, 0, 6.2832); g.stroke(); }
     if (ctxA.body) { g.strokeStyle = 'rgba(236,229,211,.8)'; g.lineWidth = 2; g.beginPath(); g.ellipse(ctxA.body[1], ctxA.body[2], 26, 9, 0, 0, 6.2832); g.stroke(); }
@@ -1806,12 +1908,12 @@ function render(now) {
     g.fillStyle = '#f2d9a0'; g.fillText(a.n, lx, ly + 1);
   }
   // 工作點上方的記號
-  if (playing && G.ph === 2 && !my.wolf) {
+  if (playing && G.ph === 2) {
     const bobm = Math.sin(now / 300) * 3;
-    for (let j = 0; j < my.tasks.length; j++) {
-      if (ME.td[1] >> j & 1) continue; const st = STATIONS[my.tasks[j]];
-      g.fillStyle = '#f2b84b'; g.beginPath(); g.moveTo(st.wx, st.wy - 58 + bobm); g.lineTo(st.wx + 8, st.wy - 68 + bobm); g.lineTo(st.wx, st.wy - 78 + bobm); g.lineTo(st.wx - 8, st.wy - 68 + bobm); g.closePath(); g.fill();
-      g.fillStyle = '#1d1405'; g.font = '800 12px ' + FONT_BODY; g.fillText('!', st.wx, st.wy - 67.5 + bobm);
+    for (const m of taskMarks()) {
+      const st = STATIONS[m.s];
+      g.fillStyle = m.fake ? '#8fa3b3' : '#f2b84b'; g.beginPath(); g.moveTo(st.wx, st.wy - 58 + bobm); g.lineTo(st.wx + 8, st.wy - 68 + bobm); g.lineTo(st.wx, st.wy - 78 + bobm); g.lineTo(st.wx - 8, st.wy - 68 + bobm); g.closePath(); g.fill();
+      g.fillStyle = '#1d1405'; g.font = '800 12px ' + FONT_BODY; g.fillText(m.fake ? '?' : '!', st.wx, st.wy - 67.5 + bobm);
     }
   }
 
@@ -1843,8 +1945,8 @@ function render(now) {
   if (playing && G.ph === 2 && !my.wolf) {
     g.setTransform(view.dpr, 0, 0, view.dpr, 0, 0);
     const mx = 26, top = 118, bot = view.h - 150;
-    for (let j = 0; j < my.tasks.length; j++) {
-      if (ME.td[1] >> j & 1) continue; const st = STATIONS[my.tasks[j]];
+    for (const m of taskMarks()) {
+      const st = STATIONS[m.s];
       const px = (st.wx - cx) * view.z, py = (st.wy - 30 - cy) * view.z;
       if (px > mx && px < view.w - mx && py > 60 && py < view.h - 60) continue;
       const ax = clamp(px, mx, view.w - mx), ay = clamp(py, top, Math.max(top, bot));
@@ -1869,7 +1971,7 @@ function frame(now) {
       else if (gap > 5000 && !hostWarned) { hostWarned = true; toast('房主的連線中斷了，正在等他回來…', 5000); }
       else if (gap < 1000) hostWarned = false;
     }
-    if (inRoom && G && G.st && (G.st.map | 0) !== curMap) applyMap(G.st.map | 0);
+    if (inRoom && G && G.st && (G.st.map | 0) !== curMap) { applyMap(G.st.map | 0); derive(); }
     onStateChange();
     if (inRoom) { updateMe(dt); sendPos(now); computeCtx(); } else ambientTick(dt);
     for (const p of players.values()) {
@@ -2237,7 +2339,6 @@ function uiTick(now) {
 
 // ----- 大廳 -----
 const SETTINGS = [
-  { k: 'map', label: '地圖', min: 0, max: MAPS.length - 1, step: 1, fmt: v => MAPS[v].name },
   { k: 'w', label: '狼人數量', min: 1, max: 2, step: 1, fmt: v => v + ' 隻' },
   { k: 't', label: '每人的工作', min: 3, max: 6, step: 1, fmt: v => v + ' 件' },
   { k: 'kc', label: '襲擊冷卻', min: 15, max: 40, step: 5, fmt: v => v + ' 秒' },
@@ -2285,7 +2386,10 @@ function renderLobby(mode) {
     c.width = Math.round(w * d); c.height = Math.round(h * d);
     paintMiniMap(c.getContext('2d'), w / WORLD_W, d, false);
     $('mapName').textContent = MAPS[curMap].name; $('mapDesc').textContent = MAPS[curMap].desc;
+    $('mapIdx').textContent = (curMap + 1) + ' / ' + MAPS.length;
   }
+  const pickMap = isHost && mode === 'lobby';   // 只有房主能換地圖
+  $('mapPrevBtn').style.visibility = $('mapNextBtn').style.visibility = pickMap ? '' : 'hidden';
   const showSet = mode === 'lobby' && G;
   const st = showSet ? SETTINGS.map(s => settingVal(s.k)).join(',') + '|' + isHost : 'none';
   if (changed('lset', st)) {
@@ -2319,17 +2423,27 @@ function renderHud() {
   const role = (my.wolf ? '狼人' : '村民') + (my.dead ? '・幽靈' : '');
   if (changed('role', role)) { chip.textContent = role; chip.className = 'chip' + (my.dead ? ' ghost' : my.wolf ? ' wolf' : ''); }
   const mask = ME.td[1];
-  const ts = my.wolf + '|' + my.tasks.join(',') + '|' + mask + '|' + G.gn;
+  const ts = my.wolf + '|' + (G.ta[my.idx] || '') + '|' + curMap + '|' + mask + '|' + G.gn;
   if (changed('tasks', ts)) {
     const ul = $('taskList'); ul.textContent = '';
+    const txt = t => document.createTextNode(t);
     if (my.wolf) {
-      ul.appendChild(el('li', '', '假裝在工作，別被看穿'));
+      // 狼人拿到的是假清單：知道該去哪裡裝忙，但做不了
+      ul.appendChild(el('li', 'fake-h', '假任務・做不了，站著裝忙'));
+      for (const tk of my.tasks) {
+        const li = el('li', 'fake'); li.appendChild(el('b', '', tk.name));
+        li.appendChild(txt('　' + tk.steps.map(k => STATIONS[k].area).join(' → '))); ul.appendChild(li);
+      }
       const mates = []; for (let i = 0; i < G.ro.length; i++) if (G.wf[i] === '1' && i !== my.idx) mates.push(nameIdx(i));
-      if (mates.length) ul.appendChild(el('li', '', '同伴：' + mates.join('、')));
-    } else my.tasks.forEach((s, j) => {
-      const st = STATIONS[s], li = el('li', mask >> j & 1 ? 'done' : '');
-      li.appendChild(el('b', '', st.name)); li.appendChild(document.createTextNode('　' + st.area)); ul.appendChild(li);
-    });
+      if (mates.length) ul.appendChild(el('li', 'fake-h', '同伴：' + mates.join('、')));
+    } else for (const tk of my.tasks) {
+      const k = taskCur(tk), li = el('li', k < 0 ? 'done' : ''); li.appendChild(el('b', '', tk.name));
+      if (tk.long) {
+        li.appendChild(el('i', '', (k < 0 ? tk.steps.length : k) + '/' + tk.steps.length));
+        if (k >= 0) { const st = STATIONS[tk.steps[k]]; li.appendChild(txt(st.name + '・' + st.area)); }
+      } else li.appendChild(txt('　' + STATIONS[tk.steps[0]].area));
+      ul.appendChild(li);
+    }
   }
   const pg = G.pg || [0, 0];
   if (changed('pg', pg[0] + '/' + pg[1])) { $('pgBar').style.width = (pg[1] ? Math.round(pg[0] / pg[1] * 100) : 0) + '%'; $('pgTxt').textContent = '全村工作 ' + pg[0] + '/' + pg[1]; }
@@ -2345,75 +2459,91 @@ function renderHud() {
 }
 
 // ----- 工作小遊戲 -----
-function openTask(j, s) {
+// heavy = 長任務的其中一步，份量比單一工作重
+function openTask(ti) {
   closeTask();
-  const st = STATIONS[s]; if (!st) return;
-  taskState = { j, s, done: false, cleanup: null };
-  $('taskTitle').textContent = st.name; $('taskArea').textContent = st.area;
+  const tk = my.tasks[ti]; if (!tk || my.wolf) return;
+  const k = taskCur(tk); if (k < 0) return;
+  const st = STATIONS[tk.steps[k]]; if (!st) return;
+  taskState = { ti, k, bit: tk.off + k, s: tk.steps[k], done: false, cleanup: null };
+  $('taskTitle').textContent = st.name;
+  $('taskArea').textContent = tk.long ? tk.name + '　第 ' + (k + 1) + ' / ' + tk.steps.length + ' 步' : st.area;
   const box = $('taskBox'); box.textContent = '';
   const done = () => finishTask();
-  ({ mash: tgMash, scatter: tgScatter, hold: tgHold, timing: tgTiming, seq: tgSeq })[st.type](box, st, done);
+  ({ mash: tgMash, scatter: tgScatter, hold: tgHold, timing: tgTiming, seq: tgSeq, pairs: tgPairs, balance: tgBalance })[st.type](box, st, done, tk.long);
   document.body.classList.add('task-open');
 }
 function finishTask() {
   if (!taskState || taskState.done || !G) return;
   taskState.done = true;
   if (taskState.cleanup) { taskState.cleanup(); taskState.cleanup = null; }
-  ME.td = [G.gn, ME.td[1] | (1 << taskState.j)]; Net.set({ td: ME.td });
+  ME.td = [G.gn, ME.td[1] | (1 << taskState.bit)]; Net.set({ td: ME.td });
   store('lw_pg', JSON.stringify({ c: code, g: G.gn, m: ME.td[1] }));
   const box = $('taskBox'); box.textContent = ''; box.appendChild(el('div', 'task-done', '完成'));
-  setTimeout(() => { if (taskState && taskState.done) closeTask(); }, 650);
+  const tk = my.tasks[taskState.ti], nk = tk ? taskCur(tk) : -1;
+  if (tk && tk.long && nk >= 0) { const ns = STATIONS[tk.steps[nk]]; box.appendChild(el('div', 'task-next', '下一步：到「' + ns.area + '」' + ns.name)); }
+  setTimeout(() => { if (taskState && taskState.done) closeTask(); }, tk && tk.long && nk >= 0 ? 1300 : 650);
 }
 function closeTask() {
   if (taskState && taskState.cleanup) taskState.cleanup();
   taskState = null; document.body.classList.remove('task-open');
 }
-function tgMash(box, st, done) {
-  let n = 0;
-  const b = el('button', 'big-tap', st.emoji), c = el('div', 'count', '0 / ' + st.n);
-  b.type = 'button';
-  b.addEventListener('pointerdown', e => { e.preventDefault(); n++; c.textContent = n + ' / ' + st.n; if (n >= st.n) done(); });
-  box.appendChild(el('div', 'task-tip', st.tip)); box.appendChild(b); box.appendChild(c);
-}
-function tgScatter(box, st, done) {
-  let left = st.n; const tip = el('div', 'task-tip', st.tip); tip.style.cssText = 'position:absolute;left:0;right:0;top:8px';
-  box.appendChild(tip);
-  const cols = 4, rows = 2, cells = shuffle(Array.from({ length: cols * rows }, (_, i) => i)).slice(0, st.n);
-  for (const cidx of cells) {
-    const b = el('button', 'scatter-item', st.emoji); b.type = 'button';
-    const cxp = (cidx % cols + .5) / cols * 100 + rnd(-5, 5), cyp = 38 + (Math.floor(cidx / cols) + .5) / rows * 56 + rnd(-4, 4);
-    b.style.left = 'calc(' + cxp + '% - 24px)'; b.style.top = 'calc(' + cyp + '% - 24px)';
-    b.addEventListener('pointerdown', e => { e.preventDefault(); if (b.disabled) return; b.disabled = true; b.style.visibility = 'hidden'; if (--left <= 0) done(); });
-    box.appendChild(b);
-  }
-}
-function tgHold(box, st, done) {
-  let p = 0, down = false, raf = 0, last = performance.now();
-  const bar = el('div', 'bar'), fill = el('div', 'bar-fill'); bar.appendChild(fill);
-  const b = el('button', 'hold-btn', st.emoji + ' 按住'); b.type = 'button';
-  const up = () => { down = false; };
-  b.addEventListener('pointerdown', e => { e.preventDefault(); down = true; try { b.setPointerCapture(e.pointerId); } catch (x) { } });
+function holdButton(label) {
+  const b = el('button', 'hold-btn', label); b.type = 'button'; const s = { b, down: false };
+  const up = () => { s.down = false; };
+  b.addEventListener('pointerdown', e => { e.preventDefault(); s.down = true; try { b.setPointerCapture(e.pointerId); } catch (x) { } });
   b.addEventListener('pointerup', up); b.addEventListener('pointercancel', up); b.addEventListener('lostpointercapture', up);
   b.addEventListener('contextmenu', e => e.preventDefault());
+  return s;
+}
+function tgMash(box, st, done, heavy) {
+  const need = heavy ? 30 : 18; let n = 0;
+  const b = el('button', 'big-tap', st.emoji), c = el('div', 'count', '0 / ' + need);
+  b.type = 'button';
+  b.addEventListener('pointerdown', e => { e.preventDefault(); n++; c.textContent = n + ' / ' + need; if (n >= need) done(); });
+  box.appendChild(el('div', 'task-tip', st.tip.replace(/\d+ 下/, need + ' 下'))); box.appendChild(b); box.appendChild(c);
+}
+function tgScatter(box, st, done, heavy) {
+  const waves = heavy ? 3 : 2; let wave = 0, left = 0;
+  const tip = el('div', 'task-tip'); tip.style.cssText = 'position:absolute;left:0;right:0;top:8px';
+  box.appendChild(tip);
+  const spawn = () => {
+    wave++; left = st.n; tip.textContent = st.tip + '（第 ' + wave + ' / ' + waves + ' 批）';
+    const cols = 4, rows = 2, cells = shuffle(Array.from({ length: cols * rows }, (_, i) => i)).slice(0, st.n);
+    for (const cidx of cells) {
+      const b = el('button', 'scatter-item', st.emoji); b.type = 'button';
+      const cxp = (cidx % cols + .5) / cols * 100 + rnd(-5, 5), cyp = 38 + (Math.floor(cidx / cols) + .5) / rows * 56 + rnd(-4, 4);
+      b.style.left = 'calc(' + cxp + '% - 24px)'; b.style.top = 'calc(' + cyp + '% - 24px)';
+      b.addEventListener('pointerdown', e => { e.preventDefault(); if (b.disabled) return; b.disabled = true; b.remove(); if (--left <= 0) { if (wave >= waves) done(); else spawn(); } });
+      box.appendChild(b);
+    }
+  };
+  spawn();
+}
+function tgHold(box, st, done, heavy) {
+  const dur = heavy ? 8 : 4.5; let p = 0, raf = 0, last = performance.now();
+  const bar = el('div', 'bar'), fill = el('div', 'bar-fill'); bar.appendChild(fill);
+  const h = holdButton(st.emoji + ' 按住');
   const loop = t => {
     const dt = Math.min(.05, (t - last) / 1000); last = t;
-    p = clamp(p + (down ? dt / 2.6 : -dt / 1.6), 0, 1); fill.style.width = (p * 100) + '%';
+    p = clamp(p + (h.down ? dt / dur : -dt / (dur * .6)), 0, 1); fill.style.width = (p * 100) + '%';
     if (p >= 1) { done(); return; }
     raf = requestAnimationFrame(loop);
   };
   raf = requestAnimationFrame(loop);
   taskState.cleanup = () => cancelAnimationFrame(raf);
-  box.appendChild(el('div', 'task-tip', st.tip)); box.appendChild(bar); box.appendChild(b);
+  box.appendChild(el('div', 'task-tip', st.tip)); box.appendChild(bar); box.appendChild(h.b);
 }
-function tgTiming(box, st, done) {
+function tgTiming(box, st, done, heavy) {
+  const need = (st.n || 3) + (heavy ? 3 : 1);
   let hits = 0, pos = 0, dir = 1, raf = 0, last = performance.now(), zs = rnd(.2, .6), zw = .24, speed = .95;
   const bar = el('div', 'bar'), zone = el('div', 'bar-zone'), mark = el('div', 'bar-mark'); bar.appendChild(zone); bar.appendChild(mark);
-  const c = el('div', 'count', '0 / ' + st.n), b = el('button', 'hit-btn', st.emoji + ' 現在'); b.type = 'button';
+  const c = el('div', 'count', '0 / ' + need), b = el('button', 'hit-btn', st.emoji + ' 現在'); b.type = 'button';
   const place = () => { zone.style.left = (zs * 100) + '%'; zone.style.width = (zw * 100) + '%'; };
   place();
   b.addEventListener('pointerdown', e => {
     e.preventDefault();
-    if (pos >= zs && pos <= zs + zw) { hits++; c.textContent = hits + ' / ' + st.n; if (hits >= st.n) { done(); return; } zs = rnd(.08, .68); speed += .15; place(); }
+    if (pos >= zs && pos <= zs + zw) { hits++; c.textContent = hits + ' / ' + need; if (hits >= need) { done(); return; } zs = rnd(.08, .68); speed = Math.min(1.5, speed + .11); place(); }
     else { bar.classList.remove('shake'); void bar.offsetWidth; bar.classList.add('shake'); }
   });
   const loop = t => {
@@ -2423,20 +2553,69 @@ function tgTiming(box, st, done) {
   };
   raf = requestAnimationFrame(loop);
   taskState.cleanup = () => cancelAnimationFrame(raf);
-  box.appendChild(el('div', 'task-tip', st.tip)); box.appendChild(bar); box.appendChild(c); box.appendChild(b);
+  box.appendChild(el('div', 'task-tip', st.tip.replace(/成功 \d+ 次/, '成功 ' + need + ' 次'))); box.appendChild(bar); box.appendChild(c); box.appendChild(b);
 }
-function tgSeq(box, st, done) {
-  let next = 1; const gridEl = el('div', 'seq-grid'), btns = [];
-  for (const n of shuffle(Array.from({ length: st.n }, (_, i) => i + 1))) {
-    const b = el('button', 'seq-btn', String(n)); b.type = 'button'; btns.push(b);
+function tgSeq(box, st, done, heavy) {
+  const cnt = Math.min(8, (st.n || 5) + 2), rounds = heavy ? 2 : 1; let round = 0;
+  const tip = el('div', 'task-tip'), gridEl = el('div', 'seq-grid');
+  const deal = () => {
+    round++; let next = 1; const btns = []; gridEl.textContent = '';
+    tip.textContent = st.emoji + ' ' + st.tip.replace(/1 到 \d+/, '1 到 ' + cnt) + (rounds > 1 ? '（第 ' + round + ' / ' + rounds + ' 輪）' : '');
+    for (const n of shuffle(Array.from({ length: cnt }, (_, i) => i + 1))) {
+      const b = el('button', 'seq-btn', String(n)); b.type = 'button'; btns.push(b);
+      b.addEventListener('pointerdown', e => {
+        e.preventDefault(); if (b.classList.contains('ok')) return;
+        if (n === next) { b.classList.add('ok'); next++; if (next > cnt) { if (round >= rounds) done(); else deal(); } }
+        else { next = 1; btns.forEach(x => x.classList.remove('ok')); gridEl.classList.remove('shake'); void gridEl.offsetWidth; gridEl.classList.add('shake'); }
+      });
+      gridEl.appendChild(b);
+    }
+  };
+  deal();
+  box.appendChild(tip); box.appendChild(gridEl);
+}
+// 翻牌配對
+function tgPairs(box, st, done, heavy) {
+  const np = heavy ? 4 : 3, pool = shuffle(Array.from(String(st.n))).slice(0, np);
+  let open = [], lock = false, left = np; const timers = [];
+  const gridEl = el('div', 'seq-grid');
+  for (const sym of shuffle(pool.concat(pool))) {
+    const b = el('button', 'seq-btn pair', '？'); b.type = 'button';
     b.addEventListener('pointerdown', e => {
-      e.preventDefault(); if (b.classList.contains('ok')) return;
-      if (n === next) { b.classList.add('ok'); next++; if (next > st.n) done(); }
-      else { next = 1; btns.forEach(x => x.classList.remove('ok')); gridEl.classList.remove('shake'); void gridEl.offsetWidth; gridEl.classList.add('shake'); }
+      e.preventDefault(); if (lock || b.classList.contains('ok') || b.classList.contains('up')) return;
+      b.classList.add('up'); b.textContent = sym; open.push(b);
+      if (open.length < 2) return;
+      const x = open[0], y = open[1]; open = [];
+      if (x.textContent === y.textContent) { x.classList.add('ok'); y.classList.add('ok'); if (--left <= 0) done(); }
+      else { lock = true; timers.push(setTimeout(() => { for (const c of [x, y]) { c.classList.remove('up'); c.textContent = '？'; } lock = false; }, 600)); }
     });
     gridEl.appendChild(b);
   }
+  taskState.cleanup = () => timers.forEach(clearTimeout);
   box.appendChild(el('div', 'task-tip', st.emoji + ' ' + st.tip)); box.appendChild(gridEl);
+}
+// 保持平衡：按住往右、放開往左，讓指針留在會飄移的綠色區裡，直到下面那條集滿
+function tgBalance(box, st, done, heavy) {
+  const need = heavy ? 9 : 5.5, zw = .32;
+  let pos = .08, vel = 0, prog = 0, raf = 0, last = performance.now(), ph = rnd(0, 6.28);
+  const bar = el('div', 'bar'), zone = el('div', 'bar-zone'), mark = el('div', 'bar-mark'); bar.appendChild(zone); bar.appendChild(mark);
+  const pbar = el('div', 'bar thin'), fill = el('div', 'bar-fill'); pbar.appendChild(fill);
+  const h = holdButton(st.emoji + ' 按住');
+  zone.style.width = (zw * 100) + '%';
+  const loop = t => {
+    const dt = Math.min(.05, (t - last) / 1000); last = t; ph += dt;
+    const zs = (1 - zw) * (.5 + .46 * Math.sin(ph * .8) * Math.cos(ph * .33 + 1));
+    vel += (h.down ? 1.15 : -1.15) * dt; vel *= Math.pow(.14, dt);
+    pos += vel * dt; if (pos < 0) { pos = 0; vel = 0; } if (pos > 1) { pos = 1; vel = 0; }
+    const inz = pos >= zs && pos <= zs + zw;
+    prog = clamp(prog + (inz ? dt / need : -dt / (need * 2.5)), 0, 1);
+    zone.style.left = (zs * 100) + '%'; mark.style.left = (pos * 100) + '%'; fill.style.width = (prog * 100) + '%';
+    if (prog >= 1) { done(); return; }
+    raf = requestAnimationFrame(loop);
+  };
+  raf = requestAnimationFrame(loop);
+  taskState.cleanup = () => cancelAnimationFrame(raf);
+  box.appendChild(el('div', 'task-tip', st.tip)); box.appendChild(bar); box.appendChild(pbar); box.appendChild(h.b);
 }
 
 // ----- 會議 -----
@@ -2551,9 +2730,9 @@ function drawMiniMap(now) {
   if (c.width !== Math.round(w * d)) { c.width = Math.round(w * d); c.height = Math.round(h * d); c.style.width = w + 'px'; c.style.height = h + 'px'; }
   const m = c.getContext('2d'); paintMiniMap(m, sc, d, true);
   if (G && my.idx >= 0) {
-    if (!my.wolf) for (let j = 0; j < my.tasks.length; j++) {
-      if (ME.td[1] >> j & 1) continue; const st = STATIONS[my.tasks[j]], r = 7 / sc;
-      m.fillStyle = '#f2b84b'; m.beginPath(); m.moveTo(st.wx, st.wy - r); m.lineTo(st.wx + r, st.wy); m.lineTo(st.wx, st.wy + r); m.lineTo(st.wx - r, st.wy); m.closePath(); m.fill();
+    for (const mk of taskMarks()) {
+      const st = STATIONS[mk.s], r = 7 / sc;
+      m.fillStyle = mk.fake ? '#8fa3b3' : '#f2b84b'; m.beginPath(); m.moveTo(st.wx, st.wy - r); m.lineTo(st.wx + r, st.wy); m.lineTo(st.wx, st.wy + r); m.lineTo(st.wx - r, st.wy); m.closePath(); m.fill();
       m.strokeStyle = '#1d1405'; m.lineWidth = 1.5 / sc; m.stroke();
     }
     const pr = (5 + Math.sin(now / 200) * 1.5) / sc;
@@ -2573,6 +2752,9 @@ function bindUI() {
   $('btnInvite').addEventListener('click', invite);
   document.addEventListener('gesturestart', e => e.preventDefault());
   document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && inRoom) keepAwake(); });
+  const turnMap = d => { if (!isHost || !H || H.ph !== 0) return; H.st.map = ((H.st.map | 0) + d + MAPS.length) % MAPS.length; hostDirty = true; };
+  $('mapPrevBtn').addEventListener('click', () => turnMap(-1));
+  $('mapNextBtn').addEventListener('click', () => turnMap(1));
   $('btnStart').addEventListener('click', () => { if (isHost) hostStart(); });
   $('btnLeave').addEventListener('click', () => { sig.lhint = ''; leaveRoom(); });
   $('btnEndLeave').addEventListener('click', () => leaveRoom());
@@ -2639,7 +2821,7 @@ function main() {
   requestAnimationFrame(frame);
   window.__lw = {
     get G() { return G; }, get H() { return H; }, ME, my, players, get BOTS() { return BOTS; }, Net, get STATIONS() { return STATIONS; }, SPAWNS, grid, MAPS, loadMap, applyMap, canSee, paintMiniMap, tget, boxFree, get curMap() { return curMap; },
-    findPath, startPractice, createRoom, joinRoom, invite, inviteLink, intro, hostStart, hostKill, hostReport, hostTick, setBotCount, castVote, sendChat, finishTask, openTask, leaveRoom, uiMode,
+    findPath, startPractice, createRoom, joinRoom, invite, inviteLink, intro, hostStart, hostKill, hostReport, hostTick, setBotCount, castVote, sendChat, finishTask, openTask, leaveRoom, uiMode, parseTasks, dealTasks, taskCur, taskMarks, get CHAINS() { return CHAINS; }, get taskState() { return taskState; }, get hs() { return hs; },
     get ctx() { return ctxA; }, get inRoom() { return inRoom; }, get isHost() { return isHost; }, get code() { return code; }
   };
 }
