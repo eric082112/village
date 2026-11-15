@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>月夜狼人村</title>
 <meta name="description" content="和朋友連線玩的狼人村：做完村裡的工作，找出混在裡面的狼人。">
+<meta name="lw-build" content="12">
 <meta name="theme-color" content="#0b151d">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -103,6 +104,7 @@ body[data-mode="intro"] .acts,body[data-mode="intro"] .joy,body[data-mode="resul
   color:var(--ink);padding-top:8px;text-shadow:0 2px 6px rgba(0,0,0,.8);
 }
 .home-panel{width:100%;max-width:400px;align-self:center}
+.ver{font-size:11.5px;color:var(--ink-dim);text-align:right;opacity:.8;font-variant-numeric:tabular-nums}
 .or{font-size:12.5px;color:var(--ink-dim);display:flex;align-items:center;gap:10px;margin-top:2px}
 .or::before,.or::after{content:"";flex:1;height:1px;background:var(--line)}
 .rules summary{cursor:pointer;font-size:14px;color:var(--lantern);padding:4px 0}
@@ -429,6 +431,7 @@ body.set-open #setSheet{display:flex}
       <button id="btnJoin" class="btn" type="button">加入</button>
     </div>
     <p id="netMsg" class="note" aria-live="polite"></p>
+    <button id="btnUpdate" class="btn primary" type="button" hidden>有新版本，按這裡更新</button>
     <details class="rules">
       <summary>怎麼玩</summary>
       <ol>
@@ -439,6 +442,7 @@ body.set-open #setSheet{display:flex}
         <li>狼人可以「吹燈」讓村民看不遠。任何一位活著的人走到提示的地點點蠟燭，視野就會恢復。</li>
       </ol>
     </details>
+    <p id="verTag" class="ver"></p>
   </div>
 </section>
 
@@ -1439,7 +1443,7 @@ function hostStart() {
   hs.steps = H.ta.map(taskStepCount); hs.stepsGn = H.gn;
   hs.tl = H.ta.map(parseTasks); hs.tlGn = H.gn;
   let tot = 0; for (let i = 0; i < n; i++) if (!wolves.has(i)) tot += hs.tl[i].length;
-  H.bd = []; H.mt = null; H.rs = null; H.win = 0; H.why = 0; H.pg = [0, tot]; H.ph = 1; H.rem = 9;
+  H.bd = []; H.mt = null; H.rs = null; H.win = 0; H.why = 0; H.pg = [0, tot]; H.ph = 1; H.rem = 11;   // 開場動畫：先「你是」再揭曉身分，總共約 10 秒
   hs.lastK = {}; hs.lastR = {}; hs.lastB = {}; hs.lastF = {}; hs.em = {}; hs.meetNo = 0; hs.absent = {}; hs.acc = 0; hs.fixer = null; H.lo = 0; hs.lastA = {}; hs.alCd = performance.now() + 20000; H.al = { a: [], on: 0, rem: 0, lk: 1 };
   for (const [id, p] of players) { if (p.bot) continue; hs.lastK[id] = Array.isArray(p.k) ? p.k[0] : undefined; hs.lastR[id] = Array.isArray(p.r) ? p.r[0] : undefined; hs.lastB[id] = Array.isArray(p.bl) ? p.bl[0] : undefined; hs.lastF[id] = Array.isArray(p.fx) ? p.fx[0] : undefined; hs.lastA[id] = [p.ap, p.ax, p.as].map(v => Array.isArray(v) ? v[0] : undefined); }
   for (const b of BOTS) {
@@ -2695,6 +2699,7 @@ function drawRoleCard(g, wolf, col, t) {
   g.fillStyle = 'rgba(236,229,211,.78)'; g.font = '600 10.5px ' + FONT_BODY; g.fillText(wolf ? '隱藏身分・伺機下手' : '完成任務・找出狼人', 0, y + h - 19);
 }
 
+const INTRO_PRE = 1.7;   // 開頭先只有「你是」兩個字的時間（秒）
 function drawIntro(now) {
   const c = $('introCv'), W = c.clientWidth, Hh = c.clientHeight; if (!W || !Hh) return;
   const d = view.dpr;
@@ -2704,31 +2709,37 @@ function drawIntro(now) {
   const calm = reduceMotion();
   let t = intro.fix != null ? intro.fix : (now - intro.t0) / 1000;
   t = Math.max(0, t);
+  const ts = Math.max(0, t - INTRO_PRE), shown = t >= INTRO_PRE;   // ts = 揭曉之後、場景自己的時間
   // 版面：直向時場景在上、字在下；橫向時場景在左、字在右。場景本身畫滿整個螢幕。
   const land = W > Hh * 1.15, u = land ? Math.min(Hh / 360, W / 700) : Math.min(W / 360, Hh / 700);
   const sx = land ? W * .31 : W / 2, sy = land ? Hh * .7 : Hh * .5;
   const tx = land ? W * .715 : W / 2, ty = land ? Hh * .4 : Hh * .735, cardX = sx, cardY = land ? Hh * .5 : Hh * .385;
   g.setTransform(d, 0, 0, d, 0, 0); g.globalAlpha = 1; g.globalCompositeOperation = 'source-over'; g.shadowBlur = 0;
-  g.fillStyle = '#070c12'; g.fillRect(0, 0, W, Hh);
-  // 場景：鏡頭慢慢推近
-  g.save();
-  const zoom = calm ? 1 : 1.04 + Math.min(t, 8) * .012; g.translate(sx, sy - 40 * u); g.scale(zoom, zoom); g.translate(-sx, -(sy - 40 * u));
-  (wolf ? fsWolf : fsVillager)(g, W, Hh, sx, sy, u, t, col);
-  g.restore();
-  // 字後面墊一層漸層，確保看得清楚
-  const sc = land ? g.createLinearGradient(W * .44, 0, W * .68, 0) : g.createLinearGradient(0, Hh * .52, 0, Hh * .72);
-  sc.addColorStop(0, 'rgba(5,8,13,0)'); sc.addColorStop(1, 'rgba(5,8,13,' + (wolf ? .74 : .66) + ')');
-  g.fillStyle = sc; if (land) g.fillRect(W * .44, 0, W * .56, Hh); else g.fillRect(0, Hh * .52, W, Hh * .48);
+  g.fillStyle = '#05080c'; g.fillRect(0, 0, W, Hh);
+  if (shown) {
+    // 場景：鏡頭慢慢推近
+    g.save();
+    const zoom = calm ? 1 : 1.04 + Math.min(ts, 8) * .012; g.translate(sx, sy - 40 * u); g.scale(zoom, zoom); g.translate(-sx, -(sy - 40 * u));
+    (wolf ? fsWolf : fsVillager)(g, W, Hh, sx, sy, u, ts, col);
+    g.restore();
+    // 字後面墊一層漸層，確保看得清楚
+    const sc = land ? g.createLinearGradient(W * .44, 0, W * .68, 0) : g.createLinearGradient(0, Hh * .52, 0, Hh * .72);
+    sc.addColorStop(0, 'rgba(5,8,13,0)'); sc.addColorStop(1, 'rgba(5,8,13,' + (wolf ? .74 : .66) + ')');
+    g.fillStyle = sc; if (land) g.fillRect(W * .44, 0, W * .56, Hh); else g.fillRect(0, Hh * .52, W, Hh * .48);
+    // 揭曉的瞬間：畫面從黑裡浮出來，帶一下閃光
+    const sf = 1 - smooth(ts / .8); if (sf > 0) { g.fillStyle = 'rgba(5,8,12,' + sf + ')'; g.fillRect(0, 0, W, Hh); }
+    const rf = clamp(1 - ts / .4, 0, 1); if (rf > 0) { g.fillStyle = (wolf ? 'rgba(226,88,74,' : 'rgba(180,225,150,') + rf * .3 + ')'; g.fillRect(0, 0, W, Hh); }
+  }
   // 身分卡翻進來
-  const cardP = smooth((t - 5.25) / .7);
+  const cardP = smooth((ts - 5.25) / .7);
   if (cardP > 0) {
     g.fillStyle = `rgba(4,7,12,${.58 * cardP})`; g.fillRect(0, 0, W, Hh);
-    const cy = cardY + (1 - cardP) * 26 * u + (!calm && t > 6 ? Math.sin((t - 6) * 2.2) * 2.2 * u : 0);
+    const cy = cardY + (1 - cardP) * 26 * u + (!calm && ts > 6 ? Math.sin((ts - 6) * 2.2) * 2.2 * u : 0);
     const gl = g.createRadialGradient(cardX, cy, 30 * u, cardX, cy, 230 * u); gl.addColorStop(0, wolf ? `rgba(226,88,74,${.42 * cardP})` : `rgba(242,184,75,${.42 * cardP})`); gl.addColorStop(1, 'rgba(0,0,0,0)');
     g.fillStyle = gl; g.fillRect(0, 0, W, Hh);
     g.save(); g.translate(cardX, cy); g.scale(u * Math.max(.03, Math.sin(cardP * Math.PI / 2)), u);
-    drawRoleCard(g, wolf, col, t);
-    const sp = (t - 6.15) / .75;
+    drawRoleCard(g, wolf, col, ts);
+    const sp = (ts - 6.15) / .75;
     if (sp > 0 && sp < 1) {
       g.save(); rr(g, -98, -143, 196, 286, 16); g.clip(); g.rotate(-.35);
       const sxx = lerp(-260, 260, sp), sg = g.createLinearGradient(sxx - 36, 0, sxx + 36, 0);
@@ -2737,30 +2748,42 @@ function drawIntro(now) {
     }
     g.restore();
   }
-  // 文字
-  const tA = wolf ? 3.15 : .9, a = clamp((t - tA) / .5, 0, 1);
-  g.textAlign = 'center'; g.textBaseline = 'middle';
-  if (a > 0) {
-    const el2 = t - tA, shake = wolf && !calm && el2 < .5 ? (Math.random() - .5) * 8 * u * (1 - el2 / .5) : 0, pop = wolf ? 1 + (1 - smooth(el2 / .3)) * .35 : 1;
-    g.save(); g.globalAlpha = a; g.translate(tx + shake, ty + (1 - smooth(a)) * 14 * u); g.scale(pop, pop); g.font = '700 ' + Math.round(62 * u) + 'px ' + FONT_DISP;
-    g.lineJoin = 'round'; g.strokeStyle = 'rgba(4,7,12,.85)'; g.lineWidth = 7 * u; g.strokeText(wolf ? '你是狼人' : '你是村民', 0, 0);
-    g.shadowColor = wolf ? 'rgba(226,88,74,.8)' : 'rgba(134,194,102,.6)'; g.shadowBlur = 24 * u * d;
-    g.fillStyle = wolf ? '#e2584a' : '#93d06f'; g.fillText(wolf ? '你是狼人' : '你是村民', 0, 0);
+  // --- 標題：先只有「你是」停在畫面正中央，接著移到定位，身分的兩個字再跳出來 ---
+  const role = wolf ? '狼人' : '村民', fpx = Math.round(62 * u);
+  g.textBaseline = 'middle'; g.lineJoin = 'round'; g.font = '700 ' + fpx + 'px ' + FONT_DISP;
+  const w1 = g.measureText('你是').width, w2 = g.measureText(role).width, left = tx - (w1 + w2) / 2;
+  const mv = smooth((t - (INTRO_PRE - .2)) / .55), a1 = clamp((t - .25) / .45, 0, 1);
+  if (a1 > 0) {
+    const cx1 = lerp(W / 2, left + w1 / 2, mv), cy1 = lerp(Hh / 2, ty, mv), k1 = lerp(1.45, 1, mv) * (1 + (1 - smooth(a1)) * .12);
+    g.save(); g.globalAlpha = a1; g.translate(cx1, cy1); g.scale(k1, k1); g.textAlign = 'center';
+    g.strokeStyle = 'rgba(4,7,12,.85)'; g.lineWidth = 7 * u; g.strokeText('你是', 0, 0);
+    g.shadowColor = 'rgba(255,240,200,.45)'; g.shadowBlur = 18 * u * d; g.fillStyle = '#f6efdd'; g.fillText('你是', 0, 0); g.shadowBlur = 0;
+    // 還沒揭曉時，後面的點一顆一顆出現
+    const da = 1 - smooth((t - (INTRO_PRE - .4)) / .3);   // 揭曉前就收掉，才不會疊到身分的字上
+    if (da > 0) for (let i = 0; i < 3; i++) { const p = clamp((t - .75 - i * .28) / .2, 0, 1); if (p > 0) { g.globalAlpha = a1 * da * p; g.fillStyle = '#f6efdd'; circ(g, w1 / 2 + (22 + i * 22) * u / k1, 6 * u, 4.2 * u / k1); } }
     g.restore();
   }
-  const sub = ty + 56 * u, mt = ty + 90 * u;
-  if (wolf) {   // 揭曉之前先有一句鋪陳
-    const pa = clamp((t - .5) / .5, 0, 1) * (1 - clamp((t - 2.75) / .3, 0, 1));
-    if (pa > 0) { g.globalAlpha = pa; g.font = '700 ' + Math.round(22 * u) + 'px ' + FONT_DISP; g.lineJoin = 'round'; g.strokeStyle = 'rgba(4,7,12,.8)'; g.lineWidth = 5 * u; g.strokeText('夜深了，你一個人回到家……', tx, ty); g.fillStyle = '#c3d0db'; g.fillText('夜深了，你一個人回到家……', tx, ty); g.globalAlpha = 1; }
+  if (shown) {
+    const ra = clamp(ts / .22, 0, 1), pop = 1 + (1 - smooth(ts / .32)) * .7, shake = wolf && !calm && ts < .5 ? (Math.random() - .5) * 9 * u * (1 - ts / .5) : 0;
+    g.save(); g.globalAlpha = ra; g.translate(left + w1 + w2 / 2 + shake, ty); g.scale(pop, pop); g.textAlign = 'center';
+    g.strokeStyle = 'rgba(4,7,12,.85)'; g.lineWidth = 7 * u; g.strokeText(role, 0, 0);
+    g.shadowColor = wolf ? 'rgba(226,88,74,.85)' : 'rgba(134,194,102,.65)'; g.shadowBlur = 26 * u * d;
+    g.fillStyle = wolf ? '#e2584a' : '#93d06f'; g.fillText(role, 0, 0);
+    g.restore();
   }
-  const line = wolf ? '別被發現，趁沒人看見時下手' : '努力完成任務，找出狼人', nch = Math.floor((t - tA - .8) / .065);
-  if (nch > 0) { g.font = '600 ' + Math.round(19 * u) + 'px ' + FONT_BODY; g.lineJoin = 'round'; g.strokeStyle = 'rgba(4,7,12,.8)'; g.lineWidth = 4.5 * u; g.strokeText(line.slice(0, nch), tx, sub); g.fillStyle = '#f3ecda'; g.fillText(line.slice(0, nch), tx, sub); }
-  if (wolf && intro.mates) { const ma = clamp((t - tA - 2) / .5, 0, 1); if (ma > 0) { g.globalAlpha = ma; g.font = '600 ' + Math.round(15 * u) + 'px ' + FONT_BODY; g.fillStyle = '#ff9d90'; g.fillText('你的同伴：' + intro.mates, tx, mt); g.globalAlpha = 1; } }
-  if (t > 6.4) { g.globalAlpha = .55 + .35 * Math.sin(t * 4); g.font = '500 ' + Math.round(13.5 * u) + 'px ' + FONT_BODY; g.fillStyle = '#b8c6d2'; g.fillText('遊戲即將開始', tx, land ? Hh * .86 : Hh - 46 * u); g.globalAlpha = 1; }
-  // 上下各一條黑邊，像電影一樣；開頭從黑畫面淡入
-  const bar = (land ? 16 : 30) * u * smooth(t / .8) * (1 - .5 * cardP); g.fillStyle = '#04070b'; g.fillRect(0, 0, W, bar); g.fillRect(0, Hh - bar, W, bar);
-  const fade = 1 - smooth(t / .6);
-  if (fade > 0) { g.fillStyle = `rgba(7,12,18,${fade})`; g.fillRect(0, 0, W, Hh); }
+  // --- 標題下面的說明 ---
+  g.textAlign = 'center';
+  const sub = ty + 56 * u, mt = ty + 90 * u, tB = wolf ? 3.5 : .7;   // tB = 說明開始一個字一個字出現的時間
+  if (wolf && shown) {   // 狼人：回頭之前先有一句鋪陳
+    const pa = clamp((ts - .6) / .5, 0, 1) * (1 - clamp((ts - 2.85) / .3, 0, 1));
+    if (pa > 0) { g.globalAlpha = pa; g.font = '600 ' + Math.round(19 * u) + 'px ' + FONT_BODY; g.strokeStyle = 'rgba(4,7,12,.8)'; g.lineWidth = 4.5 * u; g.strokeText('夜深了，你一個人回到家……', tx, sub); g.fillStyle = '#c3d0db'; g.fillText('夜深了，你一個人回到家……', tx, sub); g.globalAlpha = 1; }
+  }
+  const line = wolf ? '別被發現，趁沒人看見時下手' : '努力完成任務，找出狼人', nch = shown ? Math.floor((ts - tB) / .065) : 0;
+  if (nch > 0) { g.font = '600 ' + Math.round(19 * u) + 'px ' + FONT_BODY; g.strokeStyle = 'rgba(4,7,12,.8)'; g.lineWidth = 4.5 * u; g.strokeText(line.slice(0, nch), tx, sub); g.fillStyle = '#f3ecda'; g.fillText(line.slice(0, nch), tx, sub); }
+  if (wolf && intro.mates) { const ma = clamp((ts - tB - 1.1) / .5, 0, 1); if (ma > 0) { g.globalAlpha = ma; g.font = '600 ' + Math.round(15 * u) + 'px ' + FONT_BODY; g.fillStyle = '#ff9d90'; g.fillText('你的同伴：' + intro.mates, tx, mt); g.globalAlpha = 1; } }
+  if (ts > 6.4) { g.globalAlpha = .55 + .35 * Math.sin(ts * 4); g.font = '500 ' + Math.round(13.5 * u) + 'px ' + FONT_BODY; g.fillStyle = '#b8c6d2'; g.fillText('遊戲即將開始', tx, land ? Hh * .86 : Hh - 46 * u); g.globalAlpha = 1; }
+  // 上下各一條黑邊，像電影一樣
+  const bar = (land ? 16 : 30) * u * smooth(ts / .8) * (1 - .5 * cardP); if (bar > 0) { g.fillStyle = '#04070b'; g.fillRect(0, 0, W, bar); g.fillRect(0, Hh - bar, W, bar); }
 }
 
 // ===== 被狼人襲擊的動畫（只有被襲擊的村民自己看得到，三種隨機一種）=====
@@ -2927,6 +2950,29 @@ function netNote() {
   return inviteNote || '建立房間後，把邀請連結傳給朋友就能一起玩。';
 }
 function inviteLink() { return location.origin + location.pathname + '#' + code; }
+// ===== 版本與自動更新 =====
+// iPhone 從主畫面開啟時，常常會一直用舊的暫存檔。所以每次開啟都直接問網站「現在是第幾版」，
+// 比自己新就換成新版的網址重新載入（網址不一樣，手機就不會拿舊的暫存檔）。
+const BUILD = +((document.querySelector('meta[name="lw-build"]') || {}).content || 0);
+let newerBuild = 0;
+function goUpdate(v) {
+  try { sessionStorage.setItem('lw_upd', String(v)); } catch (e) { }
+  const c = (($('codeIn') || {}).value || '').trim().toUpperCase();   // 朋友給的房間代碼要帶過去
+  location.replace(location.pathname + '?v=' + v + (/^[A-Z0-9]{4}$/.test(c) ? '#' + c : location.hash));
+}
+function checkUpdate() {
+  try {
+    if (!/^https?:$/.test(location.protocol) || !window.fetch) return;
+    fetch(location.pathname + '?_=' + Date.now(), { cache: 'no-store' }).then(r => r.ok ? r.text() : '').then(t => {
+      const m = /<meta name="lw-build" content="(\d+)">/.exec(t || ''), remote = m ? +m[1] : 0;
+      if (!(remote > BUILD)) return;
+      newerBuild = remote;
+      let tried = ''; try { tried = sessionStorage.getItem('lw_upd') || ''; } catch (e) { }
+      if (!inRoom && tried !== String(remote)) goUpdate(remote);   // 還在首頁：直接換成新版
+      else { const b = $('btnUpdate'); b.hidden = false; b.textContent = '有新版本（第 ' + remote + ' 版），按這裡更新'; }
+    }).catch(() => { });
+  } catch (e) { }
+}
 function invite() {
   const url = inviteLink(), text = '來玩月夜狼人村，房間代碼 ' + code;
   const fallback = () => { sig.lhint = '~'; $('lobbyHint').textContent = '把這個連結傳給朋友：' + url; };
@@ -3472,26 +3518,33 @@ function renderEnd() {
 function renderEndButtons() { $('btnAgain').hidden = !isHost; $('btnToLobby').hidden = !isHost; $('endWait').hidden = isHost; }
 
 // 地圖上的記號：任務／蠟燭／祭壇（狼人放好但還沒啟動的祭壇，只有狼人看得到）
-function mapMarks(m, sc, size) {
-  const r = size / sc, dia = (x, y, col) => { m.fillStyle = col; m.beginPath(); m.moveTo(x, y - r); m.lineTo(x + r, y); m.lineTo(x, y + r); m.lineTo(x - r, y); m.closePath(); m.fill(); m.strokeStyle = '#1d1405'; m.lineWidth = 1.5 / sc; m.stroke(); };
+// box = 小地圖目前顯示的範圍；目標在範圍外時，記號會貼在邊緣當作方向提示
+function mapMarks(m, sc, size, box) {
+  const r = size / sc, dia = (x, y, col) => {
+    let k = 1; if (box) { const cx = clamp(x, box[0] + r * 1.3, box[2] - r * 1.3), cy = clamp(y, box[1] + r * 1.3, box[3] - r * 1.3); if (cx !== x || cy !== y) k = .72; x = cx; y = cy; }
+    m.fillStyle = col; m.beginPath(); m.moveTo(x, y - r * k); m.lineTo(x + r * k, y); m.lineTo(x, y + r * k); m.lineTo(x - r * k, y); m.closePath(); m.fill(); m.strokeStyle = '#1d1405'; m.lineWidth = 1.5 / sc; m.stroke();
+  };
   if (my.wolf && !G.al.on) for (const a of G.al.a) dia(a[0], a[1], '#9a6cc0');
   for (const mk of guideMarks()) dia(mk.wx, mk.wy, mk.altar ? '#d86bff' : mk.candle ? '#ff7a45' : mk.fake ? '#8fa3b3' : '#f2b84b');
 }
-// 右上角常駐的小地圖（點一下打開大地圖）
+// 右上角常駐的小地圖：只顯示自己周圍的地形（點一下打開大地圖才看得到全部）
+const MINI_SPAN = 720;   // 小地圖橫向涵蓋多少遊戲裡的距離
 let miniAcc = 0, miniBase = null, miniKey = '';
 function drawMini(now) {
-  if (now - miniAcc < 180) return; miniAcc = now;
+  if (now - miniAcc < 120) return; miniAcc = now;
   const c = $('miniCv'), w = c.clientWidth, h = c.clientHeight; if (!w || !h || !G || my.idx < 0) return;
-  const d = view.dpr, sc = Math.min(w / WORLD_W, h / WORLD_H);
+  const d = view.dpr, sc = w / MINI_SPAN, k = sc * d, vw = w / sc, vh = h / sc;
   if (c.width !== Math.round(w * d) || c.height !== Math.round(h * d)) { c.width = Math.round(w * d); c.height = Math.round(h * d); }
-  const key = curMap + '|' + c.width + 'x' + c.height + '|' + (groundCv ? 1 : 0);
-  if (key !== miniKey) {   // 地形只畫一次，之後每次只補上記號和自己的位置
-    miniKey = key; if (!miniBase) miniBase = document.createElement('canvas'); miniBase.width = c.width; miniBase.height = c.height;
-    const b = miniBase.getContext('2d'); b.setTransform(1, 0, 0, 1, 0, 0); b.fillStyle = '#0b151d'; b.fillRect(0, 0, c.width, c.height); paintMiniMap(b, sc, d, false);
+  const key = curMap + '|' + k.toFixed(4) + '|' + (groundCv ? 1 : 0);
+  if (key !== miniKey) {   // 整張地形先畫好存起來，之後每次只切出自己附近那一塊
+    miniKey = key; if (!miniBase) miniBase = document.createElement('canvas'); miniBase.width = Math.ceil(WORLD_W * k); miniBase.height = Math.ceil(WORLD_H * k);
+    const b = miniBase.getContext('2d'); b.setTransform(1, 0, 0, 1, 0, 0); b.fillStyle = '#0b151d'; b.fillRect(0, 0, miniBase.width, miniBase.height); paintMiniMap(b, sc, d, false);
   }
-  const m = c.getContext('2d'); m.setTransform(1, 0, 0, 1, 0, 0); m.drawImage(miniBase, 0, 0); m.setTransform(sc * d, 0, 0, sc * d, 0, 0);
-  mapMarks(m, sc, 3.6);
-  const pr = (3 + Math.sin(now / 200) * .6) / sc; m.fillStyle = '#fff'; circ(m, ME.x, ME.y - 14, pr + 1.3 / sc); m.fillStyle = COLORS[ME.c][1]; circ(m, ME.x, ME.y - 14, pr);
+  const x0 = clamp(ME.x - vw / 2, 0, WORLD_W - vw), y0 = clamp(ME.y - 14 - vh / 2, 0, WORLD_H - vh);
+  const m = c.getContext('2d'); m.setTransform(1, 0, 0, 1, 0, 0); m.drawImage(miniBase, Math.round(x0 * k), Math.round(y0 * k), c.width, c.height, 0, 0, c.width, c.height);
+  m.setTransform(k, 0, 0, k, -x0 * k, -y0 * k);
+  mapMarks(m, sc, 4.6, [x0, y0, x0 + vw, y0 + vh]);
+  const pr = 3.6 / sc; m.fillStyle = '#fff'; circ(m, ME.x, ME.y - 14, pr + 1.4 / sc); m.fillStyle = COLORS[ME.c][1]; circ(m, ME.x, ME.y - 14, pr);
 }
 // ----- 小地圖 -----
 let mapAcc = 0;
@@ -3548,7 +3601,7 @@ function bindUI() {
   $('btnMap').addEventListener('click', () => { mapAcc = 0; document.body.classList.add('map-open'); });
   $('btnMapClose').addEventListener('click', () => document.body.classList.remove('map-open'));
   $('mapCv').addEventListener('click', () => document.body.classList.remove('map-open'));
-  $('btnMenu').addEventListener('click', () => { $('menuCode').textContent = practice ? '單人練習' : '房間 ' + code; document.body.classList.add('menu-open'); });
+  $('btnMenu').addEventListener('click', () => { $('menuCode').textContent = (practice ? '單人練習' : '房間 ' + code) + '・第 ' + BUILD + ' 版'; document.body.classList.add('menu-open'); });
   $('btnMenuClose').addEventListener('click', () => document.body.classList.remove('menu-open'));
   $('btnSkip').addEventListener('click', () => castVote('-'));
   $('btnVote').addEventListener('click', () => { if (meetSel) castVote(meetSel); });
@@ -3599,12 +3652,15 @@ function main() {
     try { history.replaceState(null, '', location.pathname + location.search); } catch (e) { }
   }
   document.body.dataset.mode = 'home'; homeMsg('');
+  $('verTag').textContent = '第 ' + BUILD + ' 版'; checkUpdate();
+  $('btnUpdate').addEventListener('click', () => { if (newerBuild) goUpdate(newerBuild); });
+  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && !inRoom) checkUpdate(); });
   let hl = performance.now();
   setInterval(() => { const n = performance.now(), dt = Math.min(.3, (n - hl) / 1000); hl = n; if (isHost && inRoom && !window.__lwManual) { try { syncFromNet(n); hostTick(dt); } catch (e) { if (window.console) console.error(e); } } }, 100);
   requestAnimationFrame(frame);
   window.__lw = {
     get G() { return G; }, get H() { return H; }, ME, my, players, get BOTS() { return BOTS; }, Net, get STATIONS() { return STATIONS; }, SPAWNS, grid, MAPS, loadMap, applyMap, canSee, paintMiniMap, tget, boxFree, get curMap() { return curMap; },
-    findPath, startPractice, createRoom, joinRoom, invite, inviteLink, intro, hostStart, hostKill, hostReport, hostTick, setBotCount, castVote, sendChat, finishTask, openTask, leaveRoom, uiMode, parseTasks, dealTasks, taskCur, taskMarks, get CHAINS() { return CHAINS; }, get taskState() { return taskState; }, get hs() { return hs; }, get BUILDINGS() { return BUILDINGS; }, get OCC() { return OCC; }, get view() { return view; }, get CANDLE() { return CANDLE; }, hostBlow, hostRelight, doBlow, canBlow, killRangeOf, guideMarks, openCandle, killFx, startKillAnim, openAltar, finishAltar, hostAltarPlace, hostAltarStart, hostAltarSolve, doAltarPlace, doAltarStart, altarWhyNot,
+    findPath, startPractice, createRoom, joinRoom, invite, inviteLink, intro, hostStart, hostKill, hostReport, hostTick, setBotCount, castVote, sendChat, finishTask, openTask, leaveRoom, uiMode, parseTasks, dealTasks, taskCur, taskMarks, get CHAINS() { return CHAINS; }, get taskState() { return taskState; }, get hs() { return hs; }, get BUILDINGS() { return BUILDINGS; }, get OCC() { return OCC; }, BUILD, get view() { return view; }, get CANDLE() { return CANDLE; }, hostBlow, hostRelight, doBlow, canBlow, killRangeOf, guideMarks, openCandle, killFx, startKillAnim, openAltar, finishAltar, hostAltarPlace, hostAltarStart, hostAltarSolve, doAltarPlace, doAltarStart, altarWhyNot,
     get ctx() { return ctxA; }, get inRoom() { return inRoom; }, get isHost() { return isHost; }, get code() { return code; }
   };
 }
