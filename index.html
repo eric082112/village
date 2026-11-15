@@ -156,7 +156,7 @@ body[data-mode="intro"] .acts,body[data-mode="intro"] .joy,body[data-mode="resul
 .hud-top > *{pointer-events:auto}
 .hud-left{display:flex;flex-direction:column;gap:6px;align-items:flex-start;min-width:0}
 .chip{
-  font-family:var(--display);font-weight:700;font-size:17px;padding:2px 12px;border-radius:999px;
+  font-family:var(--display);font-weight:700;font-size:17px;padding:2px 12px;border-radius:999px;white-space:nowrap;
   background:rgba(11,21,29,.82);border:1px solid var(--moss);color:var(--moss);
 }
 .chip.wolf{border-color:var(--wolf);color:var(--wolf)}
@@ -172,6 +172,7 @@ body[data-mode="intro"] .acts,body[data-mode="intro"] .joy,body[data-mode="resul
 .tasks li i{font-style:normal;font-variant-numeric:tabular-nums;font-size:11px;padding:0 5px;margin:0 6px;border-radius:8px;background:rgba(242,184,75,.18);color:var(--lantern)}
 .tasks li.done i{background:none;color:inherit}
 .tasks li.fake-h{color:var(--wolf);font-weight:600}
+.tasks li.ghost-note{color:var(--ink-dim);font-size:11.5px}
 .tasks li.fake,.tasks li.fake b{color:var(--ink-dim)}
 .hud-mid{display:flex;flex-direction:column;align-items:center;gap:3px;padding-top:4px}
 .pg{width:100%;height:10px;border-radius:6px;background:rgba(11,21,29,.82);border:1px solid var(--line);overflow:hidden}
@@ -353,7 +354,7 @@ body.map-open #mapOv{display:flex}
         <li>村民照左上角的清單，到村裡各處把工作做完。全村的工作都完成，村民獲勝。</li>
         <li>狼人混在村民裡，靠近落單的人按「襲擊」。狼人數量追上村民，狼人獲勝。</li>
         <li>看到有人倒下就按「舉報」，或到廣場敲鐘。全員開會，投票放逐一個人。</li>
-        <li>出局的人變成幽靈。村民的幽靈還能繼續做工作。</li>
+        <li>出局的人變成鬼魂。村民的鬼魂會定時自動完成工作，也可以自己動手做。</li>
       </ol>
     </details>
   </div>
@@ -480,8 +481,8 @@ body.map-open #mapOv{display:flex}
 'use strict';
 // ===== 常數與工具 =====
 const TILE = 40, MW = 46, MH = 32, WORLD_W = MW * TILE, WORLD_H = MH * TILE;
-const SPEED = 170, BOT_SPEED = 150;
-const VISION = 250, VISION_WOLF = 320;
+const SPEED = 145, BOT_SPEED = 128;   // 走路速度（每秒幾個像素）
+const VISION = 185, VISION_WOLF = 290;   // 看得清楚的半徑：村民小、狼人大（約 1.6 倍）
 const KILL_RANGE = 78, USE_RANGE = 58, REPORT_RANGE = 92, BELL_RANGE = 74;
 const MAX_PLAYERS = 10, MAX_BOTS = 8;
 const COLORS = [
@@ -737,8 +738,8 @@ function parseTasks(str) {
 }
 function taskStepCount(str) { let n = 0; for (const t of parseTasks(str)) n += t.steps.length; return n; }
 // 發任務：像發牌一樣輪流發，讓每個人拿到的組合盡量不一樣，同一個人不會重複去同一個工作點
-function dealTasks(n, t) {
-  const nl = Math.min(CHAINS.length, t >> 1), ns = t - nl, out = [];
+function dealTasks(n, nLong, nShort) {
+  const nl = clamp(nLong | 0, 0, Math.min(3, CHAINS.length)), ns = clamp(nShort | 0, 0, 5), out = [];
   let cDeck = [], sDeck = [];
   const draw = (deck, all, ok) => {
     for (let pass = 0; pass < 2; pass++) {
@@ -1266,7 +1267,7 @@ function nameOfId(id) { const p = pubOf(id); return p ? p.n : '某人'; }
 
 // ===== 房主：遊戲規則 =====
 function hostCreate() {
-  H = { gn: 0, ph: 0, st: { w: 1, t: 4, kc: 25, mt: 90, map: Math.max(0, curMap) }, ro: [], wf: '', dd: '', lf: '', ta: [], bd: [], mt: null, rs: null, pg: [0, 0], win: 0, why: 0, rem: 0 };
+  H = { gn: 0, ph: 0, st: { w: 1, tl: 2, ts: 2, ga: 8, kc: 25, mt: 90, map: Math.max(0, curMap) }, ro: [], wf: '', dd: '', lf: '', ta: [], ga: [], bd: [], mt: null, rs: null, pg: [0, 0], win: 0, why: 0, rem: 0 };
   hs = { lastK: {}, lastR: {}, em: {}, meetNo: 0, acc: 0, absent: {} };
   BOTS = []; G = H; hostDirty = true;
 }
@@ -1296,7 +1297,8 @@ function hostStart() {
   H.gn++; H.ro = ids;
   H.wf = ids.map((_, i) => wolves.has(i) ? '1' : '0').join('');
   H.dd = '0'.repeat(n); H.lf = '0'.repeat(n);
-  H.ta = dealTasks(n, H.st.t);   // 每個人各自一組；狼人拿到的是假清單
+  H.ta = dealTasks(n, H.st.tl, H.st.ts);   // 每個人各自一組；狼人拿到的是假清單
+  H.ga = ids.map(() => 0); hs.gacc = {};   // 鬼魂自動完成的步驟
   hs.steps = H.ta.map(taskStepCount); hs.stepsGn = H.gn;
   let tot = 0; for (let i = 0; i < n; i++) if (!wolves.has(i)) tot += hs.steps[i];
   H.bd = []; H.mt = null; H.rs = null; H.win = 0; H.why = 0; H.pg = [0, tot]; H.ph = 1; H.rem = 9;
@@ -1364,6 +1366,27 @@ function hostWin() {
   if (win) { H.win = win; H.why = why; H.ph = 5; hostDirty = true; }
   return win;
 }
+// 出局的村民變成鬼魂後，每隔 st.ga 秒自動完成一步工作（由房主這邊計時，鬼魂的手機關螢幕也照算）
+function hostGhosts(dt) {
+  if (!hs.gacc) hs.gacc = {};
+  if (!Array.isArray(H.ga) || H.ga.length !== H.ro.length) H.ga = H.ro.map((_, i) => (H.ga && H.ga[i]) | 0);
+  if (!hs.steps || hs.stepsGn !== H.gn) { hs.steps = H.ta.map(taskStepCount); hs.stepsGn = H.gn; }
+  const every = H.st.ga || 8;
+  for (let i = 0; i < H.ro.length; i++) {
+    if (H.dd[i] !== '1' || H.wf[i] === '1' || H.lf[i] === '1') continue;
+    const id = H.ro[i]; hs.gacc[id] = (hs.gacc[id] || 0) + dt;
+    if (hs.gacc[id] < every) continue;
+    hs.gacc[id] -= every;
+    const p = pubOf(id), td = p && p.td, n = hs.steps[i] | 0;
+    const mask = ((Array.isArray(td) && td[0] === H.gn ? td[1] : 0) | H.ga[i]) & ((1 << n) - 1);
+    let k = 0; while (k < n && (mask >> k & 1)) k++;
+    if (k >= n) continue;
+    const b = BOTS.find(x => x.id === id);
+    if (b) b.td = [H.gn, (b.td[0] === H.gn ? b.td[1] : 0) | (1 << k)];
+    else { H.ga = H.ga.slice(); H.ga[i] |= 1 << k; }
+    hostDirty = true;
+  }
+}
 function hostProgress() {
   // 進度以「步驟」計算：長任務有幾步就算幾格
   if (!hs.steps || hs.stepsGn !== H.gn) { hs.steps = H.ta.map(taskStepCount); hs.stepsGn = H.gn; }
@@ -1371,7 +1394,7 @@ function hostProgress() {
   for (let i = 0; i < H.ro.length; i++) {
     if (H.wf[i] === '1' || H.lf[i] === '1') continue;
     const n = hs.steps[i] | 0; total += n; const p = pubOf(H.ro[i]), td = p && p.td;
-    if (Array.isArray(td) && td[0] === H.gn) done += popcount(td[1] & ((1 << n) - 1));
+    done += popcount(((Array.isArray(td) && td[0] === H.gn ? td[1] : 0) | (H.ga && H.ga[i])) & ((1 << n) - 1));
   }
   if (done !== H.pg[0] || total !== H.pg[1]) { H.pg = [done, total]; hostDirty = true; }
 }
@@ -1390,7 +1413,7 @@ function hostIntents() {
   }
 }
 // 只把有變動的部分送出去，省流量
-const H_KEYS = ['gn', 'ph', 'st', 'ro', 'wf', 'dd', 'lf', 'ta', 'bd', 'mt', 'rs', 'pg', 'win', 'why', 'rem'];
+const H_KEYS = ['gn', 'ph', 'st', 'ro', 'wf', 'dd', 'lf', 'ta', 'ga', 'bd', 'mt', 'rs', 'pg', 'win', 'why', 'rem'];
 let pubTick = 0;
 function hostPublish() {
   if (!Net.on || !H) return;
@@ -1418,7 +1441,7 @@ function hostTick(dt) {
     hostIntents();
     if (H.ph === 2) botsPlay(dt, now);
     if (sec) hostLeaves();
-    if (H.ph === 2) { hostProgress(); hostWin(); }
+    if (H.ph === 2) { hostGhosts(dt); hostProgress(); hostWin(); }
   } else if (ph === 3) {
     botsMeet(now);
     if (sec) { H.rem--; hostDirty = true; hostLeaves(); }
@@ -1461,7 +1484,7 @@ function botsPlay(dt, now) {
 }
 function botThink(b, idx, dt, now) {
   const wolf = H.wf[idx] === '1', dead = !aliveIdx(idx);
-  if (dead && wolf) { b.m = 0; return; }
+  if (dead) { b.m = 0; return; }   // 出局後不再走動；村民的工作由鬼魂計時自動完成
   if (!dead) {
     let near = null;
     for (const bd of H.bd) if (dist(b.x, b.y, bd[1], bd[2]) < 135 && canSee(b.x, b.y, bd[1], bd[2])) { near = bd; break; }
@@ -1611,8 +1634,8 @@ const str = x => typeof x === 'string' ? x : '';
 function normG(h) {
   const st = h.st || {}, rs = h.rs, mt = h.mt;
   return {
-    gn: h.gn | 0, ph: h.ph | 0, st: { w: st.w || 1, t: st.t || 4, kc: st.kc || 25, mt: st.mt || 90, map: clamp(st.map | 0, 0, MAPS.length - 1) },
-    ro: arr(h.ro), wf: str(h.wf), dd: str(h.dd), lf: str(h.lf), ta: arr(h.ta), bd: arr(h.bd),
+    gn: h.gn | 0, ph: h.ph | 0, st: { w: st.w || 1, tl: st.tl == null ? 2 : clamp(st.tl | 0, 0, 3), ts: st.ts == null ? 2 : clamp(st.ts | 0, 0, 5), ga: [8, 12, 15].includes(st.ga) ? st.ga : 8, kc: st.kc || 25, mt: st.mt || 90, map: clamp(st.map | 0, 0, MAPS.length - 1) },
+    ro: arr(h.ro), wf: str(h.wf), dd: str(h.dd), lf: str(h.lf), ta: arr(h.ta), ga: arr(h.ga), bd: arr(h.bd),
     mt: mt && typeof mt === 'object' ? { no: mt.no | 0, by: mt.by | 0, body: mt.body == null ? -1 : mt.body | 0 } : null,
     rs: rs && typeof rs === 'object' ? { ej: rs.ej == null ? -1 : rs.ej | 0, tie: rs.tie | 0, sk: rs.sk | 0, vt: arr(rs.vt) } : null,
     pg: Array.isArray(h.pg) ? h.pg : [0, 0], win: h.win | 0, why: h.why | 0, rem: h.rem | 0
@@ -1686,6 +1709,14 @@ function onStateChange() {
     Net.set({ td: ME.td, v: null, ch: [] });
     if (my.idx >= 0) toSpawn();
   }
+  // 變成鬼魂後，房主會定時幫忙完成一步工作；收到就記到自己的進度裡
+  const auto = my.idx >= 0 && ME.td[0] === G.gn ? (G.ga[my.idx] | 0) & ~ME.td[1] : 0;
+  if (auto) {
+    ME.td = [G.gn, ME.td[1] | auto]; Net.set({ td: ME.td });
+    store('lw_pg', JSON.stringify({ c: code, g: G.gn, m: ME.td[1] }));
+    if (taskState && !taskState.done && (ME.td[1] >> taskState.bit & 1)) closeTask();
+    if (G.ph === 2) toast('鬼魂自動完成了一步工作', 1800);
+  }
   if (G.ph !== seen.ph) {
     const prev = seen.ph; seen.ph = G.ph;
     closeTask(); document.body.classList.remove('map-open', 'menu-open');
@@ -1696,7 +1727,7 @@ function onStateChange() {
   }
   if (my.dead && !seen.dead) {
     seen.dead = true;
-    if (G.ph === 2) { closeTask(); toast(my.wolf ? '你出局了。' : '你被襲擊了。現在是幽靈，還能繼續把工作做完。', 4200); }
+    if (G.ph === 2) { closeTask(); toast(my.wolf ? '你出局了。' : '你被襲擊了。現在是鬼魂，還能繼續把工作做完。', 4200); }
   }
 }
 
@@ -2340,11 +2371,17 @@ function uiTick(now) {
 // ----- 大廳 -----
 const SETTINGS = [
   { k: 'w', label: '狼人數量', min: 1, max: 2, step: 1, fmt: v => v + ' 隻' },
-  { k: 't', label: '每人的工作', min: 3, max: 6, step: 1, fmt: v => v + ' 件' },
+  { k: 'tl', label: '長任務', min: 0, max: 3, step: 1, fmt: v => v + ' 個' },
+  { k: 'ts', label: '短任務', min: 0, max: 5, step: 1, fmt: v => v + ' 個' },
+  { k: 'ga', label: '鬼魂自動完成任務', opts: [8, 12, 15], fmt: v => v + ' 秒' },
   { k: 'kc', label: '襲擊冷卻', min: 15, max: 40, step: 5, fmt: v => v + ' 秒' },
   { k: 'mt', label: '開會時間', min: 45, max: 150, step: 15, fmt: v => v + ' 秒' },
   { k: 'bots', label: '電腦玩家', min: 0, max: MAX_BOTS, step: 1, fmt: v => v + ' 位' }
 ];
+// 長短任務至少要有一個；長任務放到 3 個時，短任務最多 3 個（不然工作點不夠分）
+function setLo(s) { const st = G.st; return s.opts ? s.opts[0] : s.k === 'ts' && st.tl === 0 ? 1 : s.k === 'tl' && st.ts === 0 ? 1 : s.min; }
+function setHi(s) { return s.opts ? s.opts[s.opts.length - 1] : s.k === 'ts' && G.st.tl >= 3 ? 3 : s.max; }
+function setStep(s, v, d) { if (s.opts) return s.opts[clamp(s.opts.indexOf(v) + d, 0, s.opts.length - 1)]; return clamp(v + d * s.step, setLo(s), setHi(s)); }
 function settingVal(k) { if (k === 'bots') { let n = 0; for (const p of players.values()) if (p.bot) n++; return isHost ? BOTS.length : n; } return G && G.st ? G.st[k] : 0; }
 function renderLobby(mode) {
   const humans = [ME], bots = [];
@@ -2400,8 +2437,8 @@ function renderLobby(mode) {
       const stp = el('div', 'stepper');
       const minus = el('button', '', '−'), out = el('output', '', s.fmt(v)), plus = el('button', '', '+');
       minus.type = plus.type = 'button'; minus.setAttribute('aria-label', s.label + '減少'); plus.setAttribute('aria-label', s.label + '增加');
-      minus.disabled = v <= s.min; plus.disabled = v >= s.max;
-      const bump = d => { if (!isHost || !H) return; const nv = clamp(settingVal(s.k) + d * s.step, s.min, s.max); if (s.k === 'bots') setBotCount(nv); else { H.st[s.k] = nv; hostDirty = true; } };
+      minus.disabled = v <= setLo(s); plus.disabled = v >= setHi(s);
+      const bump = d => { if (!isHost || !H) return; const nv = setStep(s, settingVal(s.k), d); if (s.k === 'bots') setBotCount(nv); else { H.st[s.k] = nv; if (s.k === 'tl' && nv >= 3 && H.st.ts > 3) H.st.ts = 3; hostDirty = true; } };
       minus.addEventListener('click', () => bump(-1)); plus.addEventListener('click', () => bump(1));
       stp.appendChild(minus); stp.appendChild(out); stp.appendChild(plus); box.appendChild(stp);
     }
@@ -2420,10 +2457,10 @@ function renderLobby(mode) {
 function renderHud() {
   if (!G || my.idx < 0) return;
   const chip = $('roleChip');
-  const role = (my.wolf ? '狼人' : '村民') + (my.dead ? '・幽靈' : '');
+  const role = (my.wolf ? '狼人' : '村民') + (my.dead ? '・鬼魂' : '');
   if (changed('role', role)) { chip.textContent = role; chip.className = 'chip' + (my.dead ? ' ghost' : my.wolf ? ' wolf' : ''); }
   const mask = ME.td[1];
-  const ts = my.wolf + '|' + (G.ta[my.idx] || '') + '|' + curMap + '|' + mask + '|' + G.gn;
+  const ts = my.wolf + '|' + (G.ta[my.idx] || '') + '|' + curMap + '|' + mask + '|' + G.gn + '|' + my.dead + '|' + G.st.ga;
   if (changed('tasks', ts)) {
     const ul = $('taskList'); ul.textContent = '';
     const txt = t => document.createTextNode(t);
@@ -2444,6 +2481,7 @@ function renderHud() {
       } else li.appendChild(txt('　' + STATIONS[tk.steps[0]].area));
       ul.appendChild(li);
     }
+    if (my.dead && !my.wolf && taskMarks().length) ul.appendChild(el('li', 'ghost-note', '鬼魂每 ' + G.st.ga + ' 秒自動完成一步'));
   }
   const pg = G.pg || [0, 0];
   if (changed('pg', pg[0] + '/' + pg[1])) { $('pgBar').style.width = (pg[1] ? Math.round(pg[0] / pg[1] * 100) : 0) + '%'; $('pgTxt').textContent = '全村工作 ' + pg[0] + '/' + pg[1]; }
