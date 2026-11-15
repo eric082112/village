@@ -166,6 +166,8 @@ body[data-mode="intro"] .acts,body[data-mode="intro"] .joy,body[data-mode="resul
 .chip.ghost{border-color:var(--ink-dim);color:var(--ink-dim)}
 .alert{background:rgba(120,38,22,.9);border:1px solid #ff7a45;color:#ffd9c7;font-weight:700;font-size:13px;padding:4px 10px;border-radius:10px;width:max-content;max-width:min(74vw,300px);animation:alertPulse 1.2s ease-in-out infinite}
 .alert[hidden]{display:none}
+.alert.altar{background:rgba(74,26,104,.92);border-color:#d86bff;color:#f3dcff;animation-name:altarPulse}
+@keyframes altarPulse{50%{background:rgba(104,36,146,.96)}}
 @keyframes alertPulse{50%{background:rgba(160,52,28,.95)}}
 .tasks{
   background:rgba(11,21,29,.74);border-radius:10px;padding:6px 10px;font-size:12.5px;line-height:1.5;
@@ -186,7 +188,10 @@ body[data-mode="intro"] .acts,body[data-mode="intro"] .joy,body[data-mode="resul
 .pg{width:100%;height:10px;border-radius:6px;background:rgba(11,21,29,.82);border:1px solid var(--line);overflow:hidden}
 #pgBar{height:100%;width:0;background:var(--moss);transition:width .4s}
 .pg-txt{font-size:11.5px;color:var(--ink);text-shadow:0 1px 3px #000;font-variant-numeric:tabular-nums}
-.hud-right{display:flex;gap:6px;justify-content:flex-end}
+.hud-right{display:flex;flex-direction:column;align-items:flex-end;gap:6px}
+.mini{width:132px;height:92px;padding:0;border-radius:10px;border:1px solid var(--line);overflow:hidden;background:#0b151d;box-shadow:0 4px 14px rgba(0,0,0,.4)}
+.mini:active{transform:scale(.97)}
+#miniCv{width:100%;height:100%;display:block}
 .hbtn{
   min-width:48px;height:36px;padding:0 10px;border-radius:10px;font-size:13.5px;
   background:rgba(11,21,29,.82);border:1px solid var(--line);white-space:nowrap;
@@ -199,17 +204,19 @@ body[data-mode="intro"] .acts,body[data-mode="intro"] .joy,body[data-mode="resul
   position:absolute;left:50%;top:50%;width:48px;height:48px;margin:-24px 0 0 -24px;border-radius:50%;
   background:rgba(236,229,211,.5);
 }
-.acts{position:absolute;right:calc(16px + env(safe-area-inset-right,0px));bottom:calc(28px + env(safe-area-inset-bottom,0px));display:grid;grid-template-columns:auto auto;gap:10px;align-items:end;justify-items:end}
+.acts{position:absolute;right:calc(16px + env(safe-area-inset-right,0px));bottom:calc(28px + env(safe-area-inset-bottom,0px));display:grid;grid-template-columns:auto auto auto;gap:10px;align-items:end;justify-items:end}
 .act{
   width:66px;height:66px;border-radius:50%;font-family:var(--display);font-weight:700;font-size:17px;line-height:1.1;
   background:rgba(11,21,29,.86);border:2px solid var(--ink);display:flex;flex-direction:column;align-items:center;justify-content:center;
 }
 .act small{font-family:var(--body);font-size:11px;font-weight:600;font-variant-numeric:tabular-nums}
 .act:disabled{opacity:.32}
-.act-use{grid-column:2;width:84px;height:84px;font-size:19px;background:var(--lantern);border-color:var(--lantern);color:var(--lantern-ink)}
-.act-kill{grid-column:1;grid-row:1;border-color:var(--wolf);color:var(--wolf)}
-.act-report{grid-column:2;grid-row:1}
-.act-blow{grid-column:1;grid-row:2;align-self:center;border-color:var(--wolf);color:var(--wolf)}
+.act-use{grid-column:3;width:84px;height:84px;font-size:19px;background:var(--lantern);border-color:var(--lantern);color:var(--lantern-ink)}
+.act-kill{grid-column:2;grid-row:1;border-color:var(--wolf);color:var(--wolf)}
+.act-altar{grid-column:1;grid-row:1;align-self:center;border-color:#b36ad6;color:#d9a6f2}
+.act-altargo{grid-column:1;grid-row:2;align-self:center;border-color:#b36ad6;color:#d9a6f2}
+.act-report{grid-column:3;grid-row:1}
+.act-blow{grid-column:2;grid-row:2;align-self:center;border-color:var(--wolf);color:var(--wolf)}
 .act-use{grid-row:2}
 .act-use.long{font-size:17px;line-height:1.15;white-space:pre-line}
 .tasks[hidden]{display:none}
@@ -314,6 +321,13 @@ body.map-open #mapOv{display:flex}
 
 #lobbyHint{-webkit-user-select:text;user-select:text;word-break:break-all}
 
+/* 解除祭壇 */
+.altar-bar{height:26px;border-radius:13px}
+.altar-bar .bar-mark{width:6px;margin-left:-3px;background:#fff}
+.pips{display:flex;gap:10px}
+.pips span{width:18px;height:18px;border-radius:50%;border:2px solid #b36ad6;background:transparent}
+.pips span.on{background:#d86bff;box-shadow:0 0 10px rgba(216,107,255,.7)}
+.altar-btn{background:#b45fe0;color:#1a0b24}
 /* 點燃蠟燭 */
 .candle-grid{display:grid;grid-template-columns:repeat(8,36px);gap:7px;justify-content:center}
 .candle{position:relative;width:36px;height:84px;border-radius:10px;background:rgba(255,255,255,.03)}
@@ -383,12 +397,14 @@ body.set-open #setSheet{display:flex}
       <ul id="taskList" class="tasks"></ul>
     </div>
     <div class="hud-right">
-      <button id="btnMap" class="hbtn" type="button">地圖</button>
+      <button id="btnMap" class="mini" type="button" aria-label="打開大地圖"><canvas id="miniCv" aria-hidden="true"></canvas></button>
       <button id="btnMenu" class="hbtn" type="button">選單</button>
     </div>
   </div>
   <div id="joy" class="joy"><div id="joyKnob" class="joy-knob"></div></div>
   <div class="acts">
+    <button id="btnAltar" class="act act-altar" type="button" hidden>祭壇<small id="altarCd"></small></button>
+    <button id="btnAltarGo" class="act act-altargo" type="button" hidden>啟動<small>祭壇</small></button>
     <button id="btnKill" class="act act-kill" type="button" hidden>襲擊<small id="killCd"></small></button>
     <button id="btnBlow" class="act act-blow" type="button" hidden>吹燈<small id="blowCd"></small></button>
     <button id="btnReport" class="act act-report" type="button" disabled>舉報</button>
@@ -1367,10 +1383,10 @@ const Net = {
     this.val = null; this.roomRef = null; this.meRef = null;
   }
 };
-function mePresence() { return { n: ME.n, c: ME.c, x: Math.round(ME.x), y: Math.round(ME.y), f: ME.f, m: ME.m, td: ME.td, k: ME.k, r: ME.r, bl: ME.bl, fx: ME.fx, v: ME.v, ch: ME.ch }; }
+function mePresence() { return { n: ME.n, c: ME.c, x: Math.round(ME.x), y: Math.round(ME.y), f: ME.f, m: ME.m, td: ME.td, k: ME.k, r: ME.r, bl: ME.bl, fx: ME.fx, ap: ME.ap, ax: ME.ax, as: ME.as, v: ME.v, ch: ME.ch }; }
 
 // ===== 共用狀態 =====
-const ME = { id: '', n: '', c: 0, x: 0, y: 0, f: 1, m: 0, td: [0, 0], k: null, r: null, bl: null, fx: null, v: null, ch: [] };
+const ME = { id: '', n: '', c: 0, x: 0, y: 0, f: 1, m: 0, td: [0, 0], k: null, r: null, bl: null, fx: null, ap: null, ax: null, as: null, v: null, ch: [] };
 let code = '', inRoom = false, isHost = false, practice = false;
 let H = null, hs = null, BOTS = [], hostDirty = false;   // 房主才有
 let G = null;                                            // 目前看到的遊戲狀態（房主時 G === H）
@@ -1388,8 +1404,8 @@ function nameOfId(id) { const p = pubOf(id); return p ? p.n : '某人'; }
 
 // ===== 房主：遊戲規則 =====
 function hostCreate() {
-  H = { gn: 0, ph: 0, st: { w: 1, tl: 2, ts: 2, ga: 8, kc: 25, kr: 1, bl: 45, mt: 90, map: Math.max(0, curMap) }, ro: [], wf: '', dd: '', lf: '', ta: [], ga: [], lo: 0, bd: [], mt: null, rs: null, pg: [0, 0], win: 0, why: 0, rem: 0 };
-  hs = { lastK: {}, lastR: {}, lastB: {}, lastF: {}, em: {}, meetNo: 0, acc: 0, absent: {} };
+  H = { gn: 0, ph: 0, st: { w: 1, tl: 2, ts: 2, ga: 8, kc: 25, kr: 1, bl: 45, an: 3, at: 40, mt: 90, map: Math.max(0, curMap) }, ro: [], wf: '', dd: '', lf: '', ta: [], ga: [], lo: 0, al: { a: [], on: 0, rem: 0, lk: 1 }, bd: [], mt: null, rs: null, pg: [0, 0], win: 0, why: 0, rem: 0 };
+  hs = { lastK: {}, lastR: {}, lastB: {}, lastF: {}, lastA: {}, em: {}, meetNo: 0, acc: 0, absent: {}, alCd: 0 };
   BOTS = []; G = H; hostDirty = true;
 }
 function usedColors() { const u = new Set([ME.c]); for (const p of players.values()) u.add(p.c); for (const b of BOTS) u.add(b.c); return u; }
@@ -1421,18 +1437,19 @@ function hostStart() {
   H.ta = dealTasks(n, H.st.tl, H.st.ts);   // 每個人各自一組；狼人拿到的是假清單
   H.ga = ids.map(() => 0); hs.gacc = {};   // 鬼魂自動完成的步驟
   hs.steps = H.ta.map(taskStepCount); hs.stepsGn = H.gn;
-  let tot = 0; for (let i = 0; i < n; i++) if (!wolves.has(i)) tot += hs.steps[i];
+  hs.tl = H.ta.map(parseTasks); hs.tlGn = H.gn;
+  let tot = 0; for (let i = 0; i < n; i++) if (!wolves.has(i)) tot += hs.tl[i].length;
   H.bd = []; H.mt = null; H.rs = null; H.win = 0; H.why = 0; H.pg = [0, tot]; H.ph = 1; H.rem = 9;
-  hs.lastK = {}; hs.lastR = {}; hs.lastB = {}; hs.lastF = {}; hs.em = {}; hs.meetNo = 0; hs.absent = {}; hs.acc = 0; hs.fixer = null; H.lo = 0;
-  for (const [id, p] of players) { if (p.bot) continue; hs.lastK[id] = Array.isArray(p.k) ? p.k[0] : undefined; hs.lastR[id] = Array.isArray(p.r) ? p.r[0] : undefined; hs.lastB[id] = Array.isArray(p.bl) ? p.bl[0] : undefined; hs.lastF[id] = Array.isArray(p.fx) ? p.fx[0] : undefined; }
+  hs.lastK = {}; hs.lastR = {}; hs.lastB = {}; hs.lastF = {}; hs.em = {}; hs.meetNo = 0; hs.absent = {}; hs.acc = 0; hs.fixer = null; H.lo = 0; hs.lastA = {}; hs.alCd = performance.now() + 20000; H.al = { a: [], on: 0, rem: 0, lk: 1 };
+  for (const [id, p] of players) { if (p.bot) continue; hs.lastK[id] = Array.isArray(p.k) ? p.k[0] : undefined; hs.lastR[id] = Array.isArray(p.r) ? p.r[0] : undefined; hs.lastB[id] = Array.isArray(p.bl) ? p.bl[0] : undefined; hs.lastF[id] = Array.isArray(p.fx) ? p.fx[0] : undefined; hs.lastA[id] = [p.ap, p.ax, p.as].map(v => Array.isArray(v) ? v[0] : undefined); }
   for (const b of BOTS) {
     const i = ids.indexOf(b.id), sp = SPAWNS[Math.max(0, i)];
     b.x = sp.x; b.y = sp.y; b.m = 0; b.td = [H.gn, 0]; b.v = null; b.ch = []; b.know = null; b.path = null; b.pi = 0; b.goalJ = -1;
-    b.wait = rnd(.4, 2.6); b.cd = rnd(14, 22); b.repAt = 0; b.stalkAt = 0; b.said = false; b.bcd = 15 + rnd(5, 25); b.fix = 0; b.fixT = 0;
+    b.wait = rnd(.4, 2.6); b.cd = rnd(14, 22); b.repAt = 0; b.stalkAt = 0; b.said = false; b.bcd = 15 + rnd(5, 25); b.fix = 0; b.fixT = 0; b.alK = -1; b.alW = 0; b.alGo = 0;
   }
   hostDirty = true; return true;
 }
-function hostToLobby() { if (!H) return; H.ph = 0; H.bd = []; H.mt = null; H.rs = null; H.win = 0; H.lo = 0; for (const b of BOTS) { b.m = 0; b.path = null; b.v = null; b.ch = []; } hostDirty = true; }
+function hostToLobby() { if (!H) return; H.ph = 0; H.bd = []; H.mt = null; H.rs = null; H.win = 0; H.lo = 0; H.al = { a: [], on: 0, rem: 0, lk: 1 }; for (const b of BOTS) { b.m = 0; b.path = null; b.v = null; b.ch = []; } hostDirty = true; }
 
 function hostKill(kid, vid) {
   const ki = H.ro.indexOf(kid), vi = H.ro.indexOf(vid);
@@ -1448,10 +1465,45 @@ function hostKill(kid, vid) {
   }
   hostWin(); hostDirty = true; return true;
 }
+// ===== 祭壇：狼人先偷偷放好，啟動後全員要在時間內全部解除，否則狼王降臨、狼人獲勝 =====
+function hostAltarPlace(id) {
+  const i = H.ro.indexOf(id), al = H.al;
+  if (H.ph !== 2 || i < 0 || H.wf[i] !== '1' || !aliveIdx(i) || al.on || al.lk || al.a.length >= (H.st.an || 3)) return false;
+  const p = posOf(id); if (!p) return false;
+  const x = Math.round(p.x), y = Math.round(p.y);   // 放在狼人自己腳下
+  if (!boxFree(x, y) || dist(x, y, BELL.wx, BELL.wy) < 130) return false;
+  for (const a of al.a) if (dist(a[0], a[1], x, y) < 220) return false;   // 彼此要隔開一段距離
+  H.al = { a: al.a.concat([[x, y, 0]]), on: 0, rem: 0, lk: 0 }; hostDirty = true; return true;
+}
+function hostAltarStart(id) {
+  const i = H.ro.indexOf(id), al = H.al;
+  if (H.ph !== 2 || i < 0 || H.wf[i] !== '1' || !aliveIdx(i) || al.on || al.lk || !al.a.length || H.lo) return false;
+  H.al = { a: al.a, on: 1, rem: H.st.at || 40, lk: 0 }; hs.alTake = {}; for (const b of BOTS) { b.alK = -1; b.alW = 0; }
+  hostDirty = true; return true;
+}
+function hostAltarSolve(id, k) {
+  const i = H.ro.indexOf(id), al = H.al;
+  if (H.ph !== 2 || i < 0 || !aliveIdx(i) || !al.on || !al.a[k] || al.a[k][2]) return false;
+  const p = posOf(id); if (!p || dist(p.x, p.y, al.a[k][0], al.a[k][1]) > 150) return false;
+  const a = al.a.map((v, j) => j === k ? [v[0], v[1], 1] : v);
+  if (a.every(v => v[2])) { H.al = { a: [], on: 0, rem: 0, lk: 1 }; hs.alCd = performance.now() + 45000; for (const b of BOTS) { b.alK = -1; b.alGo = 0; b.path = null; b.goalJ = -1; } }
+  else H.al = { a, on: 1, rem: al.rem, lk: 0 };
+  hostDirty = true; return true;
+}
+// 每秒：倒數、解除冷卻
+function hostAltarTick() {
+  const al = H.al;
+  if (al.on) {
+    const rem = al.rem - 1;
+    if (rem <= 0) { H.al = { a: al.a, on: 1, rem: 0, lk: 0 }; H.win = 2; H.why = 4; H.ph = 5; }
+    else H.al = { a: al.a, on: 1, rem, lk: 0 };
+    hostDirty = true;
+  } else if (al.lk && performance.now() >= (hs.alCd || 0)) { H.al = { a: al.a, on: 0, rem: 0, lk: 0 }; hostDirty = true; }
+}
 // 狼人吹燈：村民的視野變小，直到有人去點蠟燭
 function hostBlow(id) {
   const i = H.ro.indexOf(id);
-  if (H.ph !== 2 || i < 0 || H.wf[i] !== '1' || !aliveIdx(i) || H.lo || !(H.st.bl > 0)) return false;
+  if (H.ph !== 2 || i < 0 || H.wf[i] !== '1' || !aliveIdx(i) || H.lo || !(H.st.bl > 0) || H.al.on) return false;
   H.lo = 1; hs.fixer = null; hostDirty = true; return true;
 }
 // 任何一位還活著的人走到蠟燭旁邊就能點亮
@@ -1468,7 +1520,7 @@ function hostLightsOn() {
 }
 function hostReport(rid, bid) {
   const ri = H.ro.indexOf(rid);
-  if (H.ph !== 2 || ri < 0 || !aliveIdx(ri)) return false;
+  if (H.ph !== 2 || ri < 0 || !aliveIdx(ri) || H.al.on) return false;   // 祭壇啟動時不能開會
   let bi = -1;
   if (bid) { bi = H.ro.indexOf(bid); if (bi < 0 || !H.bd.some(b => b[0] === bi)) return false; }
   else { if (hs.em[rid]) return false; hs.em[rid] = 1; }
@@ -1508,6 +1560,7 @@ function hostWin() {
 }
 // 出局的村民變成鬼魂後，每隔 st.ga 秒自動完成一步工作（由房主這邊計時，鬼魂的手機關螢幕也照算）
 function hostGhosts(dt) {
+  if (H.al && H.al.on) return;   // 祭壇啟動時，所有任務都暫停
   if (!hs.gacc) hs.gacc = {};
   if (!Array.isArray(H.ga) || H.ga.length !== H.ro.length) H.ga = H.ro.map((_, i) => (H.ga && H.ga[i]) | 0);
   if (!hs.steps || hs.stepsGn !== H.gn) { hs.steps = H.ta.map(taskStepCount); hs.stepsGn = H.gn; }
@@ -1528,13 +1581,13 @@ function hostGhosts(dt) {
   }
 }
 function hostProgress() {
-  // 進度以「步驟」計算：長任務有幾步就算幾格
-  if (!hs.steps || hs.stepsGn !== H.gn) { hs.steps = H.ta.map(taskStepCount); hs.stepsGn = H.gn; }
+  // 進度以「任務」計算：長任務要每一步都做完才算完成一個
+  if (!hs.tl || hs.tlGn !== H.gn) { hs.tl = H.ta.map(parseTasks); hs.tlGn = H.gn; }
   let done = 0, total = 0;
   for (let i = 0; i < H.ro.length; i++) {
     if (H.wf[i] === '1' || H.lf[i] === '1') continue;
-    const n = hs.steps[i] | 0; total += n; const p = pubOf(H.ro[i]), td = p && p.td;
-    done += popcount(((Array.isArray(td) && td[0] === H.gn ? td[1] : 0) | (H.ga && H.ga[i])) & ((1 << n) - 1));
+    const p = pubOf(H.ro[i]), td = p && p.td, mask = (Array.isArray(td) && td[0] === H.gn ? td[1] : 0) | (H.ga && H.ga[i]);
+    for (const tk of hs.tl[i] || []) { total++; const full = ((1 << tk.steps.length) - 1) << tk.off; if ((mask & full) === full) done++; }
   }
   if (done !== H.pg[0] || total !== H.pg[1]) { H.pg = [done, total]; hostDirty = true; }
 }
@@ -1552,10 +1605,14 @@ function hostIntents() {
     if (Array.isArray(p.r) && p.r[0] !== hs.lastR[id]) { hs.lastR[id] = p.r[0]; hostReport(id, p.r[1] === '-' ? '' : p.r[1]); }
     if (Array.isArray(p.bl) && p.bl[0] !== hs.lastB[id]) { hs.lastB[id] = p.bl[0]; hostBlow(id); }
     if (Array.isArray(p.fx) && p.fx[0] !== hs.lastF[id]) { hs.lastF[id] = p.fx[0]; hostRelight(id); }
+    const la = hs.lastA[id] || (hs.lastA[id] = []);
+    if (Array.isArray(p.ap) && p.ap[0] !== la[0]) { la[0] = p.ap[0]; hostAltarPlace(id); }
+    if (Array.isArray(p.ax) && p.ax[0] !== la[1]) { la[1] = p.ax[0]; hostAltarStart(id); }
+    if (Array.isArray(p.as) && p.as[0] !== la[2]) { la[2] = p.as[0]; hostAltarSolve(id, p.as[1] | 0); }
   }
 }
 // 只把有變動的部分送出去，省流量
-const H_KEYS = ['gn', 'ph', 'st', 'ro', 'wf', 'dd', 'lf', 'ta', 'ga', 'lo', 'bd', 'mt', 'rs', 'pg', 'win', 'why', 'rem'];
+const H_KEYS = ['gn', 'ph', 'st', 'ro', 'wf', 'dd', 'lf', 'ta', 'ga', 'lo', 'al', 'bd', 'mt', 'rs', 'pg', 'win', 'why', 'rem'];
 let pubTick = 0;
 function hostPublish() {
   if (!Net.on || !H) return;
@@ -1583,6 +1640,7 @@ function hostTick(dt) {
     hostIntents();
     if (H.ph === 2) botsPlay(dt, now);
     if (sec) hostLeaves();
+    if (sec && H.ph === 2) hostAltarTick();
     if (H.ph === 2) { hostGhosts(dt); hostProgress(); hostWin(); }
   } else if (ph === 3) {
     botsMeet(now);
@@ -1593,7 +1651,7 @@ function hostTick(dt) {
     if (sec) { H.rem--; hostDirty = true; }
     if (H.rem <= 0) {
       if (!hostWin()) {
-        H.ph = 2; H.bd = []; H.mt = null;
+        H.ph = 2; H.bd = []; H.mt = null; if (!H.al.a.length) { hs.alCd = Math.max(hs.alCd || 0, performance.now() + 15000); H.al = { a: [], on: 0, rem: 0, lk: 1 }; }
         for (const b of BOTS) { const i = H.ro.indexOf(b.id); if (i < 0) continue; const sp = SPAWNS[i]; b.x = sp.x; b.y = sp.y; b.path = null; b.wait = rnd(.3, 1.8); b.m = 0; b.cd = H.st.kc + rnd(0, 6); b.repAt = 0; if (b.know && !aliveIdx(H.ro.indexOf(b.know))) b.know = null; }
       }
       hostDirty = true;
@@ -1645,6 +1703,27 @@ function botThink(b, idx, dt, now) {
       if (!b.repAt) b.repAt = now + rnd(600, 2000);
       else if (now >= b.repAt) { b.repAt = 0; hostReport(b.id, H.ro[near[0]]); return; }
     } else b.repAt = 0;
+    if (H.al.on && !wolf) {
+      // 祭壇啟動：每個電腦村民各自去最近、還沒人負責的祭壇
+      const al = H.al.a; if (!hs.alTake) hs.alTake = {};
+      if (b.alK < 0 || !al[b.alK] || al[b.alK][2]) {
+        let best = -1, bd = 1e9;
+        for (let k = 0; k < al.length; k++) { if (al[k][2] || (hs.alTake[k] && hs.alTake[k] !== b.id)) continue; const d = dist(b.x, b.y, al[k][0], al[k][1]); if (d < bd) { bd = d; best = k; } }
+        if (best < 0) for (let k = 0; k < al.length; k++) { if (al[k][2]) continue; const d = dist(b.x, b.y, al[k][0], al[k][1]); if (d < bd) { bd = d; best = k; } }
+        b.alK = best; b.alW = 0; b.path = null; if (best >= 0) { hs.alTake[best] = b.id; botGoTile(b, Math.floor(al[best][0] / TILE), Math.floor(al[best][1] / TILE)); b.goalJ = -1; b.wait = 0; }
+      }
+      if (b.alK >= 0) {
+        const a = al[b.alK];
+        if (dist(b.x, b.y, a[0], a[1]) < 52) { b.m = 0; b.alW += dt; if (b.alW > 5) { const k = b.alK; b.alK = -1; hostAltarSolve(b.id, k); } }
+        else if (botStep(b, dt, BOT_SPEED)) {   // 走到那一格了：最後幾步直接靠過去；如果其實還很遠就重新找路
+          if (dist(b.x, b.y, a[0], a[1]) < 90) { b.x += clamp(a[0] - b.x, -2.5, 2.5); b.y += clamp(a[1] - b.y, -2.5, 2.5); }
+          else if ((b.alRe = (b.alRe || 0) - dt) <= 0) { b.alRe = 1; botGoTile(b, Math.floor(a[0] / TILE), Math.floor(a[1] / TILE)); }
+        }
+        return;
+      }
+      b.m = 0; return;
+    }
+    if (wolf && !H.al.on && b.alGo && now > b.alGo) { b.alGo = 0; hostAltarStart(b.id); }
     if (wolf && H.st.bl > 0 && !H.lo) { b.bcd -= dt; if (b.bcd <= 0) { b.bcd = H.st.bl + rnd(5, 25); hostBlow(b.id); } }
     if (!wolf && H.lo && hs.fixer === b.id) {
       // 走去點蠟燭
@@ -1688,7 +1767,7 @@ function botThink(b, idx, dt, now) {
     return;
   }
   if (b.path && b.pi < b.path.length) {
-    if (botStep(b, dt, BOT_SPEED)) { b.m = 0; b.wait = wolf ? rnd(1.2, 3.5) : (b.goalJ >= 0 ? (b.heavy ? rnd(9, 13) : rnd(5, 8)) : rnd(2, 5)); }
+    if (botStep(b, dt, BOT_SPEED)) { b.m = 0; if (wolf && !dead && !H.al.on && !H.al.lk && Math.random() < .55 && hostAltarPlace(b.id) && H.al.a.length >= Math.min(H.st.an || 3, 3)) b.alGo = now + rnd(4000, 12000); b.wait = wolf ? rnd(1.2, 3.5) : (b.goalJ >= 0 ? (b.heavy ? rnd(9, 13) : rnd(5, 8)) : rnd(2, 5)); }
     return;
   }
   let s = -1; b.goalJ = -1;
@@ -1786,7 +1865,7 @@ function upsert(pr, bot, now) {
   if (!p) { p = { id: pr.id, rx: +pr.x || 0, ry: +pr.y || 0, phase: Math.random() * 6, bot }; players.set(pr.id, p); }
   p.n = cleanText(pr.n, 8) || '?'; p.c = Math.abs(pr.c | 0) % COLORS.length;
   p.x = +pr.x || 0; p.y = +pr.y || 0; p.f = pr.f === -1 ? -1 : 1; p.m = pr.m ? 1 : 0;
-  p.td = pr.td; p.k = pr.k; p.r = pr.r; p.bl = pr.bl; p.fx = pr.fx; p.v = pr.v; p.ch = pr.ch; p.bot = bot; p.seen = now;
+  p.td = pr.td; p.k = pr.k; p.r = pr.r; p.bl = pr.bl; p.fx = pr.fx; p.ap = pr.ap; p.ax = pr.ax; p.as = pr.as; p.v = pr.v; p.ch = pr.ch; p.bot = bot; p.seen = now;
   return p;
 }
 const arr = x => Array.isArray(x) ? x : EMPTY;
@@ -1797,8 +1876,8 @@ const str = x => typeof x === 'string' ? x : '';
 function normG(h) {
   const st = h.st || {}, rs = h.rs, mt = h.mt;
   return {
-    gn: h.gn | 0, ph: h.ph | 0, st: { w: st.w || 1, tl: st.tl == null ? 2 : clamp(st.tl | 0, 0, 3), ts: st.ts == null ? 2 : clamp(st.ts | 0, 0, 5), ga: [8, 12, 15].includes(st.ga) ? st.ga : 8, kc: st.kc || 25, kr: st.kr == null ? 1 : clamp(st.kr | 0, 0, 2), bl: [0, 30, 45, 60, 90].includes(st.bl) ? st.bl : 45, mt: st.mt || 90, map: clamp(st.map | 0, 0, MAPS.length - 1) },
-    ro: arr(h.ro), wf: str(h.wf), dd: str(h.dd), lf: str(h.lf), ta: arr(h.ta), ga: arr(h.ga), lo: h.lo ? 1 : 0, bd: arr(h.bd),
+    gn: h.gn | 0, ph: h.ph | 0, st: { w: st.w || 1, tl: st.tl == null ? 2 : clamp(st.tl | 0, 0, 3), ts: st.ts == null ? 2 : clamp(st.ts | 0, 0, 5), ga: [8, 12, 15].includes(st.ga) ? st.ga : 8, kc: st.kc || 25, kr: st.kr == null ? 1 : clamp(st.kr | 0, 0, 2), bl: [0, 30, 45, 60, 90].includes(st.bl) ? st.bl : 45, an: [3, 4, 5].includes(st.an) ? st.an : 3, at: [30, 40, 50].includes(st.at) ? st.at : 40, mt: st.mt || 90, map: clamp(st.map | 0, 0, MAPS.length - 1) },
+    ro: arr(h.ro), wf: str(h.wf), dd: str(h.dd), lf: str(h.lf), ta: arr(h.ta), ga: arr(h.ga), lo: h.lo ? 1 : 0, al: h.al && typeof h.al === 'object' ? { a: arr(h.al.a).filter(Array.isArray), on: h.al.on ? 1 : 0, rem: h.al.rem | 0, lk: h.al.lk ? 1 : 0 } : { a: [], on: 0, rem: 0, lk: 1 }, bd: arr(h.bd),
     mt: mt && typeof mt === 'object' ? { no: mt.no | 0, by: mt.by | 0, body: mt.body == null ? -1 : mt.body | 0 } : null,
     rs: rs && typeof rs === 'object' ? { ej: rs.ej == null ? -1 : rs.ej | 0, tie: rs.tie | 0, sk: rs.sk | 0, vt: arr(rs.vt) } : null,
     pg: Array.isArray(h.pg) ? h.pg : [0, 0], win: h.win | 0, why: h.why | 0, rem: h.rem | 0
@@ -1853,8 +1932,9 @@ function taskCur(tk) { for (let k = 0; k < tk.steps.length; k++) if (!(ME.td[1] 
 // 現在該去的工作點。狼人拿到的是假清單，所有地點都標出來方便裝忙。
 // 畫面上要標示的目標：燈被吹熄時，任務的指引全部收起來，只剩「去點蠟燭」
 function guideMarks() {
-  if (G && G.lo && G.ph === 2 && !my.dead && CANDLE) return [{ s: CANDLE.s, ti: -1, candle: true }];
-  return taskMarks();
+  if (G && G.ph === 2 && G.al.on && !my.dead) { const out = []; G.al.a.forEach((a, i) => { if (!a[2]) out.push({ altar: true, i, ti: -1, wx: a[0], wy: a[1] }); }); return out; }   // 祭壇啟動：全部祭壇都標出來
+  if (G && G.lo && G.ph === 2 && !my.dead && CANDLE) return [{ s: CANDLE.s, ti: -1, candle: true, wx: CANDLE.wx, wy: CANDLE.wy }];
+  const out = taskMarks(); for (const m of out) { m.wx = STATIONS[m.s].wx; m.wy = STATIONS[m.s].wy; } return out;
 }
 function taskMarks() {
   const out = [];
@@ -1870,7 +1950,7 @@ function onStateChange() {
   if (!inRoom || !G) return;
   derive();
   if (G.ph >= 1 && G.gn !== seen.gn) {
-    seen.gn = G.gn; seen.dead = my.dead; my.cd = 12; my.bcd = 15; my.em = false; seen.lo = 0;
+    seen.gn = G.gn; seen.dead = my.dead; my.cd = 12; my.bcd = 15; my.em = false; seen.lo = 0; seen.al = 0;
     let mask = 0;
     try { const s = JSON.parse(store('lw_pg') || 'null'); if (s && s.c === code && s.g === G.gn) mask = s.m | 0; } catch (e) { }
     ME.td = [G.gn, mask]; ME.v = null; ME.ch = [];
@@ -1885,6 +1965,16 @@ function onStateChange() {
     if (taskState && !taskState.candle && !taskState.done && (ME.td[1] >> taskState.bit & 1)) closeTask();
     if (G.ph === 2) toast('鬼魂自動完成了一步工作', 1800);
   }
+  // 祭壇啟動／解除、狼王降臨
+  if (G.al.on !== seen.al) {
+    const was = seen.al; seen.al = G.al.on;
+    if (G.ph === 2 && my.idx >= 0) {
+      if (G.al.on) { closeTask(); document.body.classList.remove('map-open', 'menu-open'); toast(my.dead ? '祭壇啟動了。' : '祭壇啟動了！' + G.al.rem + ' 秒內要把全部祭壇解除。', 3600); }
+      else if (was) toast('祭壇全部解除了。', 2200);
+    }
+  }
+  if (taskState && taskState.altar != null && !taskState.done && (!G.al.on || !G.al.a[taskState.altar] || G.al.a[taskState.altar][2])) closeTask();   // 別人先解掉了
+  if (G.ph === 5 && G.why === 4 && seen.king !== G.gn && my.idx >= 0) { seen.king = G.gn; closeTask(); startKillAnim(3); }
   // 燈被吹熄／重新點亮
   if (G.lo !== seen.lo) {
     const was = seen.lo; seen.lo = G.lo;
@@ -1919,7 +2009,7 @@ function updateMe(dt) {
   }
   const mag = Math.hypot(vx, vy); if (mag > 1) { vx /= mag; vy /= mag; }
   if (mag > .14) {
-    const sp = SPEED * (my.dead ? 1.2 : 1), dx = vx * sp * dt, dy = vy * sp * dt;
+    const sp = SPEED * (my.dead ? 1.6 : 1), dx = vx * sp * dt, dy = vy * sp * dt;
     if (my.dead) { ME.x = clamp(ME.x + dx, 60, WORLD_W - 60); ME.y = clamp(ME.y + dy, 80, WORLD_H - 60); }
     else moveCollide(ME, dx, dy);
     if (Math.abs(vx) > .15) ME.f = vx > 0 ? 1 : -1;
@@ -1939,7 +2029,7 @@ function sendPos(now) {
 function computeCtx() {
   ctxA.use = null; ctxA.body = null; ctxA.kill = null;
   if (!(G && G.ph === 2 && my.idx >= 0)) return;
-  if (!my.wolf) {
+  if (!my.wolf && !G.al.on) {   // 祭壇啟動時，任務全部暫停
     let best = USE_RANGE;
     for (const m of taskMarks()) {
       if (m.candle) continue;
@@ -1948,10 +2038,15 @@ function computeCtx() {
     }
   }
   if (my.dead) return;
-  if (G.lo && CANDLE && dist(ME.x, ME.y, CANDLE.wx, CANDLE.wy) < USE_RANGE + 14) ctxA.use = { k: 'candle' };   // 點蠟燭優先
-  if (!ctxA.use && !my.em && dist(ME.x, ME.y, BELL.wx, BELL.wy) < BELL_RANGE) ctxA.use = { k: 'bell' };
+  if (G.al.on) {   // 只能處理祭壇：不能敲鐘、不能舉報
+    let ab = USE_RANGE + 18;
+    for (let k = 0; k < G.al.a.length; k++) { const a = G.al.a[k]; if (a[2]) continue; const d = dist(ME.x, ME.y, a[0], a[1]); if (d < ab) { ab = d; ctxA.use = { k: 'altar', i: k }; } }
+  } else {
+    if (G.lo && CANDLE && dist(ME.x, ME.y, CANDLE.wx, CANDLE.wy) < USE_RANGE + 14) ctxA.use = { k: 'candle' };   // 點蠟燭優先
+    if (!ctxA.use && !my.em && dist(ME.x, ME.y, BELL.wx, BELL.wy) < BELL_RANGE) ctxA.use = { k: 'bell' };
+  }
   let bb = REPORT_RANGE;
-  for (const b of G.bd) { const d = dist(ME.x, ME.y, b[1], b[2]); if (d < bb && canSee(ME.x, ME.y, b[1], b[2])) { bb = d; ctxA.body = b; } }
+  if (!G.al.on) for (const b of G.bd) { const d = dist(ME.x, ME.y, b[1], b[2]); if (d < bb && canSee(ME.x, ME.y, b[1], b[2])) { bb = d; ctxA.body = b; } }
   if (my.wolf && my.cd <= 0) {
     let bk = killRangeOf(G.st);
     for (let i = 0; i < G.ro.length; i++) {
@@ -1965,12 +2060,30 @@ function sendKill(vid) { if (isHost) hostKill(ME.id, vid); else { ME.k = [Date.n
 function sendReport(bid) { if (isHost) hostReport(ME.id, bid); else { ME.r = [Date.now(), bid || '-']; Net.set({ r: ME.r }); } }
 function sendBlow() { if (isHost) hostBlow(ME.id); else { ME.bl = [Date.now()]; Net.set({ bl: ME.bl }); } }
 function sendFix() { if (isHost) hostRelight(ME.id); else { ME.fx = [Date.now()]; Net.set({ fx: ME.fx }); } }
-function canBlow() { return !!(G && G.ph === 2 && my.wolf && !my.dead && G.st.bl > 0 && !G.lo && my.bcd <= 0); }
+function canBlow() { return !!(G && G.ph === 2 && my.wolf && !my.dead && G.st.bl > 0 && !G.lo && !G.al.on && my.bcd <= 0); }
+// 祭壇：放置（p）、啟動（x）、解除（s）
+function sendAltar(kind, k) {
+  const ts = Date.now();
+  if (kind === 'p') { if (isHost) hostAltarPlace(ME.id); else { ME.ap = [ts]; Net.set({ ap: ME.ap }); } }
+  else if (kind === 'x') { if (isHost) hostAltarStart(ME.id); else { ME.ax = [ts]; Net.set({ ax: ME.ax }); } }
+  else { if (isHost) hostAltarSolve(ME.id, k); else { ME.as = [ts, k]; Net.set({ as: ME.as }); } }
+}
+// 現在為什麼不能放祭壇（可以放就回傳空字串）
+function altarWhyNot() {
+  const al = G.al;
+  if (al.on) return '祭壇已經啟動了。'; if (al.lk) return '祭壇還在準備中，等一下再放。'; if (al.a.length >= G.st.an) return '祭壇已經放滿了，可以啟動。';
+  if (dist(ME.x, ME.y, BELL.wx, BELL.wy) < 130) return '離廣場的鐘太近，換個地方。';
+  for (const a of al.a) if (dist(a[0], a[1], ME.x, ME.y) < 220) return '離另一座祭壇太近，走遠一點再放。';
+  return '';
+}
+function doAltarPlace() { if (!(G && G.ph === 2 && my.wolf && !my.dead)) return; const why = altarWhyNot(); if (why) { toast(why, 2200); return; } sendAltar('p'); }
+function doAltarStart() { if (!(G && G.ph === 2 && my.wolf && !my.dead)) return; if (G.al.on) return; if (!G.al.a.length) { toast('先放至少一座祭壇。', 2000); return; } if (G.lo) { toast('燈亮了之後才能啟動祭壇。', 2200); return; } sendAltar('x'); }
 function doBlow() { if (!canBlow()) return; my.bcd = G.st.bl; sendBlow(); }
 function doUse() {
   const u = ctxA.use; if (!u) return;
   if (u.k === 'task') openTask(u.ti);
   else if (u.k === 'candle') openCandle();
+  else if (u.k === 'altar') openAltar(u.i);
   else { my.em = true; sendReport(''); }
 }
 function doReport() { if (ctxA.body && G) sendReport(G.ro[ctxA.body[0]]); }
@@ -1981,7 +2094,7 @@ function genCode() { let s = ''; for (let i = 0; i < 4; i++) s += 'ABCDEFGHJKLMN
 function enterRoom(c, host, isPractice, rv) {
   code = c; inRoom = true; isHost = host; practice = !!isPractice;
   players.clear(); G = null; H = null; BOTS = [];
-  seen.gn = -1; seen.ph = -1; seen.dead = false; seen.lo = 0; my.idx = -1; hostSeenAt = performance.now();
+  seen.gn = -1; seen.ph = -1; seen.dead = false; seen.lo = 0; seen.al = 0; my.idx = -1; hostSeenAt = performance.now();
   const sp = SPAWNS[rint(0, SPAWNS.length - 1)];
   ME.x = sp.x + rnd(-14, 14); ME.y = sp.y + rnd(-10, 10); ME.f = 1; ME.m = 0; ME.td = [0, 0]; ME.k = null; ME.r = null; ME.v = null; ME.ch = [];
   netVer = -1; botsPub = EMPTY; hostWarned = false;
@@ -2069,10 +2182,13 @@ function resize() {
   fitViewport();
   view.w = cv.clientWidth; view.h = cv.clientHeight; view.dpr = Math.min(window.devicePixelRatio || 1, 2);
   cv.width = Math.max(1, Math.round(view.w * view.dpr)); cv.height = Math.max(1, Math.round(view.h * view.dpr));
-  view.z = clamp(Math.min(view.w, view.h) / 280, 1.25, 2.2);   // 鏡頭拉近：角色比較大，看到的範圍比較小
+  view.zBase = clamp(Math.min(view.w, view.h) / 280, 1.25, 2.2);   // 鏡頭拉近：角色比較大，看到的範圍比較小
+  view.z = view.zBase * (view.gz || 1);
 }
 const dyn = [];
 function render(now) {
+  // 鬼魂的鏡頭拉遠，一次看到比較大的範圍
+  { const gw = inRoom && G && G.ph === 2 && my.idx >= 0 && my.dead ? .68 : 1; view.gz = (view.gz || 1) + (gw - (view.gz || 1)) * .08; if (Math.abs(view.gz - gw) < .004) view.gz = gw; view.z = (view.zBase || view.z) * view.gz; }
   const z = view.z * view.dpr, vw = view.w / view.z, vh = view.h / view.z;
   const playing = inRoom && G && G.ph >= 1 && G.ph <= 4 && my.idx >= 0;
   let fx, fy, vis, dark;
@@ -2080,8 +2196,8 @@ function render(now) {
     fx = ME.x; fy = ME.y - 16;
     // 燈被吹熄：村民的畫面明顯變暗；狼人也會暗一點，但比村民亮
     const loT = G.lo && G.ph === 2 && !my.dead ? 1 : 0; view.lo += (loT - view.lo) * .1; if (Math.abs(loT - view.lo) < .01) view.lo = loT;
-    dark = my.dead ? .45 : .86 + (my.wolf ? .04 : .1) * view.lo;
-    const want = my.wolf ? VISION_WOLF : VISION * (G.lo && G.ph === 2 && !my.dead ? LIGHTS_OUT : 1);
+    dark = my.dead ? .3 : .86 + (my.wolf ? .04 : .1) * view.lo;
+    const want = my.dead ? 560 : my.wolf ? VISION_WOLF : VISION * (G.lo && G.ph === 2 ? LIGHTS_OUT : 1);
     view.vis = view.vis ? view.vis + (want - view.vis) * .1 : want; if (Math.abs(view.vis - want) < .5) view.vis = want;
     vis = view.vis;
   }
@@ -2099,8 +2215,19 @@ function render(now) {
   if (playing && G.ph === 2) {
     const pulse = .5 + .5 * Math.sin(now / 260);
     for (const m of guideMarks()) {
-      const st = STATIONS[m.s];
-      g.strokeStyle = m.candle ? `rgba(255,122,69,${.6 + .4 * pulse})` : m.fake ? 'rgba(157,176,191,.5)' : `rgba(242,184,75,${.55 + .4 * pulse})`; g.lineWidth = 2.6; g.beginPath(); g.ellipse(st.wx, st.wy, 18 + pulse * 2, 12 + pulse * 1.4, 0, 0, 6.2832); g.stroke();
+      const st = m;
+      g.strokeStyle = m.altar ? `rgba(216,107,255,${.6 + .4 * pulse})` : m.candle ? `rgba(255,122,69,${.6 + .4 * pulse})` : m.fake ? 'rgba(157,176,191,.5)' : `rgba(242,184,75,${.55 + .4 * pulse})`; g.lineWidth = 2.6; g.beginPath(); g.ellipse(st.wx, st.wy, 18 + pulse * 2, 12 + pulse * 1.4, 0, 0, 6.2832); g.stroke();
+    }
+    if (G.al.a.length && (G.al.on || my.wolf)) for (const a of G.al.a) {
+      const live = G.al.on && !a[2];
+      g.save(); g.translate(a[0], a[1]); g.globalAlpha = G.al.on ? (a[2] ? .35 : 1) : .6;
+      g.fillStyle = 'rgba(0,0,0,.35)'; g.beginPath(); g.ellipse(0, 3, 22, 8, 0, 0, 6.2832); g.fill();
+      g.strokeStyle = live ? `rgba(216,107,255,${.6 + .4 * pulse})` : 'rgba(176,124,208,.75)'; g.lineWidth = 2; g.setLineDash(live ? [] : [5, 4]);
+      g.beginPath(); g.ellipse(0, 0, 25 + (live ? pulse * 3 : 0), 10.5 + (live ? pulse * 1.3 : 0), 0, 0, 6.2832); g.stroke(); g.setLineDash([]);
+      g.fillStyle = '#463f55'; rr(g, -13, -15, 26, 14, 3); g.fill(); g.fillStyle = '#6a627c'; rr(g, -16, -20, 32, 7, 2.5); g.fill();
+      g.fillStyle = live ? '#f0a8ff' : a[2] ? '#8a8a8a' : '#c79be0'; g.font = '700 9px ' + FONT_BODY; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('祭', 0, -8);
+      if (live) { g.fillStyle = `rgba(232,120,255,${.55 + .4 * pulse})`; g.beginPath(); g.ellipse(Math.sin(now / 90) * .8, -28, 4 + pulse, 8 + pulse * 2, 0, 0, 6.2832); g.fill(); g.fillStyle = 'rgba(255,235,255,.9)'; g.beginPath(); g.ellipse(0, -26, 1.6, 3.6, 0, 0, 6.2832); g.fill(); }
+      g.restore();
     }
     if (ctxA.kill) { g.strokeStyle = 'rgba(220,90,77,.9)'; g.lineWidth = 2.6; g.beginPath(); g.ellipse(ctxA.kill.rx, ctxA.kill.ry, 16, 7, 0, 0, 6.2832); g.stroke(); }
     if (ctxA.body) { g.strokeStyle = 'rgba(236,229,211,.8)'; g.lineWidth = 2; g.beginPath(); g.ellipse(ctxA.body[1], ctxA.body[2], 26, 9, 0, 0, 6.2832); g.stroke(); }
@@ -2152,8 +2279,8 @@ function render(now) {
   if (playing && G.ph === 2) {
     const bobm = Math.sin(now / 300) * 3;
     for (const m of guideMarks()) {
-      const st = STATIONS[m.s];
-      g.fillStyle = m.candle ? '#ff7a45' : m.fake ? '#8fa3b3' : '#f2b84b'; g.beginPath(); g.moveTo(st.wx, st.wy - 58 + bobm); g.lineTo(st.wx + 8, st.wy - 68 + bobm); g.lineTo(st.wx, st.wy - 78 + bobm); g.lineTo(st.wx - 8, st.wy - 68 + bobm); g.closePath(); g.fill();
+      const st = m;
+      g.fillStyle = m.altar ? '#d86bff' : m.candle ? '#ff7a45' : m.fake ? '#8fa3b3' : '#f2b84b'; g.beginPath(); g.moveTo(st.wx, st.wy - 58 + bobm); g.lineTo(st.wx + 8, st.wy - 68 + bobm); g.lineTo(st.wx, st.wy - 78 + bobm); g.lineTo(st.wx - 8, st.wy - 68 + bobm); g.closePath(); g.fill();
       g.fillStyle = '#1d1405'; g.font = '800 12px ' + FONT_BODY; g.fillText(m.fake ? '?' : '!', st.wx, st.wy - 67.5 + bobm);
     }
   }
@@ -2230,20 +2357,21 @@ function render(now) {
     g.globalAlpha = 1; g.globalCompositeOperation = 'source-over';
   }
 
-  // 方向箭頭：只有一個，指向離自己最近的目標（燈熄時就是蠟燭），繞在自己周圍比較好找
+  // 方向箭頭：平常只有一個，指向離自己最近的目標（燈熄時是蠟燭）；祭壇啟動時每一座都有箭頭
   if (playing && G.ph === 2) {
-    let tgt = null, bd = 1e9;
-    for (const m of guideMarks()) { if (m.fake) continue; const st = STATIONS[m.s], dd = dist(ME.x, ME.y, st.wx, st.wy); if (dd < bd) { bd = dd; tgt = m; } }
-    if (tgt) {
+    const marks = guideMarks().filter(m => !m.fake); let list = marks;
+    if (marks.length && !marks[0].altar) { let tgt = null, bd = 1e9; for (const m of marks) { const dd = dist(ME.x, ME.y, m.wx, m.wy); if (dd < bd) { bd = dd; tgt = m; } } list = tgt ? [tgt] : []; }
+    if (list.length) {
       g.setTransform(view.dpr, 0, 0, view.dpr, 0, 0);
-      const st = STATIONS[tgt.s], mxp = (ME.x - cx) * view.z, myp = (ME.y - 22 - cy) * view.z, dx = (st.wx - ME.x) * view.z, dy = (st.wy - ME.y) * view.z, dd = Math.hypot(dx, dy);
-      const R = Math.min(view.w, view.h) * .3;
-      if (dd > R + 46) {   // 目標就在旁邊時不用箭頭
-        const an = Math.atan2(dy, dx), beat = .5 + .5 * Math.sin(now / 240), rr2 = R + beat * 5, colr = tgt.candle ? '#ff7a45' : '#f2b84b';
-        g.save(); g.translate(mxp + Math.cos(an) * rr2, myp + Math.sin(an) * rr2); g.rotate(an);
-        g.fillStyle = 'rgba(8,14,20,.78)'; circ(g, 0, 0, 23);
-        g.strokeStyle = colr; g.lineWidth = 2; g.beginPath(); g.arc(0, 0, 23, 0, 6.2832); g.stroke();
-        g.fillStyle = colr; g.beginPath(); g.moveTo(17, 0); g.lineTo(-7, -13); g.lineTo(-2, 0); g.lineTo(-7, 13); g.closePath(); g.fill();
+      const mxp = (ME.x - cx) * view.z, myp = (ME.y - 22 - cy) * view.z, Rx = Math.min(view.w * .31, 280), Ry = Math.min(view.h * .4, 280), beat = .5 + .5 * Math.sin(now / 240);
+      for (const m of list) {
+        const dx = (m.wx - ME.x) * view.z, dy = (m.wy - ME.y) * view.z, an = Math.atan2(dy, dx), ex = Math.cos(an) * Rx, ey = Math.sin(an) * Ry;
+        if (Math.hypot(dx, dy) < Math.hypot(ex, ey) + 40) continue;   // 目標就在附近時不用箭頭
+        const colr = m.altar ? '#d86bff' : m.candle ? '#ff7a45' : '#f2b84b', k = 1 + beat * .03;
+        g.save(); g.translate(mxp + ex * k, myp + ey * k); g.rotate(an);
+        g.fillStyle = 'rgba(8,14,20,.74)'; circ(g, 0, 0, 16);
+        g.strokeStyle = colr; g.lineWidth = 1.6; g.beginPath(); g.arc(0, 0, 16, 0, 6.2832); g.stroke();
+        g.fillStyle = colr; g.beginPath(); g.moveTo(12, 0); g.lineTo(-5, -9); g.lineTo(-1.5, 0); g.lineTo(-5, 9); g.closePath(); g.fill();
         g.restore();
       }
     }
@@ -2637,21 +2765,22 @@ function drawIntro(now) {
 
 // ===== 被狼人襲擊的動畫（只有被襲擊的村民自己看得到，三種隨機一種）=====
 const killFx = { on: false, t0: 0, kind: 0, col: '#d8574b', fix: null, last: -1 };
-const KILL_LEN = 3.6, KILL_HIT = [.8, .85, 1.0];
+const KILL_LEN = 3.6, KILL_HIT = [.8, .85, 1.0], KING_LEN = 5.2;   // 第 3 種（kind 3）是祭壇召喚狼王，所有人都會看到
 function startKillAnim(kind) {
   let k = kind; if (k == null) { do { k = rint(0, 2); } while (k === killFx.last); }
   killFx.kind = k; killFx.last = k; killFx.t0 = performance.now(); killFx.col = COLORS[ME.c][1]; killFx.fix = null; killFx.on = true;
-  $('killSr').textContent = '你被狼人襲擊了。你變成了鬼魂，還能繼續幫忙把工作做完。';
+  $('killSr').textContent = k === 3 ? '祭壇沒有在時間內解除，狼王降臨，狼人獲勝。' : '你被狼人襲擊了。你變成了鬼魂，還能繼續幫忙把工作做完。';
   document.body.classList.add('kill-open');
 }
-function stopKillAnim() { killFx.on = false; document.body.classList.remove('kill-open'); toast('你現在是鬼魂，還能繼續把工作做完。', 3600); }
+function stopKillAnim() { killFx.on = false; document.body.classList.remove('kill-open'); if (killFx.kind < 3) toast('你現在是鬼魂，還能繼續把工作做完。', 3600); }
 function drawKill(now) {
   const c = $('killCv'), W = c.clientWidth, H = c.clientHeight; if (!W || !H) return;
   const d = view.dpr;
   if (c.width !== Math.round(W * d) || c.height !== Math.round(H * d)) { c.width = Math.round(W * d); c.height = Math.round(H * d); }
   const g = c.getContext('2d'), kind = killFx.kind, col = killFx.col, calm = reduceMotion();
   const t = killFx.fix != null ? killFx.fix : (now - killFx.t0) / 1000;
-  if (t >= KILL_LEN && killFx.fix == null) { stopKillAnim(); return; }
+  if (t >= (kind === 3 ? KING_LEN : KILL_LEN) && killFx.fix == null) { stopKillAnim(); return; }
+  if (kind === 3) { drawKing(g, W, H, d, t, calm); return; }
   const land = W > H * 1.15, u = land ? Math.min(H / 360, W / 640) : Math.min(W / 360, H / 640);
   const vx = land ? W * .33 : W / 2, vy = land ? H * .74 : H * .6, tx = land ? W * .69 : W / 2, ty = land ? H * .42 : H * .2;
   const hit = KILL_HIT[kind], ht = t - hit, E = (x, y, rx, ry) => { g.beginPath(); g.ellipse(x, y, rx, ry, 0, 0, 6.2832); g.fill(); };
@@ -2740,6 +2869,54 @@ function drawKill(now) {
   if (sa > 0) { g.save(); g.globalAlpha *= sa; g.font = '600 ' + Math.round(17 * u) + 'px ' + FONT_BODY; g.fillStyle = '#e9e2d2'; g.fillText('你變成了鬼魂', tx, ty + 50 * u); g.font = '500 ' + Math.round(14 * u) + 'px ' + FONT_BODY; g.fillStyle = '#b8c6d2'; g.fillText('還能繼續幫忙把工作做完', tx, ty + 76 * u); g.restore(); }
   g.globalAlpha = 1;
 }
+
+// ===== 祭壇召喚狼王（倒數結束都沒解除時，所有人都會看到，然後狼人獲勝）=====
+function drawKing(g, W, H, d, t, calm) {
+  const land = W > H * 1.15, u = land ? Math.min(H / 360, W / 640) : Math.min(W / 360, H / 640);
+  const kx = land ? W * .34 : W / 2, ky = land ? H * .9 : H * .7, tx = land ? W * .72 : W / 2, ty = land ? H * .38 : H * .16;
+  g.setTransform(d, 0, 0, d, 0, 0); g.globalCompositeOperation = 'source-over'; g.shadowBlur = 0; g.clearRect(0, 0, W, H);
+  g.globalAlpha = 1 - smooth((t - (KING_LEN - .6)) / .6);
+  const sk = g.createLinearGradient(0, 0, 0, H); sk.addColorStop(0, '#12061c'); sk.addColorStop(.6, '#3a0f2c'); sk.addColorStop(1, '#16060c'); g.fillStyle = sk; g.fillRect(0, 0, W, H);
+  g.save();
+  const rumble = clamp((t - .4) / 1.2, 0, 1) * (1 - smooth((t - 3) / 1));
+  if (!calm && rumble > 0) g.translate((Math.random() - .5) * 9 * u * rumble, (Math.random() - .5) * 7 * u * rumble);
+  // 血紅的月亮和捲動的雲
+  g.fillStyle = 'rgba(255,60,50,.22)'; circ(g, kx, H * .2, 92 * u); g.fillStyle = '#c7362e'; circ(g, kx, H * .2, 58 * u); g.fillStyle = 'rgba(90,10,14,.35)'; circ(g, kx - 16 * u, H * .2 - 12 * u, 13 * u); circ(g, kx + 20 * u, H * .2 + 16 * u, 9 * u);
+  for (let i = 0; i < 5; i++) { const cx2 = ((i * 260 + t * (20 + i * 9)) * u) % (W + 300 * u) - 150 * u; g.fillStyle = 'rgba(20,6,22,.55)'; g.beginPath(); g.ellipse(cx2, H * (.1 + i * .07), 150 * u, 22 * u, 0, 0, 6.2832); g.fill(); }
+  // 地面與祭壇
+  g.fillStyle = '#0c0508'; g.beginPath(); g.moveTo(0, H); for (let x = 0; x <= W + 10; x += 10) g.lineTo(x, ky - 14 * u - Math.sin(x / (90 * u)) * 9 * u - Math.sin(x / (37 * u)) * 4 * u); g.lineTo(W, H); g.closePath(); g.fill();
+  const pw = smooth(t / 1.1), beam = smooth((t - .5) / .8);
+  for (let r = 0; r < 3; r++) { const p = ((t * .5 + r / 3) % 1); g.strokeStyle = 'rgba(216,107,255,' + (1 - p) * .7 * pw + ')'; g.lineWidth = 2.5 * u; g.beginPath(); g.ellipse(kx, ky - 6 * u, (40 + p * 230) * u, (10 + p * 52) * u, 0, 0, 6.2832); g.stroke(); }
+  if (beam > 0) { const bg = g.createLinearGradient(kx - 70 * u, 0, kx + 70 * u, 0); bg.addColorStop(0, 'rgba(216,107,255,0)'); bg.addColorStop(.5, 'rgba(236,160,255,' + .5 * beam + ')'); bg.addColorStop(1, 'rgba(216,107,255,0)'); g.fillStyle = bg; g.fillRect(kx - 70 * u * beam, 0, 140 * u * beam, ky); }
+  // 狼王從祭壇後面升起
+  const rise = smooth((t - 1.1) / 1.5);
+  if (rise > 0) {
+    g.save(); g.translate(kx, ky - 150 * u * rise + (1 - rise) * 120 * u); const k = (2.2 + rise * .6 + Math.sin(t * 2) * .02) * u; g.scale(k, k);
+    g.fillStyle = 'rgba(8,3,6,.96)'; wolfShape(g); g.fill();
+    g.beginPath(); for (let i = -4; i <= 4; i++) { g.moveTo(i * 10 - 5, 30); g.lineTo(i * 10, 12 + Math.abs(i) * 2 + Math.sin(t * 5 + i) * 2); g.lineTo(i * 10 + 5, 30); } g.fill();   // 鬃毛
+    g.fillStyle = '#e8b93f'; g.beginPath(); g.moveTo(-22, -42); g.lineTo(-24, -62); g.lineTo(-12, -50); g.lineTo(0, -68); g.lineTo(12, -50); g.lineTo(24, -62); g.lineTo(22, -42); g.closePath(); g.fill();   // 王冠
+    g.fillStyle = '#d8453a'; circ(g, 0, -52, 2.6); g.fillStyle = '#7ad0ff'; circ(g, -15, -49, 1.8); circ(g, 15, -49, 1.8);
+    g.fillStyle = 'rgba(255,50,38,' + (.8 + .2 * Math.sin(t * 9)) + ')'; g.shadowColor = '#ff2a1a'; g.shadowBlur = 20; wolfEyes(g); g.shadowBlur = 0;
+    g.fillStyle = '#f3ece0'; for (const sg of [-1, 1]) { g.beginPath(); g.moveTo(sg * 4, 34); g.lineTo(sg * 7, 46); g.lineTo(sg * 10, 34); g.closePath(); g.fill(); }   // 獠牙
+    g.restore();
+  }
+  // 祭壇本體和火焰（畫在狼王前面）
+  g.fillStyle = '#2c2636'; rr(g, kx - 44 * u, ky - 30 * u, 88 * u, 30 * u, 5 * u); g.fill(); g.fillStyle = '#4a4158'; rr(g, kx - 54 * u, ky - 42 * u, 108 * u, 14 * u, 5 * u); g.fill();
+  g.fillStyle = 'rgba(236,160,255,' + (.6 + .4 * Math.sin(t * 7)) * pw + ')'; g.font = '700 ' + Math.round(17 * u) + 'px ' + FONT_BODY; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('祭', kx, ky - 15 * u);
+  for (let i = 0; i < 5; i++) { const fx2 = kx + (i - 2) * 20 * u, fh = (26 + Math.sin(t * 9 + i * 1.7) * 8) * u * pw; g.fillStyle = 'rgba(226,110,255,.85)'; g.beginPath(); g.ellipse(fx2, ky - 44 * u - fh / 2, 7 * u, fh / 2 + 3 * u, 0, 0, 6.2832); g.fill(); g.fillStyle = 'rgba(255,235,255,.9)'; g.beginPath(); g.ellipse(fx2, ky - 44 * u - fh / 3, 2.6 * u, fh / 4, 0, 0, 6.2832); g.fill(); }
+  g.restore();
+  // 閃電
+  const fl = Math.max(clamp(1 - Math.abs(t - 2.5) / .18, 0, 1), clamp(1 - Math.abs(t - 2.85) / .12, 0, 1) * .6);
+  if (fl > 0) { g.fillStyle = 'rgba(240,225,255,' + fl * .6 + ')'; g.fillRect(0, 0, W, H); }
+  const vg = g.createRadialGradient(W / 2, H / 2, Math.min(W, H) * .25, W / 2, H / 2, Math.max(W, H) * .75); vg.addColorStop(0, 'rgba(0,0,0,0)'); vg.addColorStop(1, 'rgba(0,0,0,.7)'); g.fillStyle = vg; g.fillRect(0, 0, W, H);
+  // 文字
+  g.textAlign = 'center'; g.textBaseline = 'middle';
+  const ta = clamp((t - 2.5) / .45, 0, 1);
+  if (ta > 0) { g.save(); g.globalAlpha *= ta; g.translate(tx, ty); const pop = 1 + (1 - smooth(ta)) * .4; g.scale(pop, pop); g.font = '700 ' + Math.round(64 * u) + 'px ' + FONT_DISP; g.lineJoin = 'round'; g.strokeStyle = 'rgba(8,2,10,.9)'; g.lineWidth = 8 * u; g.strokeText('狼王降臨', 0, 0); g.shadowColor = 'rgba(226,80,255,.85)'; g.shadowBlur = 26 * u * d; g.fillStyle = '#f0c24a'; g.fillText('狼王降臨', 0, 0); g.restore(); }
+  const sa = clamp((t - 3.2) / .5, 0, 1);
+  if (sa > 0) { g.save(); g.globalAlpha *= sa; g.font = '600 ' + Math.round(18 * u) + 'px ' + FONT_BODY; g.fillStyle = '#eadcf2'; g.fillText('祭壇沒有在時間內解除', tx, ty + 58 * u); g.font = '700 ' + Math.round(26 * u) + 'px ' + FONT_DISP; g.fillStyle = '#ee5a4a'; g.fillText('狼人獲勝', tx, ty + 96 * u); g.restore(); }
+  g.globalAlpha = 1;
+}
 // ===== 介面 =====
 let toastTimer = 0;
 function toast(msg, ms) { const t = $('toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove('show'), ms || 2600); }
@@ -2792,6 +2969,7 @@ function uiTick(now) {
   else if (mode === 'result') { $('resCount').textContent = Math.max(0, G.rem) + ' 秒後繼續'; renderHud(); }
   else if (mode === 'end') renderEndButtons();
   if (document.body.classList.contains('map-open')) drawMiniMap(now);
+  if (mode === 'play') drawMini(now);
 }
 
 // ----- 大廳 -----
@@ -2803,11 +2981,13 @@ const SETTINGS = [
   { g: 'wolf', k: 'kc', label: '襲擊冷卻', min: 15, max: 40, step: 5, fmt: v => v + ' 秒' },
   { g: 'wolf', k: 'kr', label: '襲擊範圍', opts: [0, 1, 2], fmt: v => ['短', '中', '長'][v] || '中' },
   { g: 'wolf', k: 'bl', label: '吹燈冷卻', opts: [0, 30, 45, 60, 90], fmt: v => v ? v + ' 秒' : '關閉' },
+  { g: 'wolf', k: 'an', label: '祭壇數量', opts: [3, 4, 5], fmt: v => v + ' 座' },
+  { g: 'wolf', k: 'at', label: '祭壇倒數', opts: [30, 40, 50], fmt: v => v + ' 秒' },
   { g: 'task', k: 'tl', label: '長任務', min: 0, max: 3, step: 1, fmt: v => v + ' 個' },
   { g: 'task', k: 'ts', label: '短任務', min: 0, max: 5, step: 1, fmt: v => v + ' 個' },
   { g: 'task', k: 'ga', label: '鬼魂自動完成任務', opts: [8, 12, 15], fmt: v => v + ' 秒' }
 ];
-const SET_GROUPS = { wolf: { title: '狼人設定', note: '襲擊範圍越長，狼人越容易得手。吹燈會讓村民的視野變小，直到有人去點蠟燭。' }, task: { title: '任務設定', note: '長任務要照順序跑兩三個地點。出局的村民會變成鬼魂，定時自動完成一步。' } };
+const SET_GROUPS = { wolf: { title: '狼人設定', note: '吹燈會讓村民看不遠，直到有人去點蠟燭。祭壇啟動後，要在倒數內全部解除，否則狼人獲勝。' }, task: { title: '任務設定', note: '長任務要照順序跑兩三個地點。出局的村民會變成鬼魂，定時自動完成一步。' } };
 let setGroup = '';
 // 把一組設定畫成「名稱＋加減按鈕」
 function buildSettings(box, list) {
@@ -2882,7 +3062,7 @@ function renderLobby(mode) {
     if (showSet) buildSettings(box, SETTINGS.filter(x => x.g === 'base')); else box.textContent = '';
     if (showSet) {
       const v = k => { const d = SETTINGS.find(x => x.k === k); return d.fmt(settingVal(k)); };
-      $('sumWolf').textContent = '冷卻 ' + v('kc') + '・範圍 ' + v('kr') + '・吹燈 ' + v('bl');
+      $('sumWolf').textContent = '襲擊 ' + v('kc') + '・吹燈 ' + v('bl') + '・祭壇 ' + v('an');
       $('sumTask').textContent = '長 ' + settingVal('tl') + '・短 ' + settingVal('ts') + '・鬼魂 ' + v('ga');
     }
   }
@@ -2934,7 +3114,7 @@ function renderHud() {
   }
   const use = $('btnUse'), rep = $('btnReport'), kill = $('btnKill');
   const u = ctxA.use;
-  const ul = u ? (u.k === 'task' ? '工作' : u.k === 'candle' ? '點燃蠟燭' : '敲鐘') : '使用';
+  const ul = u ? (u.k === 'task' ? '工作' : u.k === 'candle' ? '點燃蠟燭' : u.k === 'altar' ? '解除祭壇' : '敲鐘') : '使用';
   if (changed('useL', ul)) { use.textContent = ul.length > 3 ? ul.slice(0, 2) + '\n' + ul.slice(2) : ul; use.classList.toggle('long', ul.length > 3); }   // 四個字分成兩行
   use.disabled = !u; rep.disabled = !ctxA.body;
   const showKill = my.wolf && !my.dead;
@@ -2945,11 +3125,22 @@ function renderHud() {
   const blow = $('btnBlow'), showBlow = my.wolf && !my.dead && G.st.bl > 0;
   if (blow.hidden === showBlow) blow.hidden = !showBlow;
   if (showBlow) { blow.disabled = !canBlow(); const bt = G.lo ? '已熄' : my.bcd > 0 ? Math.ceil(my.bcd) + ' 秒' : ''; if (changed('bcd', bt)) $('blowCd').textContent = bt; }
-  // 燈熄的時候的提示
-  const al = G.lo && G.ph === 2 ? (my.wolf ? '燈已吹熄・村民現在看不遠' : my.dead ? '燈被吹熄了' : '燈被吹熄了・到「' + CANDLE.area + '」點蠟燭') : '';
+  // 狼人的祭壇鍵：放置、啟動
+  const bAl = $('btnAltar'), bGo = $('btnAltarGo'), showAl = my.wolf && !my.dead;
+  if (bAl.hidden === showAl) { bAl.hidden = !showAl; bGo.hidden = !showAl; }
+  if (showAl) {
+    const n = G.al.a.length, N = G.st.an;
+    bAl.disabled = !!(G.al.on || G.al.lk || n >= N); bGo.disabled = !!(G.al.on || G.al.lk || !n || G.lo);
+    const t1 = G.al.on ? '啟動中' : G.al.lk ? '準備中' : n + ' / ' + N; if (changed('alc', t1)) $('altarCd').textContent = t1;
+  }
+  const alLeft = G.al.on ? G.al.a.filter(a => !a[2]).length : 0;
+  if (taskState && taskState.altar != null && !taskState.done) $('taskArea').textContent = '剩 ' + Math.max(0, G.al.rem) + ' 秒';
+  // 祭壇啟動、燈熄的時候的提示
+  const al = G.al.on && G.ph === 2 ? (my.wolf ? '祭壇啟動中・剩 ' : '祭壇啟動！') + Math.max(0, G.al.rem) + (my.wolf ? ' 秒・還有 ' + alLeft + ' 座' : ' 秒內解除全部祭壇・還有 ' + alLeft + ' 座') : G.lo && G.ph === 2 ? (my.wolf ? '燈已吹熄・村民現在看不遠' : my.dead ? '燈被吹熄了' : '燈被吹熄了・到「' + CANDLE.area + '」點蠟燭') : '';
   if (changed('alert', al)) { const e = $('alert'); e.textContent = al; e.hidden = !al; }
+  $('alert').classList.toggle('altar', !!(G.al.on && G.ph === 2));
   // 燈熄的時候，村民的任務清單先收起來，只留去點蠟燭的提示
-  const hideList = !!(G.lo && G.ph === 2 && !my.wolf && !my.dead); if ($('taskList').hidden !== hideList) $('taskList').hidden = hideList;
+  const hideList = !!(G.ph === 2 && !my.dead && (G.al.on || (G.lo && !my.wolf))); if ($('taskList').hidden !== hideList) $('taskList').hidden = hideList;
 }
 
 // ----- 工作小遊戲 -----
@@ -3008,6 +3199,41 @@ function finishCandle() {
   taskState.done = true; sendFix();
   const box = $('taskBox'); box.textContent = ''; box.appendChild(el('div', 'task-done', '點亮了'));
   setTimeout(() => { if (taskState && taskState.done) closeTask(); }, 700);
+}
+// 解除祭壇：指針進到綠色區再按，成功 3 次就解除；按錯扣 1 次
+function openAltar(i) {
+  closeTask();
+  if (!G || G.ph !== 2 || !G.al.on || my.dead || !G.al.a[i] || G.al.a[i][2]) return;
+  taskState = { altar: i, bit: -1, done: false, cleanup: null };
+  $('taskTitle').textContent = '解除祭壇'; $('taskArea').textContent = '剩 ' + Math.max(0, G.al.rem) + ' 秒';
+  const box = $('taskBox'); box.textContent = '';
+  const need = 3; let hits = 0, pos = 0, dir = 1, raf = 0, last = performance.now(), zw = .2, zs = rnd(.12, .68), speed = 1.2;
+  const bar = el('div', 'bar altar-bar'), zone = el('div', 'bar-zone'), mark = el('div', 'bar-mark'); bar.appendChild(zone); bar.appendChild(mark);
+  const pips = el('div', 'pips'), b = el('button', 'hit-btn altar-btn', '判定'); b.type = 'button';
+  const show = () => { pips.textContent = ''; for (let k = 0; k < need; k++) pips.appendChild(el('span', k < hits ? 'on' : '')); zone.style.left = (zs * 100) + '%'; zone.style.width = (zw * 100) + '%'; };
+  show();
+  b.addEventListener('pointerdown', e => {
+    e.preventDefault(); if (!taskState || taskState.done) return;
+    if (pos >= zs && pos <= zs + zw) { hits++; if (hits >= need) { show(); finishAltar(); return; } zs = rnd(.06, .74); speed = Math.min(1.7, speed + .16); }
+    else { hits = Math.max(0, hits - 1); bar.classList.remove('shake'); void bar.offsetWidth; bar.classList.add('shake'); }
+    show();
+  });
+  const loop = t => {
+    const dt = Math.min(.05, (t - last) / 1000); last = t;
+    pos += dir * dt * speed; if (pos > 1) { pos = 1; dir = -1; } if (pos < 0) { pos = 0; dir = 1; }
+    mark.style.left = (pos * 100) + '%'; raf = requestAnimationFrame(loop);
+  };
+  raf = requestAnimationFrame(loop);
+  taskState.cleanup = () => cancelAnimationFrame(raf);
+  box.appendChild(el('div', 'task-tip', '指針進到綠色區再按「判定」，成功 3 次就解除；按錯會扣 1 次')); box.appendChild(bar); box.appendChild(pips); box.appendChild(b);
+  document.body.classList.add('task-open');
+}
+function finishAltar() {
+  if (!taskState || taskState.altar == null || taskState.done) return;
+  taskState.done = true; if (taskState.cleanup) { taskState.cleanup(); taskState.cleanup = null; }
+  sendAltar('s', taskState.altar);
+  const box = $('taskBox'); box.textContent = ''; box.appendChild(el('div', 'task-done', '解除了'));
+  setTimeout(() => { if (taskState && taskState.done) closeTask(); }, 600);
 }
 function holdButton(label) {
   const b = el('button', 'hold-btn', label); b.type = 'button'; const s = { b, down: false };
@@ -3234,7 +3460,7 @@ function renderResult() {
 function renderEnd() {
   const sec = $('end'); sec.classList.toggle('vill', G.win === 1); sec.classList.toggle('wolf', G.win === 2);
   $('endTitle').textContent = G.win === 1 ? '村民獲勝' : '狼人獲勝';
-  $('endWhy').textContent = G.why === 1 ? '全村的工作都做完了，天亮了。' : G.why === 2 ? '狼人全都被放逐了。' : '剩下的村民已經擋不住狼人。';
+  $('endWhy').textContent = G.why === 1 ? '全村的工作都做完了，天亮了。' : G.why === 2 ? '狼人全都被放逐了。' : G.why === 4 ? '祭壇沒有在時間內解除，狼王降臨了。' : '剩下的村民已經擋不住狼人。';
   const ul = $('endRoster'); ul.textContent = '';
   for (let i = 0; i < G.ro.length; i++) {
     const li = el('li'), w = G.wf[i] === '1', out = G.dd[i] === '1' || G.lf[i] === '1';
@@ -3245,6 +3471,28 @@ function renderEnd() {
 }
 function renderEndButtons() { $('btnAgain').hidden = !isHost; $('btnToLobby').hidden = !isHost; $('endWait').hidden = isHost; }
 
+// 地圖上的記號：任務／蠟燭／祭壇（狼人放好但還沒啟動的祭壇，只有狼人看得到）
+function mapMarks(m, sc, size) {
+  const r = size / sc, dia = (x, y, col) => { m.fillStyle = col; m.beginPath(); m.moveTo(x, y - r); m.lineTo(x + r, y); m.lineTo(x, y + r); m.lineTo(x - r, y); m.closePath(); m.fill(); m.strokeStyle = '#1d1405'; m.lineWidth = 1.5 / sc; m.stroke(); };
+  if (my.wolf && !G.al.on) for (const a of G.al.a) dia(a[0], a[1], '#9a6cc0');
+  for (const mk of guideMarks()) dia(mk.wx, mk.wy, mk.altar ? '#d86bff' : mk.candle ? '#ff7a45' : mk.fake ? '#8fa3b3' : '#f2b84b');
+}
+// 右上角常駐的小地圖（點一下打開大地圖）
+let miniAcc = 0, miniBase = null, miniKey = '';
+function drawMini(now) {
+  if (now - miniAcc < 180) return; miniAcc = now;
+  const c = $('miniCv'), w = c.clientWidth, h = c.clientHeight; if (!w || !h || !G || my.idx < 0) return;
+  const d = view.dpr, sc = Math.min(w / WORLD_W, h / WORLD_H);
+  if (c.width !== Math.round(w * d) || c.height !== Math.round(h * d)) { c.width = Math.round(w * d); c.height = Math.round(h * d); }
+  const key = curMap + '|' + c.width + 'x' + c.height + '|' + (groundCv ? 1 : 0);
+  if (key !== miniKey) {   // 地形只畫一次，之後每次只補上記號和自己的位置
+    miniKey = key; if (!miniBase) miniBase = document.createElement('canvas'); miniBase.width = c.width; miniBase.height = c.height;
+    const b = miniBase.getContext('2d'); b.setTransform(1, 0, 0, 1, 0, 0); b.fillStyle = '#0b151d'; b.fillRect(0, 0, c.width, c.height); paintMiniMap(b, sc, d, false);
+  }
+  const m = c.getContext('2d'); m.setTransform(1, 0, 0, 1, 0, 0); m.drawImage(miniBase, 0, 0); m.setTransform(sc * d, 0, 0, sc * d, 0, 0);
+  mapMarks(m, sc, 3.6);
+  const pr = (3 + Math.sin(now / 200) * .6) / sc; m.fillStyle = '#fff'; circ(m, ME.x, ME.y - 14, pr + 1.3 / sc); m.fillStyle = COLORS[ME.c][1]; circ(m, ME.x, ME.y - 14, pr);
+}
 // ----- 小地圖 -----
 let mapAcc = 0;
 function drawMiniMap(now) {
@@ -3254,8 +3502,9 @@ function drawMiniMap(now) {
   if (c.width !== Math.round(w * d)) { c.width = Math.round(w * d); c.height = Math.round(h * d); c.style.width = w + 'px'; c.style.height = h + 'px'; }
   const m = c.getContext('2d'); paintMiniMap(m, sc, d, true);
   if (G && my.idx >= 0) {
-    for (const mk of guideMarks()) {
-      const st = STATIONS[mk.s], r = 7 / sc;
+    mapMarks(m, sc, 7);
+    for (const mk of []) {
+      const st = mk, r = 7 / sc;
       m.fillStyle = mk.candle ? '#ff7a45' : mk.fake ? '#8fa3b3' : '#f2b84b'; m.beginPath(); m.moveTo(st.wx, st.wy - r); m.lineTo(st.wx + r, st.wy); m.lineTo(st.wx, st.wy + r); m.lineTo(st.wx - r, st.wy); m.closePath(); m.fill();
       m.strokeStyle = '#1d1405'; m.lineWidth = 1.5 / sc; m.stroke();
     }
@@ -3289,6 +3538,8 @@ function bindUI() {
   $('btnReport').addEventListener('click', doReport);
   $('btnKill').addEventListener('click', doKill);
   $('btnBlow').addEventListener('click', doBlow);
+  $('btnAltar').addEventListener('click', doAltarPlace);
+  $('btnAltarGo').addEventListener('click', doAltarStart);
   $('btnSetWolf').addEventListener('click', () => openSetSheet('wolf'));
   $('btnSetTask').addEventListener('click', () => openSetSheet('task'));
   $('btnSetClose').addEventListener('click', closeSetSheet);
@@ -3353,7 +3604,7 @@ function main() {
   requestAnimationFrame(frame);
   window.__lw = {
     get G() { return G; }, get H() { return H; }, ME, my, players, get BOTS() { return BOTS; }, Net, get STATIONS() { return STATIONS; }, SPAWNS, grid, MAPS, loadMap, applyMap, canSee, paintMiniMap, tget, boxFree, get curMap() { return curMap; },
-    findPath, startPractice, createRoom, joinRoom, invite, inviteLink, intro, hostStart, hostKill, hostReport, hostTick, setBotCount, castVote, sendChat, finishTask, openTask, leaveRoom, uiMode, parseTasks, dealTasks, taskCur, taskMarks, get CHAINS() { return CHAINS; }, get taskState() { return taskState; }, get hs() { return hs; }, get BUILDINGS() { return BUILDINGS; }, get OCC() { return OCC; }, get view() { return view; }, get CANDLE() { return CANDLE; }, hostBlow, hostRelight, doBlow, canBlow, killRangeOf, guideMarks, openCandle, killFx, startKillAnim,
+    findPath, startPractice, createRoom, joinRoom, invite, inviteLink, intro, hostStart, hostKill, hostReport, hostTick, setBotCount, castVote, sendChat, finishTask, openTask, leaveRoom, uiMode, parseTasks, dealTasks, taskCur, taskMarks, get CHAINS() { return CHAINS; }, get taskState() { return taskState; }, get hs() { return hs; }, get BUILDINGS() { return BUILDINGS; }, get OCC() { return OCC; }, get view() { return view; }, get CANDLE() { return CANDLE; }, hostBlow, hostRelight, doBlow, canBlow, killRangeOf, guideMarks, openCandle, killFx, startKillAnim, openAltar, finishAltar, hostAltarPlace, hostAltarStart, hostAltarSolve, doAltarPlace, doAltarStart, altarWhyNot,
     get ctx() { return ctxA; }, get inRoom() { return inRoom; }, get isHost() { return isHost; }, get code() { return code; }
   };
 }
