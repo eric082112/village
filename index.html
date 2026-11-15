@@ -211,6 +211,8 @@ body[data-mode="intro"] .acts,body[data-mode="intro"] .joy,body[data-mode="resul
 .act-report{grid-column:2;grid-row:1}
 .act-blow{grid-column:1;grid-row:2;align-self:center;border-color:var(--wolf);color:var(--wolf)}
 .act-use{grid-row:2}
+.act-use.long{font-size:17px;line-height:1.15;white-space:pre-line}
+.tasks[hidden]{display:none}
 .act[hidden]{display:none}
 
 /* ---------- 身分揭曉 ---------- */
@@ -312,6 +314,20 @@ body.map-open #mapOv{display:flex}
 
 #lobbyHint{-webkit-user-select:text;user-select:text;word-break:break-all}
 
+/* 點燃蠟燭 */
+.candle-grid{display:grid;grid-template-columns:repeat(8,36px);gap:7px;justify-content:center}
+.candle{position:relative;width:36px;height:84px;border-radius:10px;background:rgba(255,255,255,.03)}
+.candle::before{content:"";position:absolute;left:50%;bottom:7px;width:16px;height:42px;margin-left:-8px;border-radius:4px 4px 2px 2px;background:linear-gradient(90deg,#b9ae93,#efe6cf 45%,#a99e83)}
+.candle::after{content:"";position:absolute;left:50%;bottom:49px;width:2px;height:7px;margin-left:-1px;background:#2a1f1a}
+.candle i{position:absolute;left:50%;bottom:54px;width:14px;height:22px;margin-left:-7px;border-radius:50% 50% 50% 50%/62% 62% 38% 38%;background:radial-gradient(circle at 50% 68%,#fff7cf 0 24%,#ffb347 52%,rgba(255,120,40,0) 74%);opacity:0;transform:scale(.3);transform-origin:50% 100%;transition:opacity .12s,transform .12s}
+.candle.lit{background:radial-gradient(circle at 50% 30%,rgba(255,180,80,.32),rgba(255,180,80,0) 70%)}
+.candle.lit i{opacity:1;transform:scale(1);animation:candleFlick .45s ease-in-out infinite alternate}
+.candle.lit::before{background:linear-gradient(90deg,#d9cfb4,#fff6dd 45%,#c9bea0)}
+@keyframes candleFlick{to{transform:scale(1.1,.92) translateX(.7px)}}
+/* 被襲擊的動畫蓋在最上面 */
+#killFx{padding:0;background:transparent;z-index:35}
+#killCv{width:100%;height:100%;display:block}
+body.kill-open #killFx{display:flex}
 .set-groups{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .set-groups[hidden]{display:none}
 .set-btn{min-height:52px;padding:8px 10px}
@@ -527,6 +543,7 @@ body.set-open #setSheet{display:flex}
   </div>
 </section>
 
+<section id="killFx" class="veil"><canvas id="killCv" aria-hidden="true"></canvas><p id="killSr" class="sr" aria-live="assertive"></p></section>
 <section id="setSheet" class="modal">
   <div class="panel">
     <div class="sheet-head"><h3 id="setTitle">設定</h3></div>
@@ -1631,7 +1648,7 @@ function botThink(b, idx, dt, now) {
     if (wolf && H.st.bl > 0 && !H.lo) { b.bcd -= dt; if (b.bcd <= 0) { b.bcd = H.st.bl + rnd(5, 25); hostBlow(b.id); } }
     if (!wolf && H.lo && hs.fixer === b.id) {
       // 走去點蠟燭
-      if (dist(b.x, b.y, CANDLE.wx, CANDLE.wy) < 46) { b.m = 0; b.fixT += dt; if (b.fixT > 1.2) hostRelight(b.id); return; }
+      if (dist(b.x, b.y, CANDLE.wx, CANDLE.wy) < 46) { b.m = 0; b.fixT += dt; if (b.fixT > 4.5) hostRelight(b.id); return; }   // 點 8 根蠟燭要一點時間
       if (b.fixWait > 0) { b.fixWait -= dt; b.m = 0; }
       else if (!b.fix) { if (botGoTile(b, CANDLE.x, CANDLE.y)) { b.fix = 1; b.wait = 0; b.goalJ = -1; } else b.fixWait = 1; }
       else if (botStep(b, dt, BOT_SPEED)) b.fix = 0;
@@ -1834,9 +1851,13 @@ function derive() {
 // 這個任務做到第幾步（-1 表示整個做完）
 function taskCur(tk) { for (let k = 0; k < tk.steps.length; k++) if (!(ME.td[1] >> (tk.off + k) & 1)) return k; return -1; }
 // 現在該去的工作點。狼人拿到的是假清單，所有地點都標出來方便裝忙。
+// 畫面上要標示的目標：燈被吹熄時，任務的指引全部收起來，只剩「去點蠟燭」
+function guideMarks() {
+  if (G && G.lo && G.ph === 2 && !my.dead && CANDLE) return [{ s: CANDLE.s, ti: -1, candle: true }];
+  return taskMarks();
+}
 function taskMarks() {
   const out = [];
-  if (G && G.lo && G.ph === 2 && !my.dead && CANDLE) out.push({ s: CANDLE.s, ti: -1, candle: true });
   for (let ti = 0; ti < my.tasks.length; ti++) {
     const tk = my.tasks[ti];
     if (my.wolf) { for (const s of tk.steps) out.push({ s, ti, fake: true }); continue; }
@@ -1861,7 +1882,7 @@ function onStateChange() {
   if (auto) {
     ME.td = [G.gn, ME.td[1] | auto]; Net.set({ td: ME.td });
     store('lw_pg', JSON.stringify({ c: code, g: G.gn, m: ME.td[1] }));
-    if (taskState && !taskState.done && (ME.td[1] >> taskState.bit & 1)) closeTask();
+    if (taskState && !taskState.candle && !taskState.done && (ME.td[1] >> taskState.bit & 1)) closeTask();
     if (G.ph === 2) toast('鬼魂自動完成了一步工作', 1800);
   }
   // 燈被吹熄／重新點亮
@@ -1872,6 +1893,7 @@ function onStateChange() {
       else if (was) toast('燈重新亮了。', 1800);
     }
     if (was && !G.lo) my.bcd = G.st.bl;   // 燈亮回來之後才開始算下一次的冷卻
+    if (!G.lo && taskState && taskState.candle && !taskState.done) closeTask();   // 別人先點亮了
   }
   if (G.ph !== seen.ph) {
     const prev = seen.ph; seen.ph = G.ph;
@@ -1883,7 +1905,7 @@ function onStateChange() {
   }
   if (my.dead && !seen.dead) {
     seen.dead = true;
-    if (G.ph === 2) { closeTask(); toast(my.wolf ? '你出局了。' : '你被襲擊了。現在是鬼魂，還能繼續把工作做完。', 4200); }
+    if (G.ph === 2) { closeTask(); document.body.classList.remove('map-open', 'menu-open'); if (my.wolf) toast('你出局了。', 4200); else startKillAnim(); }   // 被襲擊的人自己會看到一段動畫
   }
 }
 
@@ -1948,7 +1970,7 @@ function doBlow() { if (!canBlow()) return; my.bcd = G.st.bl; sendBlow(); }
 function doUse() {
   const u = ctxA.use; if (!u) return;
   if (u.k === 'task') openTask(u.ti);
-  else if (u.k === 'candle') sendFix();
+  else if (u.k === 'candle') openCandle();
   else { my.em = true; sendReport(''); }
 }
 function doReport() { if (ctxA.body && G) sendReport(G.ro[ctxA.body[0]]); }
@@ -1974,6 +1996,7 @@ function enterRoom(c, host, isPractice, rv) {
   ambient = [];
 }
 function leaveRoom(msg) {
+  if (killFx.on) { killFx.on = false; document.body.classList.remove('kill-open'); }
   closeTask(); document.body.classList.remove('map-open', 'menu-open');
   if (!practice) Net.close();
   inRoom = false; isHost = false; practice = false; H = null; G = null; BOTS = []; players.clear(); my.idx = -1;
@@ -2075,7 +2098,7 @@ function render(now) {
   // 地面記號：我的工作點、可襲擊的對象
   if (playing && G.ph === 2) {
     const pulse = .5 + .5 * Math.sin(now / 260);
-    for (const m of taskMarks()) {
+    for (const m of guideMarks()) {
       const st = STATIONS[m.s];
       g.strokeStyle = m.candle ? `rgba(255,122,69,${.6 + .4 * pulse})` : m.fake ? 'rgba(157,176,191,.5)' : `rgba(242,184,75,${.55 + .4 * pulse})`; g.lineWidth = 2.6; g.beginPath(); g.ellipse(st.wx, st.wy, 18 + pulse * 2, 12 + pulse * 1.4, 0, 0, 6.2832); g.stroke();
     }
@@ -2128,7 +2151,7 @@ function render(now) {
   // 工作點上方的記號
   if (playing && G.ph === 2) {
     const bobm = Math.sin(now / 300) * 3;
-    for (const m of taskMarks()) {
+    for (const m of guideMarks()) {
       const st = STATIONS[m.s];
       g.fillStyle = m.candle ? '#ff7a45' : m.fake ? '#8fa3b3' : '#f2b84b'; g.beginPath(); g.moveTo(st.wx, st.wy - 58 + bobm); g.lineTo(st.wx + 8, st.wy - 68 + bobm); g.lineTo(st.wx, st.wy - 78 + bobm); g.lineTo(st.wx - 8, st.wy - 68 + bobm); g.closePath(); g.fill();
       g.fillStyle = '#1d1405'; g.font = '800 12px ' + FONT_BODY; g.fillText(m.fake ? '?' : '!', st.wx, st.wy - 67.5 + bobm);
@@ -2207,21 +2230,22 @@ function render(now) {
     g.globalAlpha = 1; g.globalCompositeOperation = 'source-over';
   }
 
-  // 畫面邊緣的工作方向箭頭
+  // 方向箭頭：只有一個，指向離自己最近的目標（燈熄時就是蠟燭），繞在自己周圍比較好找
   if (playing && G.ph === 2) {
-    g.setTransform(view.dpr, 0, 0, view.dpr, 0, 0);
-    const mx = 26, top = 118, bot = view.h - 150;
-    for (const m of taskMarks()) {
-      if (m.fake) continue;   // 狼人的假任務不畫箭頭，蠟燭的位置大家都有箭頭
-      const st = STATIONS[m.s];
-      const px = (st.wx - cx) * view.z, py = (st.wy - 30 - cy) * view.z;
-      if (px > mx && px < view.w - mx && py > 60 && py < view.h - 60) continue;
-      const ax = clamp(px, mx, view.w - mx), ay = clamp(py, top, Math.max(top, bot));
-      const an = Math.atan2(py - ay, px - ax);
-      g.save(); g.translate(ax, ay); g.rotate(an);
-      g.fillStyle = 'rgba(11,21,29,.8)'; circ(g, 0, 0, 13);
-      g.fillStyle = m.candle ? '#ff7a45' : '#f2b84b'; g.beginPath(); g.moveTo(9, 0); g.lineTo(-4, -7); g.lineTo(-4, 7); g.closePath(); g.fill();
-      g.restore();
+    let tgt = null, bd = 1e9;
+    for (const m of guideMarks()) { if (m.fake) continue; const st = STATIONS[m.s], dd = dist(ME.x, ME.y, st.wx, st.wy); if (dd < bd) { bd = dd; tgt = m; } }
+    if (tgt) {
+      g.setTransform(view.dpr, 0, 0, view.dpr, 0, 0);
+      const st = STATIONS[tgt.s], mxp = (ME.x - cx) * view.z, myp = (ME.y - 22 - cy) * view.z, dx = (st.wx - ME.x) * view.z, dy = (st.wy - ME.y) * view.z, dd = Math.hypot(dx, dy);
+      const R = Math.min(view.w, view.h) * .3;
+      if (dd > R + 46) {   // 目標就在旁邊時不用箭頭
+        const an = Math.atan2(dy, dx), beat = .5 + .5 * Math.sin(now / 240), rr2 = R + beat * 5, colr = tgt.candle ? '#ff7a45' : '#f2b84b';
+        g.save(); g.translate(mxp + Math.cos(an) * rr2, myp + Math.sin(an) * rr2); g.rotate(an);
+        g.fillStyle = 'rgba(8,14,20,.78)'; circ(g, 0, 0, 23);
+        g.strokeStyle = colr; g.lineWidth = 2; g.beginPath(); g.arc(0, 0, 23, 0, 6.2832); g.stroke();
+        g.fillStyle = colr; g.beginPath(); g.moveTo(17, 0); g.lineTo(-7, -13); g.lineTo(-2, 0); g.lineTo(-7, 13); g.closePath(); g.fill();
+        g.restore();
+      }
     }
   }
 }
@@ -2252,6 +2276,7 @@ function frame(now) {
       p.phase += dt * (p.m ? 13 : 2.2);
     }
     if (inRoom && G && G.ph === 1 && my.idx >= 0) drawIntro(now); else render(now);
+    if (killFx.on) drawKill(now);
     uiAcc += dt; if (uiAcc >= .1) { uiAcc = 0; uiTick(now); }
   } catch (e) { if (window.console) console.error(e); }
 }
@@ -2609,6 +2634,112 @@ function drawIntro(now) {
   const fade = 1 - smooth(t / .6);
   if (fade > 0) { g.fillStyle = `rgba(7,12,18,${fade})`; g.fillRect(0, 0, W, Hh); }
 }
+
+// ===== 被狼人襲擊的動畫（只有被襲擊的村民自己看得到，三種隨機一種）=====
+const killFx = { on: false, t0: 0, kind: 0, col: '#d8574b', fix: null, last: -1 };
+const KILL_LEN = 3.6, KILL_HIT = [.8, .85, 1.0];
+function startKillAnim(kind) {
+  let k = kind; if (k == null) { do { k = rint(0, 2); } while (k === killFx.last); }
+  killFx.kind = k; killFx.last = k; killFx.t0 = performance.now(); killFx.col = COLORS[ME.c][1]; killFx.fix = null; killFx.on = true;
+  $('killSr').textContent = '你被狼人襲擊了。你變成了鬼魂，還能繼續幫忙把工作做完。';
+  document.body.classList.add('kill-open');
+}
+function stopKillAnim() { killFx.on = false; document.body.classList.remove('kill-open'); toast('你現在是鬼魂，還能繼續把工作做完。', 3600); }
+function drawKill(now) {
+  const c = $('killCv'), W = c.clientWidth, H = c.clientHeight; if (!W || !H) return;
+  const d = view.dpr;
+  if (c.width !== Math.round(W * d) || c.height !== Math.round(H * d)) { c.width = Math.round(W * d); c.height = Math.round(H * d); }
+  const g = c.getContext('2d'), kind = killFx.kind, col = killFx.col, calm = reduceMotion();
+  const t = killFx.fix != null ? killFx.fix : (now - killFx.t0) / 1000;
+  if (t >= KILL_LEN && killFx.fix == null) { stopKillAnim(); return; }
+  const land = W > H * 1.15, u = land ? Math.min(H / 360, W / 640) : Math.min(W / 360, H / 640);
+  const vx = land ? W * .33 : W / 2, vy = land ? H * .74 : H * .6, tx = land ? W * .69 : W / 2, ty = land ? H * .42 : H * .2;
+  const hit = KILL_HIT[kind], ht = t - hit, E = (x, y, rx, ry) => { g.beginPath(); g.ellipse(x, y, rx, ry, 0, 0, 6.2832); g.fill(); };
+  g.setTransform(d, 0, 0, d, 0, 0); g.globalAlpha = 1; g.globalCompositeOperation = 'source-over'; g.shadowBlur = 0; g.clearRect(0, 0, W, H);
+  g.globalAlpha = 1 - smooth((t - (KILL_LEN - .5)) / .5);   // 結尾淡出，回到遊戲
+  // 背景：暗下來，邊緣泛紅
+  g.fillStyle = 'rgba(8,4,6,' + (.93 * smooth(t / .22)) + ')'; g.fillRect(0, 0, W, H);
+  const vg = g.createRadialGradient(W / 2, H / 2, Math.min(W, H) * .2, W / 2, H / 2, Math.max(W, H) * .72);
+  vg.addColorStop(0, 'rgba(130,0,0,0)'); vg.addColorStop(1, 'rgba(150,12,8,' + (.3 + (ht > 0 ? .28 * Math.max(0, 1 - ht / 1.2) : 0)) + ')'); g.fillStyle = vg; g.fillRect(0, 0, W, H);
+  g.save();
+  if (!calm && ht > 0 && ht < .45) g.translate((Math.random() - .5) * 16 * u * (1 - ht / .45), (Math.random() - .5) * 12 * u * (1 - ht / .45));   // 被擊中時畫面震一下
+  g.fillStyle = 'rgba(0,0,0,.4)'; E(vx, vy + 4 * u, 70 * u, 13 * u);
+  // --- 狼 ---
+  if (kind === 0) {   // 一：身後的狼影撲上來，三道爪痕劃過
+    const rise = smooth((t - .12) / .5), lunge = ht > 0 ? smooth(ht / .2) : 0;
+    g.save(); g.translate(vx + 6 * u, vy - 150 * u + (1 - rise) * 90 * u + lunge * 16 * u); const k = (1.5 + rise * .5 + lunge * .25) * u; g.scale(k, k);
+    g.fillStyle = 'rgba(14,6,8,' + rise + ')'; wolfShape(g); g.fill(); g.fillStyle = 'rgba(255,50,38,' + rise * (.8 + .2 * Math.sin(t * 22)) + ')'; g.shadowColor = '#ff2a1a'; g.shadowBlur = 18; wolfEyes(g); g.restore();
+  } else if (kind === 1) {   // 二：有人從背後靠近，舉起刀
+    const sl = smooth((t - .1) / .55), px = vx + lerp(210, 62, sl) * u, sw = ht > 0 ? smooth(ht / .14) : 0;
+    g.save(); g.translate(px, vy + 2 * u); g.scale(3.3 * u, 3.3 * u);
+    g.fillStyle = 'rgba(0,0,0,.4)'; g.beginPath(); g.ellipse(0, 1, 13, 4, 0, 0, 6.2832); g.fill();
+    g.fillStyle = '#2b1519'; g.strokeStyle = 'rgba(255,70,55,.55)'; g.lineWidth = .9;
+    g.beginPath(); g.moveTo(-11, -2); g.quadraticCurveTo(-12, -18, -7, -22); g.lineTo(7, -22); g.quadraticCurveTo(12, -18, 11, -2); g.closePath(); g.fill(); g.stroke();
+    g.beginPath(); g.moveTo(-9, -31); g.lineTo(-11, -44); g.lineTo(-2, -35); g.closePath(); g.fill(); g.stroke(); g.beginPath(); g.moveTo(9, -31); g.lineTo(11, -44); g.lineTo(2, -35); g.closePath(); g.fill(); g.stroke();
+    g.beginPath(); g.arc(0, -27, 9, 0, 6.2832); g.fill(); g.stroke();
+    g.fillStyle = 'rgba(255,55,40,' + (.7 + .3 * Math.sin(t * 20)) + ')'; g.shadowColor = '#ff2a1a'; g.shadowBlur = 8; circ(g, -4, -27, 1.9); circ(g, 3, -27, 1.9); g.shadowBlur = 0;
+    const ka = lerp(-2.0, -3.6, sw); drawKnife(g, -12, -22 - (1 - sw) * 8, ka, .7); drawGlint(g, -12 + Math.cos(ka) * 20, -22 - (1 - sw) * 8 + Math.sin(ka) * 20, 9, clamp(1 - Math.abs(t - .62) / .2, 0, 1));
+    g.restore();
+  } else {   // 三：巨大的狼口咬下來
+    const loom = smooth((t - .1) / .55), ey = H * .26;
+    g.fillStyle = 'rgba(255,45,34,' + loom * (.75 + .25 * Math.sin(t * 16)) + ')'; g.shadowColor = '#ff2a1a'; g.shadowBlur = 30 * u;
+    for (const sgn of [-1, 1]) { g.beginPath(); g.moveTo(W / 2 + sgn * 150 * u, ey - 34 * u); g.lineTo(W / 2 + sgn * 46 * u, ey + 16 * u); g.lineTo(W / 2 + sgn * 128 * u, ey + 30 * u); g.closePath(); g.fill(); }
+    g.shadowBlur = 0;
+  }
+  // --- 被襲擊的村民：先嚇一跳，被擊中後倒下 ---
+  const fall = ht > 0 ? smooth(ht / .5) : 0, bounce = ht > .5 && ht < .8 ? Math.sin((ht - .5) / .3 * Math.PI) * .08 : 0;
+  g.save(); g.translate(vx, vy); g.scale(3.3 * u, 3.3 * u);
+  const scare = ht < 0 ? smooth((t - .3) / .2) : 0;
+  g.save(); g.translate(0, -scare * 2.5); g.rotate((fall - bounce) * (kind === 1 ? -1.5 : 1.5));
+  drawVillager(g, 0, 0, col, { f: 0, phase: ht < 0 ? t * 26 : 0, moving: ht < 0 && t > .35 });
+  if (fall > 0) { g.strokeStyle = '#2a1f1a'; g.lineWidth = 1.1; for (const ex of [-3, 3]) { g.beginPath(); g.moveTo(ex - 1.4, -26.8); g.lineTo(ex + 1.4, -24); g.moveTo(ex + 1.4, -26.8); g.lineTo(ex - 1.4, -24); g.stroke(); } }
+  g.restore();
+  if (scare > 0 && ht < 0) { g.fillStyle = '#ffd34a'; g.font = '900 18px ' + FONT_BODY; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('!', 0, -56 - scare * 3); }
+  g.restore();
+  // --- 擊中的瞬間 ---
+  if (kind === 0 && ht > -.06) {   // 爪痕
+    const p = clamp((ht + .06) / .16, 0, 1), fade = clamp(1 - (ht - .5) / 1.1, 0, 1);
+    g.lineCap = 'round'; g.shadowColor = '#ff3a2a'; g.shadowBlur = 16 * u;
+    for (let i = -1; i <= 1; i++) {
+      const x0 = vx - 110 * u + i * 30 * u, y0 = vy - 186 * u - i * 8 * u, x1 = lerp(x0, vx + 96 * u + i * 30 * u, p), y1 = lerp(y0, vy + 10 * u - i * 8 * u, p);
+      g.strokeStyle = 'rgba(255,90,70,' + fade + ')'; g.lineWidth = (12 - Math.abs(i) * 3) * u; g.beginPath(); g.moveTo(x0, y0); g.quadraticCurveTo((x0 + x1) / 2 + 24 * u, (y0 + y1) / 2 - 12 * u, x1, y1); g.stroke();
+      g.strokeStyle = 'rgba(255,245,235,' + fade + ')'; g.lineWidth = (4.5 - Math.abs(i)) * u; g.beginPath(); g.moveTo(x0, y0); g.quadraticCurveTo((x0 + x1) / 2 + 24 * u, (y0 + y1) / 2 - 12 * u, x1, y1); g.stroke();
+    }
+    g.shadowBlur = 0;
+  }
+  if (kind === 1 && ht > 0) {   // 刀光
+    const p = clamp(ht / .18, 0, 1), fade = clamp(1 - (ht - .3) / .9, 0, 1);
+    g.strokeStyle = 'rgba(255,255,255,' + fade + ')'; g.lineWidth = 5 * u; g.lineCap = 'round'; g.shadowColor = '#ffd0c0'; g.shadowBlur = 18 * u;
+    g.beginPath(); g.arc(vx + 20 * u, vy - 70 * u, 96 * u, -2.5, -2.5 + 2.9 * p); g.stroke(); g.shadowBlur = 0;
+  }
+  if (kind === 2) {   // 上下兩排牙齒咬合
+    const close = smooth((t - .55) / (hit - .55)), open = ht > .55 ? smooth((ht - .55) / .5) : 0, gap = (1 - close + open) * H * .56;
+    const jaw = (dir) => {
+      const base = H / 2 - dir * gap; g.fillStyle = '#16080a'; g.fillRect(0, dir > 0 ? -4 : base, W, dir > 0 ? base + 4 : H - base + 4);
+      g.fillStyle = '#5a1418'; g.fillRect(0, dir > 0 ? base - 16 * u : base, W, 16 * u);
+      g.fillStyle = '#f3ece0'; const n = Math.max(7, Math.round(W / (64 * u))), tw = W / n;
+      for (let i = 0; i < n; i++) { const big = (i === 1 || i === n - 2) ? 1.5 : 1, x = i * tw + (dir > 0 ? 0 : tw / 2) - (dir > 0 ? 0 : tw); g.beginPath(); g.moveTo(x + tw * .12, base); g.lineTo(x + tw * .5, base + dir * 46 * u * big); g.lineTo(x + tw * .88, base); g.closePath(); g.fill(); }
+      if (dir < 0) { const x = n * tw - tw / 2; g.beginPath(); g.moveTo(x + tw * .12, base); g.lineTo(x + tw * .5, base + dir * 46 * u); g.lineTo(x + tw * .88, base); g.closePath(); g.fill(); }
+    };
+    if (gap < H * .56) { jaw(1); jaw(-1); }
+  }
+  g.restore();
+  if (ht > 0 && ht < .22) { g.fillStyle = 'rgba(255,235,225,' + (1 - ht / .22) * .75 + ')'; g.fillRect(0, 0, W, H); }
+  // --- 鬼魂從身上飄起來 ---
+  const gp = smooth((ht - 1.05) / .9);
+  if (gp > 0) { g.save(); g.globalAlpha *= gp * .9; g.translate(vx + (kind === 1 ? -34 : 34) * u, vy - 30 * u - gp * 70 * u + Math.sin(t * 3) * 4 * u); g.scale(3 * u, 3 * u); drawVillager(g, 0, 0, col, { f: 0, ghost: true, phase: t * 3 }); g.restore(); }
+  // --- 文字 ---
+  const ta = clamp((ht - .35) / .4, 0, 1);
+  g.textAlign = 'center'; g.textBaseline = 'middle';
+  if (ta > 0) {
+    g.save(); g.globalAlpha *= ta; g.translate(tx, ty + (1 - smooth(ta)) * 12 * u); const pop = 1 + (1 - smooth(clamp((ht - .35) / .25, 0, 1))) * .3; g.scale(pop, pop);
+    g.font = '700 ' + Math.round(46 * u) + 'px ' + FONT_DISP; g.lineJoin = 'round'; g.strokeStyle = 'rgba(4,4,6,.9)'; g.lineWidth = 7 * u; g.strokeText('你被狼人襲擊了', 0, 0);
+    g.shadowColor = 'rgba(226,60,50,.85)'; g.shadowBlur = 22 * u * d; g.fillStyle = '#ee5a4a'; g.fillText('你被狼人襲擊了', 0, 0); g.restore();
+  }
+  const sa = clamp((ht - 1.1) / .5, 0, 1);
+  if (sa > 0) { g.save(); g.globalAlpha *= sa; g.font = '600 ' + Math.round(17 * u) + 'px ' + FONT_BODY; g.fillStyle = '#e9e2d2'; g.fillText('你變成了鬼魂', tx, ty + 50 * u); g.font = '500 ' + Math.round(14 * u) + 'px ' + FONT_BODY; g.fillStyle = '#b8c6d2'; g.fillText('還能繼續幫忙把工作做完', tx, ty + 76 * u); g.restore(); }
+  g.globalAlpha = 1;
+}
 // ===== 介面 =====
 let toastTimer = 0;
 function toast(msg, ms) { const t = $('toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove('show'), ms || 2600); }
@@ -2803,8 +2934,8 @@ function renderHud() {
   }
   const use = $('btnUse'), rep = $('btnReport'), kill = $('btnKill');
   const u = ctxA.use;
-  const ul = u ? (u.k === 'task' ? '工作' : u.k === 'candle' ? '點蠟燭' : '敲鐘') : '使用';
-  if (changed('useL', ul)) use.textContent = ul;
+  const ul = u ? (u.k === 'task' ? '工作' : u.k === 'candle' ? '點燃蠟燭' : '敲鐘') : '使用';
+  if (changed('useL', ul)) { use.textContent = ul.length > 3 ? ul.slice(0, 2) + '\n' + ul.slice(2) : ul; use.classList.toggle('long', ul.length > 3); }   // 四個字分成兩行
   use.disabled = !u; rep.disabled = !ctxA.body;
   const showKill = my.wolf && !my.dead;
   if (kill.hidden === showKill) kill.hidden = !showKill;
@@ -2817,6 +2948,8 @@ function renderHud() {
   // 燈熄的時候的提示
   const al = G.lo && G.ph === 2 ? (my.wolf ? '燈已吹熄・村民現在看不遠' : my.dead ? '燈被吹熄了' : '燈被吹熄了・到「' + CANDLE.area + '」點蠟燭') : '';
   if (changed('alert', al)) { const e = $('alert'); e.textContent = al; e.hidden = !al; }
+  // 燈熄的時候，村民的任務清單先收起來，只留去點蠟燭的提示
+  const hideList = !!(G.lo && G.ph === 2 && !my.wolf && !my.dead); if ($('taskList').hidden !== hideList) $('taskList').hidden = hideList;
 }
 
 // ----- 工作小遊戲 -----
@@ -2848,6 +2981,33 @@ function finishTask() {
 function closeTask() {
   if (taskState && taskState.cleanup) taskState.cleanup();
   taskState = null; document.body.classList.remove('task-open');
+}
+// 燈被吹熄後：要把 8 根蠟燭一根一根點亮，燈才會恢復
+function openCandle() {
+  closeTask();
+  if (!G || !G.lo || G.ph !== 2 || my.dead) return;
+  taskState = { candle: true, bit: -1, done: false, cleanup: null };
+  $('taskTitle').textContent = '點燃蠟燭'; $('taskArea').textContent = CANDLE.area;
+  const box = $('taskBox'); box.textContent = '';
+  const need = 8; let lit = 0;
+  const cnt = el('div', 'count', '0 / ' + need), gridEl = el('div', 'candle-grid');
+  for (let i = 0; i < need; i++) {
+    const b = el('button', 'candle'); b.type = 'button'; b.setAttribute('aria-label', '第 ' + (i + 1) + ' 根蠟燭'); b.appendChild(el('i'));
+    b.addEventListener('pointerdown', e => {
+      e.preventDefault(); if (!taskState || taskState.done || b.classList.contains('lit')) return;
+      b.classList.add('lit'); lit++; cnt.textContent = lit + ' / ' + need;
+      if (lit >= need) finishCandle();
+    });
+    gridEl.appendChild(b);
+  }
+  box.appendChild(el('div', 'task-tip', '把 ' + need + ' 根蠟燭全部點亮，大家的視野才會恢復')); box.appendChild(gridEl); box.appendChild(cnt);
+  document.body.classList.add('task-open');
+}
+function finishCandle() {
+  if (!taskState || !taskState.candle || taskState.done) return;
+  taskState.done = true; sendFix();
+  const box = $('taskBox'); box.textContent = ''; box.appendChild(el('div', 'task-done', '點亮了'));
+  setTimeout(() => { if (taskState && taskState.done) closeTask(); }, 700);
 }
 function holdButton(label) {
   const b = el('button', 'hold-btn', label); b.type = 'button'; const s = { b, down: false };
@@ -3094,7 +3254,7 @@ function drawMiniMap(now) {
   if (c.width !== Math.round(w * d)) { c.width = Math.round(w * d); c.height = Math.round(h * d); c.style.width = w + 'px'; c.style.height = h + 'px'; }
   const m = c.getContext('2d'); paintMiniMap(m, sc, d, true);
   if (G && my.idx >= 0) {
-    for (const mk of taskMarks()) {
+    for (const mk of guideMarks()) {
       const st = STATIONS[mk.s], r = 7 / sc;
       m.fillStyle = mk.candle ? '#ff7a45' : mk.fake ? '#8fa3b3' : '#f2b84b'; m.beginPath(); m.moveTo(st.wx, st.wy - r); m.lineTo(st.wx + r, st.wy); m.lineTo(st.wx, st.wy + r); m.lineTo(st.wx - r, st.wy); m.closePath(); m.fill();
       m.strokeStyle = '#1d1405'; m.lineWidth = 1.5 / sc; m.stroke();
@@ -3193,7 +3353,7 @@ function main() {
   requestAnimationFrame(frame);
   window.__lw = {
     get G() { return G; }, get H() { return H; }, ME, my, players, get BOTS() { return BOTS; }, Net, get STATIONS() { return STATIONS; }, SPAWNS, grid, MAPS, loadMap, applyMap, canSee, paintMiniMap, tget, boxFree, get curMap() { return curMap; },
-    findPath, startPractice, createRoom, joinRoom, invite, inviteLink, intro, hostStart, hostKill, hostReport, hostTick, setBotCount, castVote, sendChat, finishTask, openTask, leaveRoom, uiMode, parseTasks, dealTasks, taskCur, taskMarks, get CHAINS() { return CHAINS; }, get taskState() { return taskState; }, get hs() { return hs; }, get BUILDINGS() { return BUILDINGS; }, get OCC() { return OCC; }, get view() { return view; }, get CANDLE() { return CANDLE; }, hostBlow, hostRelight, doBlow, canBlow, killRangeOf,
+    findPath, startPractice, createRoom, joinRoom, invite, inviteLink, intro, hostStart, hostKill, hostReport, hostTick, setBotCount, castVote, sendChat, finishTask, openTask, leaveRoom, uiMode, parseTasks, dealTasks, taskCur, taskMarks, get CHAINS() { return CHAINS; }, get taskState() { return taskState; }, get hs() { return hs; }, get BUILDINGS() { return BUILDINGS; }, get OCC() { return OCC; }, get view() { return view; }, get CANDLE() { return CANDLE; }, hostBlow, hostRelight, doBlow, canBlow, killRangeOf, guideMarks, openCandle, killFx, startKillAnim,
     get ctx() { return ctxA; }, get inRoom() { return inRoom; }, get isHost() { return isHost; }, get code() { return code; }
   };
 }
