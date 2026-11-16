@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>月光光心慌慌</title>
 <meta name="description" content="和朋友連線玩的狼人村：做完村裡的工作，找出混在裡面的狼人。">
-<meta name="lw-build" content="30">
+<meta name="lw-build" content="32">
 <meta name="theme-color" content="#0b151d">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -1231,6 +1231,8 @@ function artCanvas(b) {
 }
 // 這個檔案由 art/scenes.py 產生：開場揭曉身分時的橫式職業卡（使用者提供）
 const ROLE_SCENE_DEF = {"0": {"w": 1672, "h": 941, "d": "img-8c7e554875.webp"}, "1": {"w": 1672, "h": 941, "d": "img-fd9850f922.webp"}, "2": {"w": 1672, "h": 941, "d": "img-4f8ae1f6e9.webp"}, "3": {"w": 1672, "h": 941, "d": "img-65c3d5b3a6.webp"}, "4": {"w": 1672, "h": 941, "d": "img-2fbd53f1bd.webp"}};
+// 這個檔案由 art/comic.py 產生：投票放逐的漫畫（使用者提供）
+const COMIC_DEF = {"ej": [{"w": 1672, "h": 941, "d": "img-799435197e.webp"}, {"w": 1672, "h": 941, "d": "img-8743da2e02.webp"}, {"w": 1672, "h": 941, "d": "img-5157534406.webp"}, {"w": 1672, "h": 941, "d": "img-b2dcd46d08.webp"}, {"w": 1672, "h": 941, "d": "img-27dfc46984.webp"}, {"w": 1672, "h": 941, "d": "img-b8a9c5932f.webp"}, {"w": 1672, "h": 941, "d": "img-c3c43d5cdd.webp"}], "none": [{"w": 1672, "h": 941, "d": "img-799435197e.webp"}, {"w": 1672, "h": 941, "d": "img-8743da2e02.webp"}, {"w": 1672, "h": 941, "d": "img-5157534406.webp"}, {"w": 1672, "h": 941, "d": "img-f951f0537c.webp"}], "boom": {"w": 1321, "h": 737, "d": "img-3c6b521bf7.webp"}};
 'use strict';
 // ===== 常數與工具 =====
 const TILE = 40, MW = 64, MH = 46, WORLD_W = MW * TILE, WORLD_H = MH * TILE;
@@ -3241,6 +3243,7 @@ function allVoted(humansOnly) {
   for (let i = 0; i < H.ro.length; i++) { if (!aliveIdx(i)) continue; if (humansOnly && isBotId(H.ro[i])) continue; if (!hasVoted(i)) return false; }
   return true;
 }
+const EJ_HOST = 14, NONE_HOST = 9;   // 漫畫演出的秒數：有人被放逐、沒人被放逐（和 04b-intro.js 的 EJ_LEN、NONE_LEN 一樣）
 function hostResolve() {
   const n = H.ro.length, cnt = new Array(n).fill(0), vt = []; let skip = 0;
   for (let i = 0; i < n; i++) {
@@ -3255,11 +3258,9 @@ function hostResolve() {
   for (let i = 0; i < n; i++) { if (cnt[i] > max) { max = cnt[i]; top = i; tie = false; } else if (cnt[i] === max && max > 0) tie = true; }
   let ej = -1; if (max > 0 && !tie && max > skip) ej = top;
   if (ej >= 0) H.dd = setFlag(H.dd, ej);
-  // 放逐動畫（裡面就有票數）大約 5 秒，播完直接進下一個階段：分出勝負就結算，沒有就繼續
-  let w = 0, v = 0; for (let i = 0; i < n; i++) { if (!aliveIdx(i)) continue; if (H.wf[i] === '1') w++; else v++; }
+  // 放逐的漫畫（最後是票數）大約 14 秒；沒人被放逐是另一組四格加票數，約 9 秒。播完直接進下一個階段：分出勝負就結算，沒有就繼續
   hs.foolOut = ej >= 0 && H.st.gm === 2 && ej === H.sp && !H.su;
-  const over = hs.foolOut || w === 0 || w >= v;
-  H.rs = { ej, tie: tie ? 1 : 0, sk: skip, vt }; H.ph = 4; H.rem = over ? 5 : ej >= 0 ? 6 : 5; hostDirty = true;
+  H.rs = { ej, tie: tie ? 1 : 0, sk: skip, vt }; H.ph = 4; H.rem = ej >= 0 ? EJ_HOST : NONE_HOST; hostDirty = true;
 }
 // ===== 特殊玩法 =====
 // 檢驗官：一局一次，靠近一位玩家查出他是不是狼人（結果只有檢驗官自己看得到）
@@ -4578,11 +4579,10 @@ function startKillAnim(kind) {
   let k = kind; if (k == null) { do { k = rint(0, 2); } while (k === killFx.last); }
   if (k === 4) {   // 放逐：先把這一刻的結果記下來
     const rs = G.rs, e = rs.ej;
-    killFx.ej = e >= 0 ? { name: nameIdx(e), col: COLORS[colorIdx(e)][1], me: G.ro[e] === ME.id } : { none: true, tie: !!rs.tie };   // 只記是誰，不記身分：動畫不透露他是不是狼人
-    killFx.len = e >= 0 ? 5.6 : 4.6; killFx.crowd = [];
+    killFx.ej = e >= 0 ? { name: nameIdx(e), col: COLORS[colorIdx(e)][1], me: G.ro[e] === ME.id, w: G.wf[e] === '1' ? 1 : 0 } : { none: true, tie: !!rs.tie };   // w：他是不是狼人，決定漫畫最後一張用哪張
+    killFx.len = e >= 0 ? EJ_LEN : NONE_LEN; comicLoad();
     { const cnt = {}; for (const v of rs.vt || []) if (v[1] >= 0) cnt[v[1]] = (cnt[v[1]] || 0) + 1;   // 每個人得到幾票，畫在動畫裡
       killFx.votes = Object.keys(cnt).map(i => ({ n: nameIdx(+i), c: COLORS[colorIdx(+i)][1], v: cnt[i], out: +i === e })).sort((a, b) => b.v - a.v).slice(0, 6); if (rs.sk) killFx.votes.push({ n: '棄票', c: '#8fa3b3', v: rs.sk, skip: true }); }
-    for (let i = 0; i < G.ro.length && killFx.crowd.length < 5; i++) if (i !== e && G.dd[i] === '0' && G.lf[i] === '0') killFx.crowd.push(COLORS[colorIdx(i)][1]);
   }
   killFx.kind = k; if (k < 3) killFx.last = k; killFx.t0 = performance.now(); killFx.col = COLORS[ME.c][1]; killFx.fix = null; killFx.on = true;
   $('killSr').textContent = k === 4 ? (killFx.ej.none ? '沒有人被放逐。' : killFx.ej.me ? '你被放逐了。' : killFx.ej.name + ' 被放逐了。') : k === 3 ? '祭壇沒有在時間內解除，狼王降臨，狼人獲勝。' : '你被狼人襲擊了。你變成了鬼魂，還能繼續幫忙把工作做完。';
@@ -4745,96 +4745,119 @@ function drawKing(g, W, H, d, t, calm) {
   g.globalAlpha = 1;
 }
 
-// ===== 投票結束：把被放逐的人踢出村子（所有人都會看到）=====
-function drawEject(g, W, H, d, t, calm) {
-  fxInit();
-  const ej = killFx.ej || { none: true }, LEN = killFx.len || 5.6;
-  const land = W > H * 1.15, u = land ? Math.min(H / 360, W / 640) : Math.min(W / 360, H / 640);
-  const gy = land ? H * .76 : H * .62, gx = land ? W * .23 : W * .3, tx = land ? W * .72 : W / 2, ty = land ? H * .2 : H * .1, mnx = land ? W * .45 : W * .74, mny = land ? H * .2 : H * .3;
-  const E = (x, y, rx, ry) => { g.beginPath(); g.ellipse(x, y, rx, ry, 0, 0, 6.2832); g.fill(); };
-  g.setTransform(d, 0, 0, d, 0, 0); g.globalCompositeOperation = 'source-over'; g.shadowBlur = 0; g.clearRect(0, 0, W, H);
-  g.globalAlpha = 1 - smooth((t - (LEN - .5)) / .5);
-  // --- 夜空、月亮、遠山 ---
-  const sk = g.createLinearGradient(0, 0, 0, gy); sk.addColorStop(0, '#0b1430'); sk.addColorStop(1, '#2a3f68'); g.fillStyle = sk; g.fillRect(0, 0, W, gy + 2);
-  for (const st of FX.stars) { g.fillStyle = 'rgba(255,255,255,' + (.3 + .5 * Math.abs(Math.sin(t * 1.5 + st[3]))) + ')'; circ(g, st[0] * W, st[1] * gy * .8, st[2] * u); }
-  g.fillStyle = 'rgba(230,236,255,.16)'; circ(g, mnx, mny, 54 * u); g.fillStyle = '#f2f0dc'; circ(g, mnx, mny, 34 * u); g.fillStyle = 'rgba(190,190,170,.5)'; circ(g, mnx - 10 * u, mny - 8 * u, 7 * u); circ(g, mnx + 11 * u, mny + 10 * u, 5 * u);
-  g.fillStyle = '#1b2a4a'; g.beginPath(); g.moveTo(0, gy); for (let x = 0; x <= W + 10; x += 10) g.lineTo(x, gy - 34 * u - Math.sin(x / (120 * u) + 1) * 22 * u - Math.sin(x / (47 * u)) * 7 * u); g.lineTo(W, gy); g.closePath(); g.fill();
-  // --- 地面和通往村外的路 ---
-  const gg = g.createLinearGradient(0, gy, 0, H); gg.addColorStop(0, '#22402e'); gg.addColorStop(1, '#122317'); g.fillStyle = gg; g.fillRect(0, gy - 2, W, H - gy + 2);
-  g.fillStyle = '#6a5a44'; g.beginPath(); g.moveTo(0, gy + 8 * u); g.lineTo(gx + 60 * u, gy + 6 * u); g.quadraticCurveTo(W * .62, gy + 4 * u, W, gy - 6 * u); g.lineTo(W, gy + 16 * u); g.quadraticCurveTo(W * .62, gy + 34 * u, gx + 60 * u, gy + 44 * u); g.lineTo(0, gy + 50 * u); g.closePath(); g.fill();
-  // --- 木牆和村門 ---
-  for (let x = -6 * u; x < gx - 52 * u; x += 17 * u) { g.fillStyle = '#6b4d33'; g.beginPath(); g.moveTo(x, gy + 6 * u); g.lineTo(x, gy - 84 * u); g.lineTo(x + 8 * u, gy - 98 * u); g.lineTo(x + 16 * u, gy - 84 * u); g.lineTo(x + 16 * u, gy + 6 * u); g.closePath(); g.fill(); g.fillStyle = 'rgba(255,220,170,.1)'; g.fillRect(x + 1 * u, gy - 84 * u, 3 * u, 90 * u); g.fillStyle = 'rgba(0,0,0,.3)'; g.fillRect(x + 13 * u, gy - 84 * u, 3 * u, 90 * u); }
-  g.fillStyle = 'rgba(0,0,0,.28)'; g.fillRect(0, gy - 52 * u, gx - 54 * u, 5 * u);
-  g.fillStyle = '#3a2819'; g.fillRect(gx - 54 * u, gy - 122 * u, 13 * u, 130 * u); g.fillRect(gx + 44 * u, gy - 122 * u, 13 * u, 130 * u); g.fillStyle = '#573d27'; rr(g, gx - 64 * u, gy - 136 * u, 130 * u, 17 * u, 4 * u); g.fill();
-  g.fillStyle = '#f2b84b'; g.font = '700 ' + Math.round(12 * u) + 'px ' + FONT_DISP; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('月光村', gx + 1 * u, gy - 127 * u);
-  const lg = g.createRadialGradient(gx, gy - 100 * u, 2 * u, gx, gy - 100 * u, 110 * u); lg.addColorStop(0, 'rgba(255,190,100,.5)'); lg.addColorStop(1, 'rgba(255,190,100,0)'); g.fillStyle = lg; g.fillRect(gx - 120 * u, gy - 220 * u, 240 * u, 240 * u);
-  g.strokeStyle = '#2a1c12'; g.lineWidth = 1.5 * u; g.beginPath(); g.moveTo(gx, gy - 119 * u); g.lineTo(gx, gy - 108 * u); g.stroke(); g.fillStyle = '#ffd27a'; rr(g, gx - 6 * u, gy - 108 * u, 12 * u, 15 * u, 3 * u); g.fill();
-  if (ej.none) { g.fillStyle = '#4a3524'; g.fillRect(gx - 41 * u, gy - 104 * u, 41 * u, 110 * u); g.fillRect(gx + 1 * u, gy - 104 * u, 43 * u, 110 * u); g.fillStyle = 'rgba(0,0,0,.3)'; g.fillRect(gx - 1 * u, gy - 104 * u, 2 * u, 110 * u); }   // 沒人被放逐：門關著
-  // --- 留下來的村民舉著火把，站在牆邊看 ---
-  const hit = .95, ht = t - hit, cw = killFx.crowd && killFx.crowd.length ? killFx.crowd : ['#7fb857', '#5a9be0', '#e58f3c'];
-  const SP = SPR.ok, spots = (SP ? [[.045, 12], [.13, 12], [.087, 40], [.172, 40], [.0, 40]] : [[.035, 12], [.105, 12], [.07, 40], [.14, 40], [.0, 40]]).slice(0, cw.length).map((s, i) => [s[0], s[1], i]).sort((p, q) => p[1] - q[1]);
-  for (const sp of spots) {
-    const i = sp[2], x = (land ? W * .035 : 22 * u) + sp[0] * (land ? W : W * 1.6), y = gy + sp[1] * u, hop = ej.none ? 0 : Math.abs(Math.sin(t * 7 + i * 1.3)) * 5 * u * (ht > 0 ? 1 : .35);
-    g.save(); g.translate(x, y - hop); g.scale((SP ? 1.85 : 2.1) * u, (SP ? 1.85 : 2.1) * u);
-    if (!SP) drawVillager(g, 0, 0, cw[i], { f: 1, phase: t * 3 + i });
-    const tx = SP ? 19 : 14, ty = SP ? -51 : -43;
-    g.strokeStyle = '#3a2819'; g.lineWidth = 2.2; g.lineCap = 'round'; g.beginPath(); g.moveTo(SP ? 13 : 9, SP ? -16 : -12); g.lineTo(tx, ty + 5); g.stroke();
-    g.fillStyle = 'rgba(255,150,40,.28)'; circ(g, tx, ty, 11);
-    g.fillStyle = 'rgba(255,160,50,.95)'; g.beginPath(); g.ellipse(tx + Math.sin(t * 13 + i) * .8, ty, 3.4, 6.5 + Math.sin(t * 17 + i * 2), 0, 0, 6.2832); g.fill(); g.fillStyle = 'rgba(255,240,190,.95)'; g.beginPath(); g.ellipse(tx, ty + 1.5, 1.5, 3, 0, 0, 6.2832); g.fill();
-    if (SP) drawVillager(g, 0, 0, cw[i], { f: 1, phase: t * 3 + i });
-    if (ej.none && t > .5) { g.fillStyle = '#e9e2d2'; g.font = '800 12px ' + FONT_BODY; g.textAlign = 'center'; g.fillText('?', -2, -56 - Math.sin(t * 3 + i) * 2); }
+// ===== 投票結束：用漫畫演出放逐（使用者提供的圖，所有人都會看到）=====
+// 四格依序出現（左上、右上、左下、右下，每格隔 1 秒）→ 全螢幕：主角站起來 → 投出狼人／不是狼人 → 黑屏 0.5 秒 →「蹦!!!」0.5 秒 → 黑底的投票結果
+// 沒有人被放逐時（平手、票數不夠）：另一組四格，同樣每格隔 1 秒 → 黑底的「沒有人被放逐」和票數
+const COMIC = { ej: [], none: [], boom: null, go: false };
+function comicLoad() {
+  if (COMIC.go || typeof COMIC_DEF === 'undefined') return; COMIC.go = true;
+  const mk = D => { const o = { ok: false, im: new Image(), w: D.w, h: D.h }; o.im.decoding = 'async'; o.im.onload = () => { const done = () => { o.ok = true; }; if (o.im.decode) o.im.decode().then(done, done); else done(); }; o.im.src = D.d; return o; };
+  COMIC.ej = COMIC_DEF.ej.map(mk); COMIC.none = (COMIC_DEF.none || []).map(mk); COMIC.boom = mk(COMIC_DEF.boom);
+}
+setTimeout(comicLoad, 2500);   // 首頁先載完，再在背景把漫畫載好
+const EJ_PANEL = [.25, 1.25, 2.25, 3.25], EJ_STAND = 4.6, EJ_VERD = 6.7, EJ_BLACK = 8.9, EJ_BOOM = 9.4, EJ_BOARD = 9.9, EJ_LEN = 14;
+const NONE_OUT = 4.6, NONE_BOARD = 5.0, NONE_LEN = 9;   // 沒人被放逐：四格到 4.6 秒，淡出，5 秒起是票數
+const easeOut = x => x <= 0 ? 0 : x >= 1 ? 1 : 1 - Math.pow(1 - x, 3);
+// 整張圖放進畫面（不裁切，邊框才完整），多的地方是黑的
+function comicFit(o, W, H) { const s = Math.min(W / o.w, H / o.h); return { w: o.w * s, h: o.h * s, x: (W - o.w * s) / 2, y: (H - o.h * s) / 2 }; }
+function comicImg(g, o, x, y, w, h) { if (!o || !o.ok) return false; g.imageSmoothingEnabled = true; g.imageSmoothingQuality = 'high'; g.drawImage(o.im, x, y, w, h); return true; }
+// 四格漫畫的版面：兩欄兩列，放在安全範圍裡
+function comicGrid(W, H, a) {
+  const { l: sl, r: sr } = safeInsets(), m = Math.max(8, H * .035), gap = Math.max(5, H * .016);
+  const AW = W - Math.max(sl, m) - Math.max(sr, m), AH = H - m * 2;
+  const pw = Math.min((AW - gap) / 2, (AH - gap) / 2 * a), ph = pw / a, gw = pw * 2 + gap, gh = ph * 2 + gap;
+  const x0 = Math.max(sl, m) + (AW - gw) / 2, y0 = (H - gh) / 2;
+  return [0, 1, 2, 3].map(k => ({ x: x0 + (k % 2) * (pw + gap), y: y0 + (k >> 1) * (ph + gap), w: pw, h: ph }));
+}
+function drawComicPage(g, W, H, u, panels, t, calm) {
+  const bg = g.createRadialGradient(W / 2, H / 2, 0, W / 2, H / 2, Math.max(W, H) * .7); bg.addColorStop(0, '#1a110b'); bg.addColorStop(1, '#050304'); g.fillStyle = bg; g.fillRect(0, 0, W, H);
+  const o0 = panels.find(o => o) || { w: 16, h: 9 }, R = comicGrid(W, H, o0.w / o0.h);
+  g.save();
+  if (!calm) { const z = 1 + .025 * smooth(t / EJ_STAND); g.translate(W / 2, H / 2); g.scale(z, z); g.translate(-W / 2, -H / 2); }
+  // 每一格落下時，整頁輕輕震一下
+  if (!calm) for (const p of EJ_PANEL) { const q = t - p - .2; if (q > 0 && q < .16) { const k = (1 - q / .16) * 3 * u; g.translate((Math.random() - .5) * k, (Math.random() - .5) * k); } }
+  for (let k = 0; k < 4; k++) {
+    const q = (t - EJ_PANEL[k]) / .3, o = panels[k], r = R[k]; if (q <= 0) continue;
+    const e = easeOut(q), s = calm ? 1 : 1 + .14 * (1 - e), dx = calm ? 0 : (k % 2 ? 1 : -1) * (1 - e) * 16 * u, dy = calm ? 0 : (k >> 1 ? 1 : -1) * (1 - e) * 10 * u;
+    g.save(); g.globalAlpha = smooth(q * 1.6);
+    g.translate(r.x + r.w / 2 + dx, r.y + r.h / 2 + dy); g.scale(s, s);
+    g.shadowColor = 'rgba(0,0,0,.7)'; g.shadowBlur = 14 * u; g.fillStyle = '#000'; g.fillRect(-r.w / 2, -r.h / 2, r.w, r.h); g.shadowBlur = 0;
+    if (!comicImg(g, o, -r.w / 2, -r.h / 2, r.w, r.h)) { g.fillStyle = '#2a1d14'; g.fillRect(-r.w / 2, -r.h / 2, r.w, r.h); }
+    const f = calm ? 0 : 1 - (t - EJ_PANEL[k] - .2) / .25; if (f > 0 && f <= 1) { g.fillStyle = 'rgba(255,244,220,' + (f * .32).toFixed(3) + ')'; g.fillRect(-r.w / 2, -r.h / 2, r.w, r.h); }
     g.restore();
   }
-  if (!ej.none) {
-    // --- 被放逐的人：站在門口發抖 → 被一腳踢飛，朝月亮飛出去 ---
-    const x0 = gx + 36 * u, y0 = gy + 22 * u, p = clamp(ht / 1.9, 0, 1), e2 = 1 - (1 - p) * (1 - p);
-    if (ht < 0) {
-      const sh = calm ? 0 : Math.sin(t * 46) * 1.4 * u * smooth(t / .5);
-      g.save(); g.translate(x0 + sh, y0); g.scale(2.7 * u, 2.7 * u); drawVillager(g, 0, 0, ej.col, { f: 0, phase: t * 2 });
-      for (let i = 0; i < 2; i++) { const q = ((t * 1.6 + i * .5) % 1); g.fillStyle = 'rgba(160,215,255,' + (1 - q) + ')'; g.beginPath(); g.ellipse((i ? 12 : -12) + q * (i ? 4 : -4), -33 + q * 9, 1.3, 2, 0, 0, 6.2832); g.fill(); }
-      g.restore();
-      // 一隻大腳從門裡踢出來
-      const k = smooth((t - .62) / (hit - .62));
-      if (k > 0) { g.save(); g.translate(gx - 22 * u + k * 38 * u, gy - 6 * u); g.rotate(-.5 + k * .55); g.fillStyle = '#141c2c'; rr(g, -46 * u, -9 * u, 46 * u, 18 * u, 8 * u); g.fill(); g.fillStyle = '#5a3d28'; rr(g, -6 * u, -13 * u, 34 * u, 26 * u, 8 * u); g.fill(); g.fillStyle = '#3a2819'; g.fillRect(-6 * u, 9 * u, 36 * u, 5 * u); g.restore(); }
-    } else {
-      const fx2 = lerp(x0, mnx, e2), fy2 = lerp(y0 - 20 * u, mny, e2) - Math.sin(p * Math.PI) * 60 * u, sc2 = lerp(2.7, .32, e2) * u;
-      if (p < 1) { g.save(); g.translate(fx2, fy2); g.rotate(ht * 9); g.scale(sc2, sc2); g.translate(0, 22); drawVillager(g, 0, 0, ej.col, { f: 0, nohat: true }); g.restore(); }
-      for (let i = 0; i < 5; i++) { const q = clamp((ht - i * .05) / .5, 0, 1); if (q > 0 && q < 1) { g.fillStyle = 'rgba(230,220,200,' + (1 - q) * .5 + ')'; circ(g, x0 - i * 6 * u + q * 30 * u, y0 - 10 * u - q * 26 * u, (5 + q * 9) * u); } }
-      drawGlint(g, x0 - 6 * u, y0 - 34 * u, 30 * u, clamp(1 - ht / .28, 0, 1));
-      if (ht < .5) { g.save(); g.globalAlpha *= 1 - ht / .5; g.fillStyle = '#ffd34a'; g.font = '900 ' + Math.round(30 * u) + 'px ' + FONT_DISP; g.fillText('砰！', x0 + 6 * u, y0 - 84 * u - ht * 30 * u); g.restore(); }
-      drawGlint(g, mnx, mny, 22 * u, clamp(1 - Math.abs(ht - 1.95) / .3, 0, 1));
-      // 草帽慢慢飄下來
-      const hp = clamp((ht - .1) / 2.2, 0, 1);
-      if (!SPR.ok) { g.save(); g.translate(x0 + 34 * u + Math.sin(hp * 9) * 16 * u * (1 - hp), lerp(y0 - 130 * u, y0 + 2 * u, hp)); g.rotate(Math.sin(hp * 9) * .5 * (1 - hp)); g.scale(2.2 * u, 2.2 * u);
-      g.fillStyle = '#b89a52'; g.beginPath(); g.moveTo(-15.5, 0); g.quadraticCurveTo(0, 5, 15.5, 0); g.quadraticCurveTo(0, -2.5, -15.5, 0); g.fill(); g.fillStyle = '#dcc078'; g.beginPath(); g.moveTo(-15.5, 0); g.quadraticCurveTo(-3, -16.5, 0, -17.5); g.quadraticCurveTo(3, -16.5, 15.5, 0); g.quadraticCurveTo(0, -4, -15.5, 0); g.fill(); g.restore(); }
-    }
-    if (ht > 0 && ht < .2) { g.fillStyle = 'rgba(255,245,225,' + (1 - ht / .2) * .5 + ')'; g.fillRect(0, 0, W, H); }
-  }
-  // --- 文字 ---
-  const sc = land ? g.createLinearGradient(W * .46, 0, W * .7, 0) : g.createLinearGradient(0, H * .34, 0, 0);
-  sc.addColorStop(0, 'rgba(5,8,13,0)'); sc.addColorStop(1, 'rgba(5,8,13,.6)'); g.fillStyle = sc; if (land) g.fillRect(W * .46, 0, W * .54, H); else g.fillRect(0, 0, W, H * .34);
+  g.restore();
+}
+// 全螢幕的一張：in = 進場方式，push = 之後慢慢推近多少
+function drawComicFull(g, W, H, u, o, ts, dur, calm, mode) {
+  g.fillStyle = '#000'; g.fillRect(0, 0, W, H); if (!o || !o.ok) return;
+  const f = comicFit(o, W, H);
+  let s = 1, dy = 0, a = 1;
+  if (!calm) {
+    if (mode === 'rise') { const e = easeOut(ts / .5); s = 1.07 - .07 * e + .04 * smooth((ts - .5) / (dur - .5)); dy = (1 - e) * H * .09; a = smooth(ts / .3); }   // 站起來：從下面往上升
+    else { const e = easeOut(ts / .22); s = 1.12 - .12 * e + .06 * Math.pow(clamp((ts - .22) / (dur - .22), 0, 1), 1.6); }   // 一刀切進來，再慢慢逼近
+    if (mode !== 'rise' && ts > dur * .55) { const k = (ts - dur * .55) / (dur * .45) * 1.6 * u; g.translate((Math.random() - .5) * k, (Math.random() - .5) * k); }   // 開槍前，畫面越來越抖
+  } else a = smooth(ts / .3);
+  g.save(); g.globalAlpha = a; g.translate(W / 2, H / 2 + dy); g.scale(s, s); g.translate(-W / 2, -H / 2);
+  comicImg(g, o, f.x, f.y, f.w, f.h); g.restore();
+  if (!calm && mode !== 'rise' && ts < .18) { g.fillStyle = 'rgba(255,248,235,' + (.55 * (1 - ts / .18)).toFixed(3) + ')'; g.fillRect(0, 0, W, H); }
+}
+// 黑底的投票結果：誰被放逐、每個人得幾票
+function drawVoteBoard(g, W, H, u, t1, ej, vs, land, calm) {
+  g.fillStyle = '#000'; g.fillRect(0, 0, W, H); if (t1 <= 0) return;
+  // 標題和票數整塊放在畫面正中間
+  const head = (ej.none ? 62 : 32) * u + 14 * u, rh0 = 34 * u, blk = head + rh0 * Math.max(1, vs.length);
+  const tx = W / 2, ty = Math.max(H * .14, (H - blk) / 2 + 4 * u);
   g.textAlign = 'center'; g.textBaseline = 'middle'; g.lineJoin = 'round';
-  const say = (txt, y, px, colr, a, pop) => { if (a <= 0) return; g.save(); g.globalAlpha *= a; g.translate(tx, y); g.scale(pop || 1, pop || 1); g.font = '700 ' + Math.round(px * u) + 'px ' + FONT_DISP; const tw = g.measureText(txt).width, mw = (land ? W * .54 : W * .9); if (tw > mw) g.scale(mw / tw, mw / tw); g.strokeStyle = 'rgba(4,7,12,.85)'; g.lineWidth = 6 * u; g.strokeText(txt, 0, 0); g.fillStyle = colr; g.fillText(txt, 0, 0); g.restore(); };
-  const t1 = ej.none ? t - .5 : ht - .25;
-  if (ej.none) { say('沒有人被放逐', ty, 40, '#f3ecda', clamp(t1 / .4, 0, 1)); say(ej.tie ? '最高票平手' : '票數不夠', ty + 40 * u, 20, '#b8c6d2', clamp((t1 - .5) / .4, 0, 1)); }
-  else say(ej.me ? '你被放逐了' : ej.name + ' 被放逐了', ty, ej.me ? 44 : 40, '#f3ecda', clamp(t1 / .4, 0, 1), 1 + (1 - smooth(clamp(t1 / .3, 0, 1))) * .25);
-  // 票數：誰得了幾票，一列一列跳出來
-  const vs = killFx.votes || [], rh = Math.min(34 * u, (H - (ty + (ej.none ? 66 : 44) * u) - 40 * u) / Math.max(1, vs.length)), y0 = ty + (ej.none ? 70 : 46) * u, pw = land ? Math.min(W * .4, 330 * u) : W * .8, mx = Math.max(1, ...vs.map(v => v.v));
+  const say = (txt, y, px, colr, a, pop) => { if (a <= 0) return; g.save(); g.globalAlpha *= a; g.translate(tx, y); g.scale(pop || 1, pop || 1); g.font = '700 ' + Math.round(px * u) + 'px ' + FONT_DISP; const tw = g.measureText(txt).width, mw = W * .86; if (tw > mw) g.scale(mw / tw, mw / tw); g.fillStyle = colr; g.fillText(txt, 0, 0); g.restore(); };
+  if (ej.none) { say('沒有人被放逐', ty, 38, '#f3ecda', smooth(t1 / .45)); say(ej.tie ? '最高票平手' : '票數不夠', ty + 38 * u, 19, '#9fb0bd', smooth((t1 - .45) / .4)); }
+  else say(ej.me ? '你被放逐了' : ej.name + ' 被放逐了', ty, ej.me ? 42 : 38, '#f3ecda', smooth(t1 / .45), calm ? 1 : 1 + (1 - smooth(clamp(t1 / .35, 0, 1))) * .12);
+  // 標題底下一條細細的紅線，從中間往兩邊拉開
+  const la = smooth((t1 - .25) / .5), ly = ty + (ej.none ? 62 : 32) * u; if (la > 0) { const lw = Math.min(W * .5, 380 * u) * la, lg = g.createLinearGradient(tx - lw / 2, 0, tx + lw / 2, 0); lg.addColorStop(0, 'rgba(178,16,10,0)'); lg.addColorStop(.5, 'rgba(178,16,10,.9)'); lg.addColorStop(1, 'rgba(178,16,10,0)'); g.fillStyle = lg; g.fillRect(tx - lw / 2, ly, lw, Math.max(1.5, 2 * u)); }
+  const y0 = ly + 14 * u, rh = Math.min(34 * u, (H - y0 - 18 * u) / Math.max(1, vs.length)), pw = land ? Math.min(W * .46, 360 * u) : W * .84, t2 = t1 - .35;
   vs.forEach((v, i) => {
-    const a = smooth((t1 - .55 - i * .16) / .3); if (a <= 0) return;
-    const yy = y0 + i * rh + rh / 2, x0 = tx - pw / 2 + (1 - a) * 24 * u;
+    const a = smooth((t2 - .3 - i * .16) / .3); if (a <= 0) return;
+    const yy = y0 + i * rh + rh / 2, x0 = tx - pw / 2 + (1 - a) * 24 * u, fpx = Math.round(Math.min(18 * u, rh * .56));
     g.save(); g.globalAlpha *= a;
-    g.fillStyle = v.out ? 'rgba(226,88,74,.3)' : 'rgba(10,16,26,.62)'; rr(g, x0, yy - rh / 2 + 2 * u, pw, rh - 4 * u, 7 * u); g.fill();
-    if (v.out) { g.strokeStyle = 'rgba(240,138,126,.8)'; g.lineWidth = 1.5 * u; g.stroke(); }
+    g.fillStyle = v.out ? 'rgba(178,16,10,.28)' : 'rgba(255,255,255,.06)'; rr(g, x0, yy - rh / 2 + 2 * u, pw, rh - 4 * u, 7 * u); g.fill();
+    if (v.out) { g.strokeStyle = 'rgba(214,60,48,.85)'; g.lineWidth = 1.5 * u; g.stroke(); }
     g.fillStyle = v.c; circ(g, x0 + 15 * u, yy, 6.5 * u); g.strokeStyle = 'rgba(0,0,0,.5)'; g.lineWidth = 1.2 * u; g.stroke();
-    g.textAlign = 'left'; g.font = '600 ' + Math.round(Math.min(18 * u, rh * .56)) + 'px ' + FONT_BODY; g.fillStyle = v.skip ? '#b8c6d2' : '#f3ecda'; g.fillText(v.n, x0 + 28 * u, yy + 1);
-    for (let k = 0; k < v.v; k++) { const p = smooth((t1 - .7 - i * .16 - k * .07) / .2); if (p > 0) { g.fillStyle = v.out ? '#f08a7e' : v.skip ? '#8fa3b3' : '#f2b84b'; rr(g, x0 + pw * .42 + k * 11 * u, yy - 6 * u * p, 8 * u, 12 * u * p, 2.5 * u); g.fill(); } }
-    g.textAlign = 'right'; g.fillStyle = v.out ? '#ffb0a6' : '#f3ecda'; g.font = '700 ' + Math.round(Math.min(18 * u, rh * .56)) + 'px ' + FONT_BODY; g.fillText(v.v + ' 票', x0 + pw - 10 * u, yy + 1);
+    g.textAlign = 'left'; g.font = '600 ' + fpx + 'px ' + FONT_BODY; g.fillStyle = v.skip ? '#9fb0bd' : '#f3ecda'; g.fillText(v.n, x0 + 28 * u, yy + 1);
+    for (let k = 0; k < v.v; k++) { const p = smooth((t2 - .45 - i * .16 - k * .07) / .2); if (p > 0) { g.fillStyle = v.out ? '#e0574a' : v.skip ? '#7d8f9c' : '#e8c27a'; rr(g, x0 + pw * .42 + k * 11 * u, yy - 6 * u * p, 8 * u, 12 * u * p, 2.5 * u); g.fill(); } }
+    g.textAlign = 'right'; g.fillStyle = v.out ? '#ff9d92' : '#f3ecda'; g.font = '700 ' + fpx + 'px ' + FONT_BODY; g.fillText(v.v + ' 票', x0 + pw - 10 * u, yy + 1);
     g.restore();
   });
   g.textAlign = 'center';
-  const vg = g.createRadialGradient(W / 2, H / 2, Math.min(W, H) * .3, W / 2, H / 2, Math.max(W, H) * .78); vg.addColorStop(0, 'rgba(0,0,0,0)'); vg.addColorStop(1, 'rgba(0,0,0,.55)'); g.fillStyle = vg; g.fillRect(0, 0, W, H);
-  const fin = 1 - smooth(t / .3); if (fin > 0) { g.fillStyle = 'rgba(5,8,12,' + fin + ')'; g.fillRect(0, 0, W, H); }
+}
+function drawEject(g, W, H, d, t, calm) {
+  const ej = killFx.ej || { none: true }, LEN = killFx.len || EJ_LEN, vs = killFx.votes || [];
+  const land = W > H * 1.15, u = land ? Math.min(H / 360, W / 640) : Math.min(W / 360, H / 640);
+  comicLoad();
+  g.setTransform(d, 0, 0, d, 0, 0); g.globalCompositeOperation = 'source-over'; g.shadowBlur = 0; g.globalAlpha = 1; g.clearRect(0, 0, W, H);
+  g.globalAlpha = 1 - smooth((t - (LEN - .5)) / .5);   // 最後淡出，回到遊戲（或結算畫面）
+  const P = COMIC.ej;
+  if (ej.none) {
+    if (t < NONE_OUT) drawComicPage(g, W, H, u, COMIC.none, t, calm);
+    else if (t < NONE_BOARD) { g.fillStyle = '#000'; g.fillRect(0, 0, W, H); const q = (t - NONE_OUT) / .35; if (q < 1) { g.save(); g.globalAlpha *= 1 - smooth(q); if (!calm) { const z = 1 + .06 * q; g.translate(W / 2, H / 2); g.scale(z, z); g.translate(-W / 2, -H / 2); } drawComicPage(g, W, H, u, COMIC.none, NONE_OUT, calm); g.restore(); } }   // 四格那一頁淡出到黑
+    else drawVoteBoard(g, W, H, u, t - NONE_BOARD - .15, ej, vs, land, calm);
+  }
+  else if (t < EJ_STAND) drawComicPage(g, W, H, u, P.slice(0, 4), t, calm);
+  else if (t < EJ_VERD) {
+    drawComicFull(g, W, H, u, P[4], t - EJ_STAND, EJ_VERD - EJ_STAND, calm, 'rise');
+    const q = (t - EJ_STAND) / .35; if (q < 1 && !calm) { g.save(); g.globalAlpha *= 1 - smooth(q); const z = 1 + .1 * q; g.translate(W / 2, H / 2); g.scale(z, z); g.translate(-W / 2, -H / 2); drawComicPage(g, W, H, u, P.slice(0, 4), EJ_STAND, false); g.restore(); }   // 四格那一頁放大淡出
+  }
+  else if (t < EJ_BLACK) { g.save(); drawComicFull(g, W, H, u, P[ej.w ? 5 : 6], t - EJ_VERD, EJ_BLACK - EJ_VERD, calm, 'cut'); g.restore(); }
+  else if (t < EJ_BOOM) { g.fillStyle = '#000'; g.fillRect(0, 0, W, H); }
+  else if (t < EJ_BOARD) {
+    const ts = t - EJ_BOOM, o = COMIC.boom; g.fillStyle = '#000'; g.fillRect(0, 0, W, H);
+    if (!calm && ts < .16) { const rg = g.createRadialGradient(W / 2, H / 2, 0, W / 2, H / 2, Math.max(W, H) * .6); rg.addColorStop(0, 'rgba(120,0,0,' + (.55 * (1 - ts / .16)).toFixed(3) + ')'); rg.addColorStop(1, 'rgba(40,0,0,0)'); g.fillStyle = rg; g.fillRect(0, 0, W, H); }
+    if (o && o.ok) {
+      const bw = Math.min(W * .74, H * .78 * o.w / o.h), bh = bw * o.h / o.w, s = calm ? 1 : ts < .08 ? 1.45 - .45 * easeOut(ts / .08) : 1 + .035 * (ts - .08) / .42;
+      const k = calm ? 0 : Math.max(0, 1 - ts / .38) * 14 * u;
+      g.save(); g.globalAlpha *= 1 - smooth((ts - .44) / .06); g.translate(W / 2 + (Math.random() - .5) * k, H / 2 + (Math.random() - .5) * k); g.scale(s, s); comicImg(g, o, -bw / 2, -bh / 2, bw, bh); g.restore();
+    } else { g.save(); g.fillStyle = '#b30000'; g.font = '900 ' + Math.round(96 * u) + 'px ' + FONT_DISP; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('蹦!!!', W / 2, H / 2); g.restore(); }
+  }
+  else drawVoteBoard(g, W, H, u, t - EJ_BOARD - .25, ej, vs, land, calm);
   g.globalAlpha = 1;
 }
 
@@ -5677,7 +5700,7 @@ function main() {
   let hl = performance.now();
   setInterval(() => { const n = performance.now(), dt = Math.min(.3, (n - hl) / 1000); hl = n; if (isHost && inRoom && !window.__lwManual) { try { syncFromNet(n); hostTick(dt); } catch (e) { if (window.console) console.error(e); } } }, 100);
   requestAnimationFrame(frame);
-  window.__lw = { homeBg, sceneArt, SPR_ANI, killFx, startKillAnim, aniOf, drawCharFallen, ARTI, STATIC, drawTree, drawBuilding, get WORLD_W() { return WORLD_W; }, get WORLD_H() { return WORLD_H; }, VFX, fxBlood, fxTaskDone, fxSpark, fxDust, camShake, fxFlash, cardArt, cardW, openCard, closeCard, get cardOpen() { return cardOpen; }, SPR, NCHAR, turnChar, sprFlip, drawChar, drawCharFit, drawCharFallen, COLORS, get BUILDINGS() { return BUILDINGS; }, drawBuilding, BK, loadMap, buildGround,
+  window.__lw = { COMIC, get EJ() { return { EJ_PANEL, EJ_STAND, EJ_VERD, EJ_BLACK, EJ_BOOM, EJ_BOARD, EJ_LEN, NONE_OUT, NONE_BOARD, NONE_LEN }; }, homeBg, sceneArt, SPR_ANI, killFx, startKillAnim, aniOf, drawCharFallen, ARTI, STATIC, drawTree, drawBuilding, get WORLD_W() { return WORLD_W; }, get WORLD_H() { return WORLD_H; }, VFX, fxBlood, fxTaskDone, fxSpark, fxDust, camShake, fxFlash, cardArt, cardW, openCard, closeCard, get cardOpen() { return cardOpen; }, SPR, NCHAR, turnChar, sprFlip, drawChar, drawCharFit, drawCharFallen, COLORS, get BUILDINGS() { return BUILDINGS; }, drawBuilding, BK, loadMap, buildGround,
     get G() { return G; }, get H() { return H; }, ME, my, players, get BOTS() { return BOTS; }, Net, get STATIONS() { return STATIONS; }, SPAWNS, grid, MAPS, loadMap, applyMap, canSee, paintMiniMap, tget, boxFree, get curMap() { return curMap; },
     findPath, startPractice, createRoom, joinRoom, invite, inviteLink, intro, hostStart, hostKill, hostReport, hostTick, setBotCount, castVote, sendChat, finishTask, openTask, leaveRoom, uiMode, parseTasks, dealTasks, taskCur, taskMarks, get CHAINS() { return CHAINS; }, get taskState() { return taskState; }, get hs() { return hs; }, get BUILDINGS() { return BUILDINGS; }, get OCC() { return OCC; }, BUILD, get view() { return view; }, get CANDLE() { return CANDLE; }, hostBlow, hostRelight, doBlow, canBlow, killRangeOf, guideMarks, openCandle, killFx, startKillAnim, COLORS, hostResolve, hostInspect, hostExecute, hostFool, hostPet, showSlash, DOG, bldAt, occFor, get STATIC() { return STATIC; }, art: { drawChar, drawCharFallen, drawFallen, avatarCanvas, drawVillager, wolfShape, wolfEyes, lantern, drawTree, drawDog, circ, ell }, openAltar, finishAltar, hostAltarPlace, hostAltarStart, hostAltarSolve, doAltarPlace, doAltarStart, altarWhyNot,
     get ctx() { return ctxA; }, get inRoom() { return inRoom; }, get isHost() { return isHost; }, get code() { return code; }
