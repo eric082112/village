@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>月光光心慌慌</title>
 <meta name="description" content="和朋友連線玩的狼人村：做完村裡的工作，找出混在裡面的狼人。">
-<meta name="lw-build" content="27">
+<meta name="lw-build" content="28">
 <meta name="theme-color" content="#0b151d">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -625,6 +625,17 @@ body.task-open #task .panel{animation:sheetUp .3s var(--ease-out) both}
 }
 #toast.show{transform:translateX(-50%)}
 #mapCv{box-shadow:0 14px 40px rgba(0,0,0,.6),0 0 0 3px rgba(242,184,75,.22)}
+
+/* ---------- 第 28 版：首頁面板變窄、靠右，左邊多露出背景圖 ---------- */
+@media (orientation:landscape) and (max-height:520px){
+  .home{flex-direction:row;align-items:stretch;padding-right:calc(10px + env(safe-area-inset-right,0px))}   /* 小台的 iPhone 橫放也一樣：標題在左、面板在右 */
+  .home-panel{max-width:312px;padding:13px 14px;gap:8px}
+  .home-panel .btn{min-height:40px}
+  .home-panel input{padding-top:9px;padding-bottom:9px}
+}
+@media (min-width:760px) and (min-height:521px){ .home-panel{max-width:340px} }
+/* 面板稍微透一點，後面的圖隱約看得到 */
+.home-panel{background:linear-gradient(180deg,rgba(24,40,56,.86),rgba(12,22,33,.9));-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
 [hidden]{display:none !important}
 </style>
 </head>
@@ -4411,6 +4422,20 @@ const INTRO_PRE = 1.7;   // 開頭先只有「你是……」的時間（秒）
 const ROLE_SCENE = {};
 for (const k in ROLE_SCENE_DEF) { const D = ROLE_SCENE_DEF[k], o = { ok: false, im: new Image(), w: D.w, h: D.h }; o.im.onload = () => { o.ok = true; }; o.im.src = D.d; ROLE_SCENE[k] = o; }
 function sceneArt(role) { const o = ROLE_SCENE[role | 0]; return o && o.ok ? o : null; }
+// 全螢幕顯示時，iPhone 比卡片寬，上下一定會裁掉一點：卡片左下角的名牌一定要完整，所以從下面量起
+const SCENE_KEEP_BOTTOM = [880, 861, 873, 886, 883].map(y => y / 941);   // 每張卡片名牌（含花邊）的底在圖的這個高度：村民、狼人、檢驗官、白癡、義警
+// 說明字的位置：卡片右邊、人物旁邊的空處（畫面寬、高的比例）
+const SCENE_TEXT_X = .63, SCENE_TEXT_Y = .4;
+// 瀏海和圓角的安全範圍（左右各多少）：用一個看不見的元素量一次，每秒最多更新一次
+let safeEl = null, safeAt = -1e9, safeV = { l: 0, r: 0 };
+function safeInsets() {
+  const n = performance.now(); if (n - safeAt < 1000) return safeV; safeAt = n;
+  try {
+    if (!safeEl) { safeEl = document.createElement('div'); safeEl.style.cssText = 'position:fixed;left:0;top:0;width:0;height:0;visibility:hidden;pointer-events:none;padding-left:env(safe-area-inset-left,0px);padding-right:env(safe-area-inset-right,0px)'; document.body.appendChild(safeEl); }
+    const cs = getComputedStyle(safeEl); safeV = { l: parseFloat(cs.paddingLeft) || 0, r: parseFloat(cs.paddingRight) || 0 };
+  } catch (e) { }
+  return safeV;
+}
 function drawIntro(now) {
   const c = $('introCv'), W = c.clientWidth, Hh = c.clientHeight; if (!W || !Hh) return;
   const d = view.dpr;
@@ -4423,28 +4448,20 @@ function drawIntro(now) {
   const art = sceneArt(role);
   g.setTransform(d, 0, 0, d, 0, 0); g.globalAlpha = 1; g.globalCompositeOperation = 'source-over'; g.shadowBlur = 0;
   g.fillStyle = '#05080c'; g.fillRect(0, 0, W, Hh);
-  // 卡片的位置：上面留一點邊，下面留一條放說明文字
-  const band = Math.max(64 * u, Hh * (intro.mates ? .22 : .18));
-  const ch = Math.min(Hh - band - Hh * .04, (W * .92) * (art ? art.h / art.w : .5625)), cw = ch * (art ? art.w / art.h : 1.778);
-  const cx = W / 2, top = Math.max(Hh * .035, (Hh - band - ch) / 2), cy = top + ch / 2, bot = top + ch;
+  // 安全範圍（瀏海、圓角）：字不要放進去
+  const { l: sl, r: sr } = safeInsets();
   if (shown && art) {
-    const ap = smooth(ts / .6);
-    // 卡片後面：身分顏色的光暈
-    const gl = g.createRadialGradient(cx, cy, ch * .2, cx, cy, Math.max(W, Hh) * .75); gl.addColorStop(0, RF.flash + (.32 * ap).toFixed(3) + ')'); gl.addColorStop(1, RF.flash + '0)');
-    g.fillStyle = gl; g.fillRect(0, 0, W, Hh);
-    // 卡片：從稍大縮回定位，之後非常慢地推近
-    const k = calm ? 1 : (1 + (1 - smooth(ts / .9)) * .07) * (1 + Math.min(ts, 10) * .0028);
-    g.save(); g.globalAlpha = ap; g.translate(cx, cy); g.scale(k, k);
-    g.shadowColor = 'rgba(0,0,0,.6)'; g.shadowBlur = 24 * u * d; g.shadowOffsetY = 6 * u * d; g.fillStyle = '#000'; rr(g, -cw / 2, -ch / 2, cw, ch, 8 * u); g.fill();
-    g.shadowBlur = 0; g.shadowOffsetY = 0; g.shadowColor = 'transparent';
-    g.save(); rr(g, -cw / 2, -ch / 2, cw, ch, 8 * u); g.clip();
-    g.imageSmoothingEnabled = true; g.imageSmoothingQuality = 'high'; g.drawImage(art.im, -cw / 2, -ch / 2, cw, ch);
-    // 一道光從卡面斜斜掃過去（揭曉後一次）
-    const sp = (ts - .95) / .9;
-    if (sp > 0 && sp < 1) { const sx = -cw / 2 - 80 * u + sp * (cw + 160 * u), sg = g.createLinearGradient(sx - 50 * u, 0, sx + 50 * u, 0); sg.addColorStop(0, 'rgba(255,250,235,0)'); sg.addColorStop(.5, 'rgba(255,250,235,.24)'); sg.addColorStop(1, 'rgba(255,250,235,0)'); g.transform(1, 0, -.4, 1, 0, 0); g.fillStyle = sg; g.fillRect(sx - 60 * u, -ch, 120 * u + ch * .8, ch * 2); }
-    g.restore(); g.restore();
-    // 揭曉的瞬間：閃一下身分的顏色
-    const rf = clamp(1 - ts / .45, 0, 1); if (rf > 0) { g.fillStyle = RF.flash + (rf * .35).toFixed(3) + ')'; g.fillRect(0, 0, W, Hh); }
+    const ap = smooth(ts / .55);
+    // 卡片鋪滿整個畫面（等比例放大、多的裁掉）；揭曉時從稍大一點縮回來
+    const sc = Math.max(W / art.w, Hh / art.h), dw = art.w * sc, dh = art.h * sc;
+    const dx = (W - dw) / 2, dy = clamp(Hh - SCENE_KEEP_BOTTOM[role] * dh, Hh - dh, 0);
+    const k = calm ? 1 : 1 + (1 - smooth(ts / .9)) * .06;
+    g.save(); g.globalAlpha = ap; g.translate(W / 2, Hh / 2); g.scale(k, k); g.translate(-W / 2, -Hh / 2);
+    g.imageSmoothingEnabled = true; g.imageSmoothingQuality = 'high'; g.drawImage(art.im, dx, dy, dw, dh);
+    // 一道光從畫面斜斜掃過去（揭曉後一次）
+    const sp = (ts - .95) / 1;
+    if (sp > 0 && sp < 1) { const sx = -120 * u + sp * (W + 240 * u), sg = g.createLinearGradient(sx - 60 * u, 0, sx + 60 * u, 0); sg.addColorStop(0, 'rgba(255,250,235,0)'); sg.addColorStop(.5, 'rgba(255,250,235,.2)'); sg.addColorStop(1, 'rgba(255,250,235,0)'); g.save(); g.transform(1, 0, -.4, 1, 0, 0); g.fillStyle = sg; g.fillRect(sx - 70 * u, 0, 140 * u + Hh * .5, Hh); g.restore(); }
+    g.restore();
   }
   // --- 「你是……」：揭曉前停在畫面正中央；有卡片時揭曉就淡出，沒有卡片（圖還沒載入好）時接著跳出身分的字 ---
   const fpx = Math.round(62 * u), roleN = RF.n;
@@ -4467,16 +4484,22 @@ function drawIntro(now) {
     g.strokeStyle = 'rgba(4,7,12,.85)'; g.lineWidth = 7 * u; g.strokeText(roleN, 0, 0); g.shadowColor = RF.glow; g.shadowBlur = 26 * u * d; g.fillStyle = RF.c; g.fillText(roleN, 0, 0);
     g.restore();
   }
-  // --- 卡片下面的說明：一個字一個字出現；狼人再加一行同伴的名字 ---
-  g.textAlign = 'center'; g.textBaseline = 'middle';
-  const l1 = art ? bot + band * (intro.mates ? .32 : .42) : ty + 58 * u, l2 = art ? bot + band * .7 : ty + 90 * u;
-  const nch = shown ? Math.floor((ts - .9) / .06) : 0;
-  if (nch > 0) { const line = RF.line.slice(0, nch); g.font = '700 ' + Math.round(18 * u) + 'px ' + FONT_BODY; g.strokeStyle = 'rgba(4,7,12,.85)'; g.lineWidth = 4.5 * u; g.strokeText(line, cx, l1); g.fillStyle = RF.c; g.fillText(line, cx, l1); }
-  if (wolf && intro.mates) { const ma = clamp((ts - 2.6) / .5, 0, 1); if (ma > 0) { g.globalAlpha = ma; g.font = '700 ' + Math.round(15 * u) + 'px ' + FONT_BODY; g.strokeStyle = 'rgba(4,7,12,.85)'; g.lineWidth = 4 * u; g.strokeText('你的同伴：' + intro.mates, cx, l2); g.fillStyle = '#ff9d90'; g.fillText('你的同伴：' + intro.mates, cx, l2); g.globalAlpha = 1; } }
-  if (ts > 6.4) {
-    g.globalAlpha = .55 + .35 * Math.sin(ts * 4); g.font = '500 ' + Math.round(13 * u) + 'px ' + FONT_BODY; g.fillStyle = '#b8c6d2';
-    if (wolf && intro.mates) { g.textAlign = 'right'; g.fillText('遊戲即將開始', W - 16 * u, Hh - 14 * u); } else g.fillText('遊戲即將開始', cx, l2);
-    g.globalAlpha = 1;
+  // --- 右邊的白字介紹：說明分成兩行（一個字一個字出現）、狼人的同伴、遊戲即將開始。身分的名字卡片上已經有，不再寫一次 ---
+  if (shown && art) {
+    const cx = clamp(W * SCENE_TEXT_X, sl + 140 * u, W - sr - 140 * u);
+    const bpx = Math.round(27 * u), spx = Math.round(15 * u);
+    const lines = RF.line.split('，');
+    const extra = wolf && intro.mates ? 1 : 0, blockH = lines.length * bpx * 1.5 + extra * spx * 2.1;
+    const cy0 = Hh * SCENE_TEXT_Y;
+    let y = cy0 - blockH / 2 + bpx * .75;
+    // 字後面墊一層很淡的暗影，背景再亮也看得清楚
+    const ba = smooth((ts - .3) / .6);
+    if (ba > 0) { g.font = '700 ' + bpx + 'px ' + FONT_DISP; const tw = Math.max(...lines.map(l => g.measureText(l).width)), R = tw * .8 + 30 * u, gr = g.createRadialGradient(cx, cy0, 0, cx, cy0, R); gr.addColorStop(0, 'rgba(4,6,12,' + (.6 * ba).toFixed(3) + ')'); gr.addColorStop(.55, 'rgba(4,6,12,' + (.36 * ba).toFixed(3) + ')'); gr.addColorStop(1, 'rgba(4,6,12,0)'); g.save(); g.translate(cx, cy0); g.scale(1, Math.min(1, (blockH + 50 * u) / R)); g.translate(-cx, -cy0); g.fillStyle = gr; g.fillRect(cx - R, cy0 - R, R * 2, R * 2); g.restore(); }
+    const txt = (s, yy, px, font, a, col) => { if (a <= 0 || !s) return; g.save(); g.globalAlpha = a; g.font = font + ' ' + px + 'px ' + (font === '700' ? FONT_DISP : FONT_BODY); g.textAlign = 'center'; g.textBaseline = 'middle'; g.lineJoin = 'round'; g.shadowColor = 'rgba(0,0,0,.9)'; g.shadowBlur = px * .5 * d; g.strokeStyle = 'rgba(6,8,14,.72)'; g.lineWidth = Math.max(2, px * .15); g.strokeText(s, cx, yy); g.shadowBlur = 0; g.fillStyle = col || '#ffffff'; g.fillText(s, cx, yy); g.restore(); };
+    let left = Math.floor((ts - .7) / .07);
+    for (const ln of lines) { if (left > 0) txt(ln.slice(0, left), y, bpx, '700', 1); left -= ln.length; y += bpx * 1.5; }
+    if (extra) { y += spx * .35; txt('你的同伴：' + intro.mates, y, spx, '600', smooth((ts - 2.6) / .5), '#f2f2f2'); y += spx * 1.75; }
+    if (ts > 6.4) txt('遊戲即將開始', Math.min(Hh - 18 * u, y + 10 * u), Math.round(13 * u), '500', .6 + .3 * Math.sin(ts * 4), '#e8ecf0');
   }
 }
 
