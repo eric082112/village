@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>月光光心慌慌</title>
 <meta name="description" content="和朋友連線玩的狼人村：做完村裡的工作，找出混在裡面的狼人。">
-<meta name="lw-build" content="42">
+<meta name="lw-build" content="45">
 <meta name="theme-color" content="#0b151d">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -681,6 +681,11 @@ body[data-mode="hunt"] #hunt{display:flex}
 .credits summary{cursor:pointer;color:#e8d9a8;font-weight:700}
 .credits p{margin:6px 0 2px}
 #menu .panel{max-height:calc(100dvh - 16px);overflow-y:auto;-webkit-overflow-scrolling:touch}
+
+/* 第 45 版：首頁左下角的背景音樂開關（右邊是面板、左上是標題） */
+#btnHomeMus{position:absolute;bottom:calc(env(safe-area-inset-bottom,0px) + 12px);left:calc(env(safe-area-inset-left,0px) + 14px);z-index:5;width:44px;height:44px;border-radius:50%;border:1.5px solid rgba(242,210,122,.75);background:rgba(10,16,26,.62);color:#f2d27a;font-size:22px;line-height:1;display:flex;align-items:center;justify-content:center;cursor:pointer;-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px)}
+#btnHomeMus.off{color:rgba(242,210,122,.45);border-color:rgba(242,210,122,.3)}
+#btnHomeMus.off::after{content:'';position:absolute;width:30px;height:2px;background:rgba(242,210,122,.6);transform:rotate(-45deg);border-radius:2px}
 [hidden]{display:none !important}
 </style>
 </head>
@@ -712,6 +717,7 @@ body[data-mode="hunt"] #hunt{display:flex}
 </div>
 
 <section id="home" class="screen home">
+  <button id="btnHomeMus" class="home-mus" type="button" aria-label="背景音樂">♪</button>
   <div class="home-bg" aria-hidden="true"><div class="hb-zoom"><i class="hb"></i><i class="hb"></i><span class="ff"></span><span class="ff"></span><span class="ff"></span><span class="ff"></span><span class="ff"></span><span class="ff"></span><span class="ff"></span><span class="ff"></span><span class="ff"></span><span class="ff"></span></div></div>
   <div class="title-col">
     <h1 class="title">月光光心慌慌</h1>
@@ -883,8 +889,8 @@ body[data-mode="hunt"] #hunt{display:flex}
     </ol>
     <div class="snd-row"><button id="btnMus" class="btn snd-btn" type="button">背景音樂：開</button><button id="btnSfx" class="btn snd-btn" type="button">音效：開</button></div>
     <details class="credits"><summary>音樂與音效來源</summary>
-      <p>背景音樂來自 FreePD（公眾領域）：田園村〈Magic in the Garden〉、開會〈Asking Questions〉Rafael Krux；潮聲漁港〈Windy Old Weather〉、燈籠老街〈Coy Koi〉、霧鐘莊園〈Night in the Castle〉Kevin MacLeod；月影荒原〈Creepy Hallow〉Alexander Nakarada；投票懸疑底音〈Horror Mytery〉。</p>
-      <p>音效（CC0）：Kenney（kenney.nl）、rubberduck（OpenGameArt）、Warfork（Team Forbidden）。</p>
+      <p>背景音樂來自 FreePD（公眾領域）：田園村〈Magic in the Garden〉、開會〈Asking Questions〉Rafael Krux；潮聲漁港〈Windy Old Weather〉、燈籠老街〈Coy Koi〉、霧鐘莊園〈Night in the Castle〉Kevin MacLeod；月影荒原〈Creepy Hallow〉Alexander Nakarada；投票懸疑底音〈Horror Mytery〉；主畫面〈Witch Waltz〉〈Dancing at the Inn〉〈Creepy Comedy〉〈Brewing Potions〉。</p>
+      <p>音效（CC0）：Kenney（kenney.nl）、rubberduck（OpenGameArt）、Warfork（Team Forbidden）、Ben Burnes（滑哨、大提琴、頌缽）。</p>
     </details>
     <button id="btnMenuClose" class="btn primary" type="button">繼續遊戲</button>
     <button id="btnMenuLeave" class="btn danger" type="button">離開房間</button>
@@ -1197,6 +1203,10 @@ const ART_HOME = ART_HOME_FRAMES[0];
 
 Object.assign(ART_BLD, {"moor_barn": {"wall": [50, 1428], "base": 840, "top": 110, "wins": [], "w": 1484, "h": 880, "d": "img-aa9de53c19.webp"}, "moor_chapel": {"wall": [45, 962], "base": 945, "top": 280, "wins": [288, 772], "w": 1004, "h": 984, "d": "img-47c64fabc3.webp"}, "moor_mill": {"wall": [50, 1093], "base": 915, "top": 380, "wins": [282, 725], "hub": [565, 382, 300], "w": 1140, "h": 972, "d": "img-5ad5c5aeb6.webp"}, "moor_smithy": {"wall": [30, 1158], "base": 758, "top": 75, "wins": [655], "smoke": [[195, 38]], "spark": [[195, 44]], "w": 1196, "h": 792, "d": "img-adee6f7c4c.webp"}, "moor_cabin": {"wall": [50, 945], "base": 893, "top": 170, "wins": [815], "smoke": [[765, 44]], "w": 996, "h": 936, "d": "img-b9a988a2d9.webp"}, "manor_house": {"wall": [110, 1530], "base": 938, "top": 250, "wins": [267, 535, 1100, 1377], "w": 1596, "h": 968, "d": "img-573a71c9fd.webp"}, "manor_glass": {"wall": [35, 1105], "base": 836, "top": 170, "wins": [300, 850], "w": 1136, "h": 864, "d": "img-7b92679183.webp"}, "manor_stable": {"wall": [43, 1171], "base": 957, "top": 290, "wins": [310, 610], "w": 1220, "h": 996, "d": "img-2167f23a7b.webp"}, "manor_kitchen": {"wall": [36, 1106], "base": 915, "top": 200, "wins": [789], "smoke": [[892, 48]], "w": 1144, "h": 952, "d": "img-e75a1a88b5.webp"}, "manor_chapel": {"wall": [45, 922], "base": 988, "top": 330, "wins": [200, 747], "w": 952, "h": 1024, "d": "img-d1485ea6bc.webp"}});
 const ART_PROPS = {"moor_pine1": {"h": 80, "w": 109.8, "ax": 0.243, "iw": 516, "ih": 376, "d": "img-efd8c012cf.webp"}, "moor_pine2": {"h": 88, "w": 118.1, "ax": 0.328, "iw": 596, "ih": 444, "d": "img-dabd74cc7a.webp"}, "moor_dead": {"h": 78, "w": 82.6, "ax": 0.252, "iw": 432, "ih": 408, "d": "img-21efc87a08.webp"}, "moor_heath1": {"h": 30, "w": 39.9, "ax": 0.477, "iw": 404, "ih": 304, "d": "img-e2eaf0486e.webp"}, "moor_heath2": {"h": 28, "w": 33.5, "ax": 0.485, "iw": 340, "ih": 284, "d": "img-f4771ccf5f.webp"}, "moor_boulder": {"h": 40, "w": 60.7, "ax": 0.458, "iw": 528, "ih": 348, "d": "img-cd253ff8b5.webp"}, "moor_grave1": {"h": 38, "w": 34.3, "ax": 0.497, "iw": 332, "ih": 368, "d": "img-4c74251aa7.webp"}, "moor_grave2": {"h": 46, "w": 27.5, "ax": 0.494, "iw": 268, "ih": 448, "d": "img-605d604ae7.webp"}, "moor_rune": {"h": 54, "w": 43.8, "ax": 0.476, "iw": 380, "ih": 468, "d": "img-b2e01c15de.webp"}, "moor_peat": {"h": 34, "w": 40.1, "ax": 0.477, "iw": 420, "ih": 356, "d": "img-cbac3f99f0.webp"}, "moor_stump": {"h": 28, "w": 37.7, "ax": 0.521, "iw": 436, "ih": 324, "d": "img-021ce512cc.webp"}, "moor_trough": {"h": 28, "w": 50.1, "ax": 0.484, "iw": 480, "ih": 268, "d": "img-576ccffe83.webp"}, "moor_well": {"h": 62, "w": 58.9, "ax": 0.493, "iw": 460, "ih": 484, "d": "img-c8f537a82b.webp"}, "manor_cone": {"h": 70, "w": 47.9, "ax": 0.494, "iw": 252, "ih": 368, "d": "img-c131c0db99.webp"}, "manor_spiral": {"h": 80, "w": 49.8, "ax": 0.423, "iw": 284, "ih": 456, "d": "img-141244dd75.webp"}, "manor_ball": {"h": 78, "w": 60.6, "ax": 0.507, "iw": 292, "ih": 376, "d": "img-de4258b4d7.webp"}, "manor_hedge": {"h": 0, "w": 0, "ax": 0.498, "iw": 652, "ih": 276, "d": "img-768b832bc4.webp"}, "manor_bush": {"h": 32, "w": 33.6, "ax": 0.502, "iw": 332, "ih": 316, "d": "img-a3a2867e34.webp"}, "manor_apple1": {"h": 88, "w": 79.4, "ax": 0.53, "iw": 444, "ih": 492, "d": "img-6de827d79d.webp"}, "manor_apple2": {"h": 80, "w": 80.0, "ax": 0.514, "iw": 428, "ih": 428, "d": "img-34c2fdbcd5.webp"}, "manor_fountain": {"h": 80, "w": 77.4, "ax": 0.5, "iw": 480, "ih": 496, "d": "img-c93d74e19f.webp"}, "manor_angel": {"h": 62, "w": 42.8, "ax": 0.509, "iw": 320, "ih": 464, "d": "img-69a5016341.webp"}, "manor_bench": {"h": 32, "w": 43.2, "ax": 0.505, "iw": 432, "ih": 320, "d": "img-16a8e2820b.webp"}, "manor_roses": {"h": 32, "w": 39.7, "ax": 0.503, "iw": 456, "ih": 368, "d": "img-aca97c1ba7.webp"}, "manor_gazebo": {"h": 104, "w": 65.0, "ax": 0.49, "iw": 360, "ih": 576, "d": "img-a92993a8ec.webp"}};
+// 這個檔案由 art/harborart.py 產生：第 43 版，潮聲漁港自己的建築、樹和小物件
+
+Object.assign(ART_BLD, {"harbor_market": {"wall": [25, 1395], "base": 672, "top": 42, "wins": [194, 428, 1095], "w": 1440, "h": 716, "d": "img-ee376d5919.webp"}, "harbor_ice": {"wall": [25, 690], "base": 742, "top": 40, "wins": [413, 745], "sd": 1, "w": 824, "h": 808, "d": "img-6b38adf9b4.webp"}, "harbor_tackle": {"wall": [105, 760], "base": 762, "top": 147, "wins": [60, 487], "sd": 1, "w": 836, "h": 816, "d": "img-b39c7532bb.webp"}, "harbor_boatshed": {"wall": [25, 905], "base": 838, "top": 207, "wins": [300, 965], "sd": 1, "w": 1032, "h": 896, "d": "img-739dc3c890.webp"}, "harbor_light": {"wall": [-25, 450], "base": 1240, "wins": [205], "lamp": [160, 170], "w": 420, "h": 1288, "d": "img-3a501d8b00.webp"}, "harbor_hut": {"wall": [95, 600], "base": 690, "top": 32, "wins": [65, 390], "sd": 1, "w": 852, "h": 748, "d": "img-b0b44d0835.webp"}});
+Object.assign(ART_PROPS, {"harbor_pine1": {"h": 84, "w": 113.1, "ax": 0.334, "iw": 1384, "ih": 1028, "d": "img-48cdfb04fd.webp"}, "harbor_pine2": {"h": 84, "w": 117.2, "ax": 0.338, "iw": 1440, "ih": 1032, "d": "img-5862cfc9bb.webp"}, "harbor_casuarina": {"h": 92, "w": 126.1, "ax": 0.405, "iw": 1464, "ih": 1068, "d": "img-280ca58a6c.webp"}, "harbor_basket": {"h": 26, "w": 26.0, "ax": 0.505, "iw": 632, "ih": 632, "d": "img-609f382f90.webp"}, "harbor_barrel": {"h": 31, "w": 24.0, "ax": 0.502, "iw": 548, "ih": 708, "d": "img-de66929379.webp"}, "harbor_rack": {"h": 46, "w": 40.5, "ax": 0.526, "iw": 644, "ih": 732, "d": "img-fe7d1cef21.webp"}, "harbor_rock": {"h": 30, "w": 34.3, "ax": 0.576, "iw": 644, "ih": 564, "d": "img-57f850d6dc.webp"}, "harbor_sampan": {"h": 46, "w": 57.7, "ax": 0.695, "iw": 788, "ih": 628, "d": "img-2a404bf5a7.webp"}, "harbor_basin": {"h": 27, "w": 34.0, "ax": 0.512, "iw": 644, "ih": 512, "d": "img-78e67f2f85.webp"}, "harbor_nets": {"h": 30, "w": 31.0, "ax": 0.492, "iw": 648, "ih": 628, "d": "img-945040d3fe.webp"}, "harbor_bollard": {"h": 32, "w": 28.2, "ax": 0.52, "iw": 568, "ih": 644, "d": "img-e0687624c4.webp"}});
 // ---------- AI 圖的載入與擺放（資料在 00d-art.js，由 art/assets.py 產生；這個檔案是手寫的）----------
 // 圖片解碼好之前，樹和建築先用程式畫的
 const ARTI = { trees: [], pines: [], bld: {}, props: {} };
@@ -1232,7 +1242,7 @@ function artGeom(b) {
   const m = ART_BLD[artKey(b)]; if (!m) return null;
   const k = b.W / (m.wall[1] - m.wall[0]), ky = m.top != null ? b.H / (m.base - m.top) : k, left = b.X - m.wall[0] * k, top = b.Y + b.H - m.base * ky;
   const P = p => [left + p[0] * k, top + p[1] * ky];
-  return { k, ky, x: left, y: top, w: m.w * k, h: m.h * ky, wins: m.wins.map(px => left + px * k), smoke: (m.smoke || []).map(P), spark: (m.spark || []).map(P), hub: m.hub ? [left + m.hub[0] * k, top + m.hub[1] * ky, m.hub[2] * k] : null };
+  return { k, ky, x: left, y: top, w: m.w * k, h: m.h * ky, wins: m.wins.map(px => left + px * k), smoke: (m.smoke || []).map(P), spark: (m.spark || []).map(P), hub: m.hub ? [left + m.hub[0] * k, top + m.hub[1] * ky, m.hub[2] * k] : null, sd: !!m.sd, lamp: m.lamp ? P(m.lamp) : null };   // 第 43 版：sd = 圖上已經畫了側門；lamp = 燈塔燈室的位置
 }
 // 圖上會動的東西：煙囪的煙、鐵匠鋪的火星、磨坊的風車扇葉（畫在建築的圖上面）
 function artLive(g, b, t) {
@@ -1272,7 +1282,7 @@ const ROLE_SCENE_DEF = {"0": {"w": 1672, "h": 941, "d": "img-8c7e554875.webp"}, 
 const COMIC_DEF = {"ej": [{"w": 1672, "h": 941, "d": "img-799435197e.webp"}, {"w": 1672, "h": 941, "d": "img-8743da2e02.webp"}, {"w": 1672, "h": 941, "d": "img-5157534406.webp"}, {"w": 1672, "h": 941, "d": "img-b2dcd46d08.webp"}, {"w": 1672, "h": 941, "d": "img-27dfc46984.webp"}, {"w": 1672, "h": 941, "d": "img-b8a9c5932f.webp"}, {"w": 1672, "h": 941, "d": "img-c3c43d5cdd.webp"}], "none": [{"w": 1672, "h": 941, "d": "img-799435197e.webp"}, {"w": 1672, "h": 941, "d": "img-8743da2e02.webp"}, {"w": 1672, "h": 941, "d": "img-5157534406.webp"}, {"w": 1672, "h": 941, "d": "img-f951f0537c.webp"}], "boom": {"w": 1321, "h": 737, "d": "img-3c6b521bf7.webp"}};
 // 這個檔案由 art/audio.py 產生：聲音檔（audio/ 底下，打包時複製到 dist/）
 // f：檔名；d：長度（秒）；g：音樂播放時再乘上的音量；loop：可以循環
-const SND_FILES = {"m0": {"f": "snd-cd26099553.mp3", "d": 136.0, "g": 1.121, "loop": 1}, "m1": {"f": "snd-3ecc5ae8a0.mp3", "d": 87.9, "g": 1.492, "loop": 1}, "m2": {"f": "snd-b101ea4430.mp3", "d": 47.85, "g": 1.139, "loop": 1}, "m3": {"f": "snd-b3c2caee08.mp3", "d": 120.059, "g": 1.0, "loop": 1}, "m4": {"f": "snd-9f942a7362.mp3", "d": 187.0, "g": 1.851, "loop": 1}, "meet": {"f": "snd-c8f6db0bb4.mp3", "d": 100.35, "g": 1.0, "loop": 1}, "tense": {"f": "snd-3f87b61c0b.mp3", "d": 10.5, "g": 1.0, "loop": 0}, "click": {"f": "snd-7073cd290a.mp3", "d": 0.091}, "ok": {"f": "snd-7d421678e3.mp3", "d": 0.29}, "done": {"f": "snd-7035523a9c.mp3", "d": 0.797}, "win": {"f": "snd-4e8e2fe376.mp3", "d": 0.797}, "lose": {"f": "snd-b07d5c8f49.mp3", "d": 1.739}, "reveal": {"f": "snd-29882e1b81.mp3", "d": 0.729}, "report": {"f": "snd-3a4ee8b9e2.mp3", "d": 0.607}, "wrong": {"f": "snd-64fe54ec5a.mp3", "d": 1.324}, "bell": {"f": "snd-9811ba8b3b.mp3", "d": 1.326}, "hit0": {"f": "snd-d9ec04603c.mp3", "d": 0.544}, "hit1": {"f": "snd-a94f330098.mp3", "d": 0.464}, "hit2": {"f": "snd-e73ecbc2c5.mp3", "d": 0.414}, "hit3": {"f": "snd-49f5b1885c.mp3", "d": 0.416}, "thud": {"f": "snd-7d45089c54.mp3", "d": 0.569}, "slash": {"f": "snd-7b09fd3779.mp3", "d": 0.422}, "vote": {"f": "snd-c489725646.mp3", "d": 0.653}, "gong": {"f": "snd-468f4e1d4e.mp3", "d": 1.413}, "blow": {"f": "snd-61d7d39515.mp3", "d": 2.637}, "whoosh": {"f": "snd-f88369d099.mp3", "d": 1.053}, "roar": {"f": "snd-9295c3bdbd.mp3", "d": 0.927}, "growl": {"f": "snd-25dbd856e9.mp3", "d": 0.608}, "magic": {"f": "snd-b338b77971.mp3", "d": 0.578}, "altar": {"f": "snd-f6a8ab7390.mp3", "d": 0.479}, "fire": {"f": "snd-fbbabe7faa.mp3", "d": 0.889}, "gun": {"f": "snd-5860a8e2b1.mp3", "d": 1.139}, "empty": {"f": "snd-de1e3e0ba8.mp3", "d": 0.428}};
+const SND_FILES = {"m0": {"f": "snd-cd26099553.mp3", "d": 136.0, "g": 1.121, "loop": 1}, "m1": {"f": "snd-3ecc5ae8a0.mp3", "d": 87.9, "g": 1.492, "loop": 1}, "m2": {"f": "snd-b101ea4430.mp3", "d": 47.85, "g": 1.139, "loop": 1}, "m3": {"f": "snd-b3c2caee08.mp3", "d": 120.059, "g": 1.0, "loop": 1}, "m4": {"f": "snd-9f942a7362.mp3", "d": 187.0, "g": 1.851, "loop": 1}, "meet": {"f": "snd-c8f6db0bb4.mp3", "d": 100.35, "g": 1.0, "loop": 1}, "tense": {"f": "snd-3f87b61c0b.mp3", "d": 10.5, "g": 1.0, "loop": 0}, "h0": {"f": "snd-dfb126a389.mp3", "d": 185.678, "g": 1.309, "loop": 0}, "h1": {"f": "snd-ba2a481e09.mp3", "d": 158.224, "g": 1.0, "loop": 0}, "h2": {"f": "snd-d6b345b4bc.mp3", "d": 137.953, "g": 1.116, "loop": 0}, "h3": {"f": "snd-1cae790c30.mp3", "d": 93.701, "g": 1.321, "loop": 0}, "click": {"f": "snd-7073cd290a.mp3", "d": 0.091}, "ok": {"f": "snd-7d421678e3.mp3", "d": 0.29}, "done": {"f": "snd-7035523a9c.mp3", "d": 0.797}, "win": {"f": "snd-4e8e2fe376.mp3", "d": 0.797}, "lose": {"f": "snd-b07d5c8f49.mp3", "d": 1.739}, "report": {"f": "snd-3a4ee8b9e2.mp3", "d": 0.607}, "wrong": {"f": "snd-64fe54ec5a.mp3", "d": 1.324}, "bell": {"f": "snd-9811ba8b3b.mp3", "d": 1.326}, "hit0": {"f": "snd-d9ec04603c.mp3", "d": 0.544}, "hit1": {"f": "snd-a94f330098.mp3", "d": 0.464}, "hit2": {"f": "snd-e73ecbc2c5.mp3", "d": 0.414}, "hit3": {"f": "snd-49f5b1885c.mp3", "d": 0.416}, "thud": {"f": "snd-7d45089c54.mp3", "d": 0.569}, "slash": {"f": "snd-7b09fd3779.mp3", "d": 0.422}, "vote": {"f": "snd-c489725646.mp3", "d": 0.653}, "gong": {"f": "snd-468f4e1d4e.mp3", "d": 1.413}, "blow": {"f": "snd-61d7d39515.mp3", "d": 2.637}, "whoosh": {"f": "snd-f88369d099.mp3", "d": 1.053}, "roar": {"f": "snd-9295c3bdbd.mp3", "d": 0.927}, "growl": {"f": "snd-25dbd856e9.mp3", "d": 0.608}, "magic": {"f": "snd-b338b77971.mp3", "d": 0.578}, "altar": {"f": "snd-f6a8ab7390.mp3", "d": 0.479}, "fire": {"f": "snd-fbbabe7faa.mp3", "d": 0.889}, "gun": {"f": "snd-5860a8e2b1.mp3", "d": 1.139}, "empty": {"f": "snd-de1e3e0ba8.mp3", "d": 0.428}, "r_vill": {"f": "snd-22d64404c6.mp3", "d": 1.793}, "r_wolf": {"f": "snd-e85f845d0c.mp3", "d": 3.25}, "r_seer": {"f": "snd-aa425ed5bc.mp3", "d": 1.82}, "r_fool": {"f": "snd-6205bf9068.mp3", "d": 1.26}, "r_vigil": {"f": "snd-b1f9d151c9.mp3", "d": 2.67}, "r_hunt": {"f": "snd-c970c89799.mp3", "d": 2.35}};
 // 這個檔案由 art/prep_dog.py 產生：場景裡小白狗的動畫（第 42 版，使用者提供的圖）
 // rows：每個動作的每一格 [x, y, 寬, 高, 腳底中心 x, 腳底 y]（圖上的像素）；face：這個動作畫的時候臉朝哪邊（1 右、-1 左、0 正面）；tall：站著時大約多高（像素）
 const DOG_ART = {"d": "img-4cc8d91ee6.webp", "w": 2960, "h": 2112, "rows": {"idle": [[8, 8, 220, 206, 104.8, 192.0], [304, 8, 226, 212, 110.2, 198.0], [600, 8, 220, 212, 106.5, 198.0], [896, 8, 222, 212, 108.0, 198.0], [1192, 8, 218, 212, 103.2, 198.0], [1488, 8, 222, 212, 107.9, 198.0], [1784, 8, 216, 212, 102.3, 198.0], [2080, 8, 222, 212, 106.3, 198.0]], "runR": [[2376, 8, 182, 172, 90.3, 148.0], [2672, 8, 182, 172, 89.3, 148.0], [8, 272, 178, 180, 88.5, 156.0], [304, 272, 176, 180, 86.8, 156.0], [600, 272, 170, 180, 83.3, 156.0], [896, 272, 176, 180, 86.5, 156.0], [1192, 272, 178, 180, 86.9, 156.0], [1488, 272, 178, 180, 89.0, 154.0]], "runL": [[1784, 272, 178, 172, 87.4, 148.0], [2080, 272, 178, 172, 88.5, 148.0], [2376, 272, 182, 174, 89.6, 148.0], [2672, 272, 176, 178, 86.0, 154.0], [8, 536, 176, 182, 87.0, 156.0], [304, 536, 178, 180, 87.6, 156.0], [600, 536, 180, 182, 87.8, 156.0], [896, 536, 178, 180, 89.7, 156.0]], "dig": [[1192, 536, 228, 186, 118.9, 172.0], [1488, 536, 236, 196, 116.1, 182.0], [1784, 536, 276, 198, 119.8, 184.0], [2080, 536, 280, 206, 119.4, 192.0], [2376, 536, 274, 206, 123.8, 192.0], [2672, 536, 274, 206, 120.1, 192.0], [8, 800, 244, 206, 118.4, 192.0], [304, 800, 236, 206, 121.3, 192.0]], "carryR": [[600, 800, 190, 164, 91.7, 150.0], [896, 800, 182, 164, 86.2, 150.0], [1192, 800, 184, 164, 87.4, 150.0], [1488, 800, 180, 174, 87.2, 160.0], [1784, 800, 180, 176, 84.7, 162.0], [2080, 800, 180, 176, 83.9, 162.0], [2376, 800, 180, 176, 85.2, 162.0], [2672, 800, 180, 176, 86.4, 162.0]], "carryL": [[8, 1064, 180, 166, 91.4, 152.0], [304, 1064, 180, 166, 91.2, 152.0], [600, 1064, 180, 166, 91.7, 152.0], [896, 1064, 178, 166, 90.2, 152.0], [1192, 1064, 182, 176, 92.0, 162.0], [1488, 1064, 182, 174, 93.1, 160.0], [1784, 1064, 184, 176, 91.9, 162.0], [2080, 1064, 182, 176, 94.2, 162.0]], "bury": [[2376, 1064, 200, 178, 98.2, 164.0], [2672, 1064, 196, 178, 94.6, 164.0], [8, 1328, 194, 184, 95.3, 170.0], [304, 1328, 190, 180, 96.4, 166.0], [600, 1328, 194, 178, 98.7, 164.0], [896, 1328, 224, 186, 100.5, 172.0], [1192, 1328, 246, 186, 99.9, 172.0], [1488, 1328, 250, 186, 101.3, 172.0], [1784, 1328, 240, 186, 103.7, 172.0], [2080, 1328, 222, 186, 99.4, 172.0], [2376, 1328, 176, 186, 87.0, 172.0], [2672, 1328, 218, 186, 83.7, 172.0]], "belly": [[8, 1592, 190, 202, 90.3, 188.0], [304, 1592, 242, 202, 112.5, 188.0], [600, 1592, 250, 212, 119.9, 198.0], [896, 1592, 266, 212, 127.6, 198.0], [1192, 1592, 270, 210, 135.9, 196.0], [1488, 1592, 276, 206, 130.7, 192.0], [1784, 1592, 228, 212, 106.8, 198.0], [2080, 1592, 200, 212, 97.4, 198.0]], "dig_out": [[2376, 1592, 248, 232, 108.7, 218.0], [2672, 1592, 224, 220, 111.6, 206.0], [8, 1856, 238, 214, 109.3, 200.0], [304, 1856, 244, 220, 113.5, 206.0], [600, 1856, 230, 220, 112.0, 206.0], [896, 1856, 226, 230, 115.5, 216.0], [1192, 1856, 226, 234, 113.7, 220.0], [1488, 1856, 226, 234, 107.5, 220.0], [1784, 1856, 222, 234, 105.3, 220.0], [2080, 1856, 224, 234, 107.5, 220.0], [2376, 1856, 212, 232, 99.0, 218.0], [2672, 1856, 236, 248, 92.5, 234.0]]}, "fps": {"idle": 6, "runR": 12, "runL": 12, "dig": 10, "carryR": 12, "carryL": 12, "bury": 0, "belly": 8, "dig_out": 0}, "sc": {"idle": 1, "runR": 1.42, "runL": 1.42, "dig": 1.08, "carryR": 1.46, "carryL": 1.46, "bury": 1.3, "belly": 1.02, "dig_out": 1.12}, "face": {"idle": 0, "runR": 1, "runL": -1, "dig": 1, "carryR": 1, "carryL": -1, "bury": 1, "belly": 0, "dig_out": 1}, "tall": 198.0};
@@ -1435,35 +1445,39 @@ function buildHarbor() {
   tfill(9, 30, 10, 40, T_PLANK); tfill(7, 39, 12, 40, T_PLANK); tfill(30, 30, 31, 41, T_PLANK); tfill(28, 40, 33, 41, T_PLANK); tfill(50, 30, 51, 39, T_PLANK); tfill(48, 38, 53, 39, T_PLANK);
   // 路：港口大街（中段往上彎）、西邊的路、東邊的路（在燈塔前面轉彎）
   P(8, 11, 24, 12); P(24, 10, 40, 11); P(40, 11, 57, 12); P(8, 13, 9, 26); P(52, 13, 53, 19); P(52, 20, 57, 21); P(54, 22, 55, 26);
-  P(31, 12, 32, 13); P(31, 25, 32, 26); P(15, 23, 16, 26); P(46, 23, 47, 26); P(13, 10, 13, 10); P(48, 10, 48, 10);
-  P(18, 8, 18, 10); P(43, 8, 43, 10); P(21, 20, 24, 20); P(39, 20, 41, 20);   // 通往側門的小路
+  P(31, 12, 32, 13); P(31, 25, 32, 26); P(14, 23, 15, 26); P(47, 23, 48, 26); P(13, 10, 13, 10); P(49, 10, 49, 10);
+  P(16, 8, 16, 10); P(43, 8, 45, 8); P(43, 9, 43, 10); P(19, 20, 24, 20); P(39, 20, 43, 20);   // 通往側門的小路
   P(8, 2, 8, 10);                                                          // 冰庫西邊、貼著松林的小巷（接到房子後面那條路）
   tfill(25, 14, 38, 24, T_STONE);
-  tfill(39, 3, 42, 9, T_TREE, true);
+  tfill(37, 3, 42, 9, T_TREE, true); tfill(26, 3, 36, 4, T_TREE, true); tfill(52, 3, 53, 9, T_TREE, true); tfill(44, 3, 51, 3, T_TREE, true);   // 第 43 版：房子照圖的比例變小，空出來的地方種樹
   [[22, 14], [23, 14], [22, 23], [40, 22], [41, 14], [11, 24], [12, 26], [58, 13], [59, 20], [54, 14]].forEach(p => tset(p[0], p[1], T_TREE));
   fbox(19, 3, 23, 9, [[21, 9]], T_GRASS);   // 曬魚場
   BUILDINGS = [
-    bld('market', '魚市', 25, 3, 38, 9, [[31, 9], [32, 9]], [[34, 4, 34, 6]]),
-    bld('ice', '冰庫', 9, 3, 17, 9, [[13, 9], [17, 8]], [[13, 4, 13, 6]]),
-    bld('tackle', '漁具倉', 44, 3, 52, 9, [[48, 9], [44, 8]], [[47, 4, 47, 6]]),
-    bld('boat', '造船棚', 10, 15, 20, 22, [[15, 22], [16, 22], [20, 20]], []),
-    bld('light', '燈塔', 55, 14, 59, 19, [[57, 19]], []),
-    bld('hut', '漁夫小屋', 42, 15, 50, 22, [[46, 22], [42, 20]], [[46, 16, 46, 18]])
+    // 第 43 版：房子換成漁港自己的圖（ak）。大小照圖的比例（門跟人差不多高），所以每棟都比以前小一圈；燈塔是細細的三格寬
+    bld('market', '魚市', 26, 5, 36, 9, [[31, 9], [32, 9]], [], { ak: 'harbor_market' }),
+    bld('ice', '冰庫', 10, 4, 15, 9, [[13, 9], [15, 8]], [], { ak: 'harbor_ice' }),
+    bld('tackle', '漁具倉', 46, 4, 51, 9, [[49, 9], [46, 8]], [], { ak: 'harbor_tackle' }),
+    bld('boat', '造船棚', 11, 17, 18, 22, [[14, 22], [15, 22], [18, 20]], [], { ak: 'harbor_boatshed' }),
+    bld('light', '燈塔', 56, 14, 58, 19, [[57, 19]], [], { ak: 'harbor_light' }),
+    bld('hut', '漁夫小屋', 44, 15, 49, 22, [[47, 22], [44, 20]], [], { ak: 'harbor_hut' })
   ];
+  // 第 43 版：屋外的東西用漁港自己的圖（a）：魚簍、木桶、曬魚架、礁石、舢舨、洗魚石槽，再多擺幾堆漁網和繫船石柱。屋裡的家具沿用程式畫的
+  const A = (k, list, a, ex) => list.map(p => ob(k, p[0], p[1], Object.assign({ a }, ex || {})));
   OBJECTS = [
-    ...obs('counter', [[27, 4], [29, 4], [36, 4]]), ob('barrel', 31, 4), ob('crate', 26, 8), ob('ice', 37, 8),
-    ...obs('ice', [[10, 4], [11, 4], [10, 5], [16, 6], [15, 4], [16, 4]]),
-    ...obs('rack', [[20, 5], [22, 5], [22, 7], [22, 17], [23, 20]]),
-    ...obs('crate', [[45, 4], [46, 4], [11, 16], [12, 16], [40, 15], [40, 16], [39, 20], [12, 27], [13, 27], [24, 29], [25, 29], [36, 27], [37, 27], [45, 29], [53, 27], [56, 15]]),
-    ...obs('shelf', [[51, 4], [50, 4], [18, 16], [49, 16]]), ...obs('barrel', [[45, 6], [19, 16], [19, 27], [40, 29], [52, 28], [58, 15]]),
-    ob('hull', 13, 18, { w: 3 }), ob('logs', 11, 21), ob('bed', 43, 16, { c: '#5a8a8a' }), ob('table', 48, 18), ob('trough', 37, 16),
-    ...obs('rock', [[11, 35], [26, 32], [40, 33], [54, 32], [32, 32], [24, 35]]),
-    ...obs('boat', [[4, 42], [16, 38], [22, 39], [36, 36], [44, 37], [57, 40], [22, 43], [42, 43]], { ns: true })
+    ...obs('counter', [[27, 6], [29, 6], [34, 6]]), ob('barrel', 31, 6), ob('crate', 27, 8), ob('ice', 35, 8),
+    ...obs('ice', [[11, 5], [12, 5], [11, 6], [14, 5]]),
+    ...A('rack', [[20, 5], [22, 5], [22, 7], [22, 17], [23, 18]], 'harbor_rack'),
+    ...obs('crate', [[47, 5], [48, 5], [16, 18], [17, 18]]), ...A('crate', [[40, 15], [40, 16], [41, 17], [12, 27], [13, 27], [24, 29], [25, 29], [36, 27], [37, 27], [45, 29], [53, 27]], 'harbor_basket'),
+    ...obs('shelf', [[49, 5], [12, 18], [48, 17]]), ...obs('barrel', [[47, 7]]), ...A('barrel', [[19, 27], [40, 29], [52, 28]], 'harbor_barrel'),
+    ob('hull', 13, 18, { w: 3 }), ob('logs', 12, 21), ob('bed', 45, 17, { c: '#5a8a8a' }), ob('table', 48, 19), ...A('trough', [[37, 16]], 'harbor_basin'),
+    ...A('rock', [[11, 35], [26, 32], [40, 33], [54, 32], [32, 32], [24, 35]], 'harbor_rock'),
+    ...A('crate', [[16, 29], [47, 28]], 'harbor_nets'), ...A('rock', [[11, 29], [32, 29], [52, 29]], 'harbor_bollard'),
+    ...A('boat', [[4, 42], [16, 38], [22, 39], [36, 36], [44, 37], [57, 40], [22, 43], [42, 43]], 'harbor_sampan', { ns: true })
   ];
   STATIONS = [
-    stn('秤魚', '魚市', 36, 5, 'timing', '🐟', '指針進到綠色區再按，成功 3 次', 3),
-    stn('搬冰塊', '冰庫', 15, 5, 'mash', '🧊', '連點 8 下把冰塊搬完', 8),
-    stn('整理漁具', '漁具倉', 50, 5, 'seq', '🎣', '照 1 到 5 的順序把漁具歸位', 5),
+    stn('秤魚', '魚市', 35, 7, 'timing', '🐟', '指針進到綠色區再按，成功 3 次', 3),
+    stn('搬冰塊', '冰庫', 13, 6, 'mash', '🧊', '連點 8 下把冰塊搬完', 8),
+    stn('整理漁具', '漁具倉', 50, 6, 'seq', '🎣', '照 1 到 5 的順序把漁具歸位', 5),
     stn('修船', '造船棚', 14, 19, 'timing', '🔨', '指針進到綠色區再敲，成功 3 次', 3),
     stn('點亮燈塔', '燈塔', 57, 16, 'hold', '💡', '按住不放，把燈點亮'),
     stn('釣魚', '西碼頭', 8, 40, 'balance', '🐟', '按住收線、放開放線，讓魚留在綠色區'),
@@ -1705,7 +1719,7 @@ function buildManor() {
 
 const MAPS = [
   { name: '田園村', desc: '四周是樹林的農村。鄉間大路繞一圈，倉庫的後門通到林間小路。', fence: 0, build: buildVillage, fruit: .16 },
-  { name: '潮聲漁港', desc: '彎彎曲曲的海岸，兩頭是松林岬角。三座碼頭和沙灘都是死路，落單很危險。', fence: 1, build: buildHarbor, pine: .6 },
+  { name: '潮聲漁港', desc: '彎彎曲曲的海岸，兩頭是松林岬角。三座碼頭和沙灘都是死路，落單很危險。', fence: 1, build: buildHarbor, pine: .6, tart: 'harbor' },
   { name: '燈籠老街', desc: '巷弄交錯的老街，南邊一條水道只有三座橋。房子多、轉角多，進了屋外面就看不到你。', fence: 2, build: buildOldStreet, bloom: .5 },
   { name: '月影荒原', desc: '大片空地和矮石牆，小溪把地圖切成兩半，只有三座橋。房子少，但大多有兩個門。', fence: 3, build: buildMoor, pine: .4, tart: 'moor' },
   { name: '霧鐘莊園', desc: '大宅前的庭院、樹籬迷宮、湖心島和果園。路繞來繞去，大部分房子有兩個門。', fence: 4, build: buildManor, fruit: .5, tart: 'manor' }
@@ -1825,7 +1839,7 @@ function loadMap(i) {
     if (b.art) { b.wins = b.art.wins; const a = b.art, x0 = Math.min(b.cb.x, a.x), y0 = Math.min(b.cb.y, a.y); b.cb = { x: x0, y: y0, w: Math.max(b.cb.x + b.cb.w, a.x + a.w) - x0, h: Math.max(b.cb.y + b.cb.h, a.y + a.h) - y0 }; }
     STATIC.push({ y: b.Y + 1, k: 5, o: b, x0: b.X - 4, x1: b.X + b.W + 4, y0: b.Y - 4, y1: b.Y + b.H + 4 });
     STATIC.push({ y: b.Y + b.H - 2, k: 1, o: b, x0: b.cb.x, x1: b.cb.x + b.cb.w, y0: b.cb.y, y1: b.cb.y + b.cb.h });
-    if (b.kind === 'light') LIGHTS.push({ x: b.X + 58, y: b.Y + b.H - 3 - 248, r: 120, beam: true });
+    if (b.kind === 'light') LIGHTS.push(b.art && b.art.lamp ? { x: b.art.lamp[0], y: b.art.lamp[1], r: 120, beam: true } : { x: b.X + 58, y: b.Y + b.H - 3 - 248, r: 120, beam: true });
     if (!b.dim && !k.nowin) for (const wx of b.wins) LIGHTS.push({ x: wx, y: b.Y + b.H - 24, r: 62 });
     if (!b.dim) for (const d of b.dops) LIGHTS.push({ x: (d[0] + d[1]) / 2, y: b.Y + b.H + 6, r: 54 });
     for (const sd of b.sides) LIGHTS.push({ x: sd.s < 0 ? b.X - 14 : b.X + b.W + 14, y: (sd.y + 1) * TILE - 6, r: 58 });   // 側門口的燈
@@ -1854,6 +1868,7 @@ function loadMap(i) {
 const MAZE = [3, 3, 20, 21];   // 莊園的樹籬迷宮範圍（格子）
 function treeArt(kind, t, x, y) {
   if (kind === 'moor') { t.art = ['moor_pine1', 'moor_pine2', 'moor_pine1', 'moor_pine2', 'moor_dead'][(x * 7 + y * 13) % 5]; return; }
+  if (kind === 'harbor') { t.art = ['harbor_pine1', 'harbor_pine2', 'harbor_pine1', 'harbor_pine2', 'harbor_casuarina'][(x * 7 + y * 13) % 5]; return; }   // 第 43 版：漁港的黑松兩種、木麻黃
   if (kind !== 'manor') return;
   const inMaze = (x, y) => x >= MAZE[0] && y >= MAZE[1] && x <= MAZE[2] && y <= MAZE[3];
   const tr = (x, y) => tget(x, y) === T_TREE;
@@ -2046,6 +2061,8 @@ function buildGround() {
       g.fillStyle = 'rgba(255,255,255,.1)'; ell(g, px - 1.2, py - 1.4, 2.6, 1.6);
     }
   });
+  // 第 43 版：有 AI 圖的房子，先把它底下「還沒畫地板時」的草地存一塊起來。圖蓋著的時候畫這塊（圖沒蓋到的角落、屋簷外面才不會露出室內地板）
+  for (const b of BUILDINGS) if (b.art) { const c = b.gpatch || document.createElement('canvas'); c.width = Math.ceil(b.W * GS); c.height = Math.ceil(b.H * GS); const cg = c.getContext('2d'); cg.clearRect(0, 0, c.width, c.height); cg.drawImage(groundCv, b.X * GS, b.Y * GS, b.W * GS, b.H * GS, 0, 0, c.width, c.height); b.gpatch = c; }
   // 室內地板：依建築種類
   each(T_FLOOR, (x, y) => {
     const bi = bmap[y * MW + x], b = BUILDINGS[bi], k = b ? bk(b) : BK.house, X = x * T, Y = y * T;
@@ -2303,6 +2320,7 @@ const ICONS = {
 // ---------- 物件 ----------
 function drawObject(g, o, t) {
   const x = o.wx, y = o.wy, k = o.k;
+  { const bi = bmap[o.y * MW + o.x], B = bi >= 0 ? BUILDINGS[bi] : null; if (B && B.gpatch && B.ra > .5 && artCanvas(B)) return; }   // 第 43 版：AI 圖的房子屋頂蓋著時，屋裡的家具不畫（圖沒蓋到的地方才不會看到）
   if (k !== 'boat' && k !== 'gate') { g.fillStyle = 'rgba(6,12,16,.3)'; ell(g, x + 1, y + 1, (o.w || 1) * 17, 6); }
   // 第 38 版：有自己的圖（a）就畫圖，底部中心對齊物件站的位置
   if (o.a) { const P = ARTI.props[o.a]; if (P && P.ok) {
@@ -2709,11 +2727,11 @@ const BK = {
   coop: { lay: 'gable', rf: 'thatch', rc: '#c2a35e', wl: 'plank', wc: '#b08a5a', fl: 'earth', fa: 'plain', wh: 40, up: 14, rr: .45, nowin: 1, xu: 14 },
   farm: { lay: 'sanhe', rf: 'tile', rc: '#a9503a', wl: 'plaster', wc: '#e3d8c0', fl: 'wood', fa: 'plain', wh: 58, wing: .26, xu: 24 },
   market: { lay: 'canopy', rf: 'canvas', rc: '#3f7c8c', wl: 'plank', wc: '#a98b63', fl: 'stone', fa: 'open', wh: 46, nowin: 1, xu: 30 },
-  ice: { lay: 'flat', rf: 'tar', rc: '#9fb4c2', wl: 'panel', wc: '#d3dce2', fl: 'stone', fa: 'cold', wh: 74, pw: 10, nowin: 1, xu: 30 },
-  tackle: { lay: 'shed', rf: 'tin', rc: '#6d8a78', wl: 'plank', wc: '#8a6c48', fl: 'wood', fa: 'plain', wh: 66, rise: 46, flip: 1, xu: 20 },
-  boat: { lay: 'barrel', rf: 'tin', rc: '#7c8a94', wl: 'plank', wc: '#8f775a', fl: 'earth', fa: 'arch', wh: 70, gh: 96, nowin: 1, xu: 14 },
+  ice: { lay: 'flat', rf: 'tar', rc: '#9fb4c2', wl: 'panel', wc: '#8d8a84', fl: 'stone', fa: 'cold', wh: 74, pw: 10, nowin: 1, xu: 30 },
+  tackle: { lay: 'shed', rf: 'tin', rc: '#6d8a78', wl: 'plank', wc: '#8a857c', fl: 'wood', fa: 'plain', wh: 66, rise: 46, flip: 1, xu: 20 },
+  boat: { lay: 'barrel', rf: 'tin', rc: '#7c8a94', wl: 'plank', wc: '#6e5a44', fl: 'earth', fa: 'arch', wh: 70, gh: 96, nowin: 1, xu: 14 },
   light: { lay: 'flat', rf: 'tar', rc: '#8b8e95', wl: 'plaster', wc: '#ece6d6', fl: 'stone', fa: 'tower', wh: 62, pw: 9, xu: 200 },
-  hut: { lay: 'gable', rf: 'turf', rc: '#5f8a4a', wl: 'lap', wc: '#c4493b', fl: 'wood', fa: 'plain', wh: 54, rr: .32, xu: 30 },
+  hut: { lay: 'gable', rf: 'turf', rc: '#5f8a4a', wl: 'lap', wc: '#8f897e', fl: 'wood', fa: 'plain', wh: 54, rr: .32, xu: 30 },
   tea: { lay: 'gable', rf: 'tile', rc: '#4c7758', wl: 'plank', wc: '#7a5a40', fl: 'wood', fa: 'two', wh: 102, rr: .4, xu: 24 },
   cloth: { lay: 'flat', rf: 'tar', rc: '#6f6a78', wl: 'plaster', wc: '#d9c9ad', fl: 'wood', fa: 'jp', wh: 100, pw: 10, ped: 1, xu: 40 },
   temple: { lay: 'tiers', rf: 'tile', rc: '#a23a30', wl: 'plaster', wc: '#e0cfa8', fl: 'stone', fa: 'hall', wh: 80, up: 44, xu: 52, curve: 1 },
@@ -3233,6 +3251,7 @@ const DECO = {
 // ---------- 屋頂掀開後看到的牆和門口的暗處 ----------
 function drawBuildingIn(g, b) {
   const bot = b.Y + b.H;
+  if (b.gpatch && b.ra > .02 && artCanvas(b)) { const a = g.globalAlpha; g.globalAlpha = a * Math.min(1, b.ra); g.drawImage(b.gpatch, b.X, b.Y, b.W, b.H); g.globalAlpha = a; }   // 第 43 版：屋頂（圖）蓋著時，地板換成屋外的草地；走進去時淡掉，露出地板
   if (b.ra > .985) { g.fillStyle = 'rgba(14,10,8,.72)'; for (const d of b.dops) g.fillRect(d[0], bot - 40, d[1] - d[0], 40); return; }
   const k = bk(b), c = k.wc, cap = tone(c, -.5), T = TILE;
   for (let ty = b.y0; ty <= b.y1; ty++) for (let tx = b.x0; tx <= b.x1; tx++) {
@@ -3268,7 +3287,7 @@ function drawBuilding(g, b, t) {
   if (b.ra < .02) return;
   // 有 AI 圖而且載入好了：直接畫圖（不經過快取，保持原圖的清晰度）
   const ac = b.art && artCanvas(b);
-  if (ac) { const a = g.globalAlpha; if (b.ra < .99) g.globalAlpha = a * b.ra; const sm = g.imageSmoothingQuality; g.imageSmoothingQuality = 'high'; g.drawImage(ac, b.art.x, b.art.y, b.art.w, b.art.h); g.imageSmoothingQuality = sm; artLive(g, b, t); drawSideDoors(g, b, t); g.globalAlpha = a; return; }
+  if (ac) { const a = g.globalAlpha; if (b.ra < .99) g.globalAlpha = a * b.ra; const sm = g.imageSmoothingQuality; g.imageSmoothingQuality = 'high'; g.drawImage(ac, b.art.x, b.art.y, b.art.w, b.art.h); g.imageSmoothingQuality = sm; artLive(g, b, t); if (!b.art.sd) drawSideDoors(g, b, t); g.globalAlpha = a; return; }
   const k = bk(b), a = g.globalAlpha;
   if (!b.cv || b.cgs !== GS) bakeBuilding(b, k);
   if (b.ra < .99) g.globalAlpha = a * b.ra;
@@ -4500,7 +4519,7 @@ function render(now) {
     fx = ME.x; fy = ME.y - 16;
     // 燈被吹熄：村民的畫面明顯變暗；狼人也會暗一點，但比村民亮
     const loT = G.lo && G.ph === 2 && !my.dead ? 1 : 0; view.lo += (loT - view.lo) * .1; if (Math.abs(loT - view.lo) < .01) view.lo = loT;
-    dark = my.dead ? .3 : .86 + (my.wolf ? .04 : .1) * view.lo;
+    dark = window.__lwNoFog ? 0 : my.dead ? .3 : .86 + (my.wolf ? .04 : .1) * view.lo;   // __lwNoFog：截圖檢查用
     const out = G.lo && G.ph === 2, want = my.dead ? 560 : my.wolf ? (out ? VISION * LIGHTS_OUT * LIGHTS_OUT_WOLF : VISION_WOLF) : VISION * (out ? LIGHTS_OUT : 1);   // 燈熄時狼人只比村民多看一倍
     view.vis = view.vis ? view.vis + (want - view.vis) * .1 : want; if (Math.abs(view.vis - want) < .5) view.vis = want;
     vis = view.vis;
@@ -4797,7 +4816,7 @@ function startIntro() {
   const mates = [];
   if (my.wolf && G) for (let i = 0; i < G.ro.length; i++) if (G.wf[i] === '1' && i !== my.idx) mates.push(nameIdx(i));
   intro.mates = mates.join('、');
-  sfx('reveal', { at: INTRO_PRE }); if (my.wolf) sfx('growl', { at: INTRO_PRE + .15, vol: .5 });   // 揭曉身分的那一下
+  sfx('whoosh', { at: INTRO_PRE - .5, vol: .35 }); sfx(['r_vill', 'r_wolf', 'r_seer', 'r_fool', 'r_vigil', 'r_hunt'][intro.role] || 'r_vill', { at: INTRO_PRE - .05 });   // 第 45 版：每種身分揭曉時有自己的音效
   $('introSr').textContent = '你是' + ROLE_FX[intro.role].n + '。' + ROLE_FX[intro.role].line + '。' + (my.wolf && mates.length ? '你的同伴：' + intro.mates + '。' : '');
 }
 
@@ -5427,9 +5446,11 @@ function drawPinwheel(g, x, y, r, a) {
 // 音量都用 Web Audio 的 GainNode 控制（iPhone 的 <audio> 不能調音量）
 const SND_VOL = { music: .30, meet: .22, sfx: .58 };  // 背景音樂適中、開會時再小一點。音效那一路有壓縮限幅（會自動補一點音量），第 41 版整體比上一版大約 +3 dB
 const SND_XF = 1.6;                                   // 音樂循環接回開頭時，前後交疊淡化幾秒
-const SND_GAIN = { click: .3, ok: .5, done: .6, win: .8, lose: .8, reveal: .7, report: .85, wrong: .85, bell: .85, thud: .8, slash: .9, vote: .6, gong: .65,
+const SND_GAIN = { click: .3, ok: .5, done: .6, win: .8, lose: .8, r_vill: .8, r_wolf: .95, r_seer: .8, r_fool: .85, r_vigil: .9, r_hunt: .9, report: .85, wrong: .85, bell: .85, thud: .8, slash: .9, vote: .6, gong: .65,
   blow: .7, whoosh: .55, roar: 1, growl: .8, magic: .7, altar: .85, fire: .6, gun: 1, empty: .7, tense: 1, hit0: .8, hit1: .8, hit2: .8, hit3: .8 };
-const Snd = { ctx: null, out: null, mus: null, lp: null, fx: null, buf: {}, wait: {}, opt: { m: 1, s: 1 }, cur: null, want: null, pos: {}, on: false, log: [], lit: 0 };
+const Snd = { ctx: null, out: null, mus: null, lp: null, fx: null, buf: {}, wait: {}, opt: { m: 1, s: 1 }, cur: null, want: null, pos: {}, on: false, log: [], lit: 0, hi: 0 };
+const HOME_N = Object.keys(SND_FILES).filter(k => /^h\d$/.test(k)).length;   // 第 45 版：主畫面的歌有幾首（輪流放）
+Snd.hi = Math.floor(Math.random() * Math.max(1, HOME_N));                   // 每次打開從隨機一首開始
 try { const o = JSON.parse(localStorage.getItem('lw_snd') || '{}'); if (o.m === 0) Snd.opt.m = 0; if (o.s === 0) Snd.opt.s = 0; } catch (e) { }
 
 function sndCtx() {
@@ -5454,7 +5475,7 @@ function sndUnlock() {
   if (!Snd.on) {
     Snd.on = true;
     try { const b = c.createBuffer(1, 1, 22050), s = c.createBufferSource(); s.buffer = b; s.connect(c.destination); s.start(0); } catch (e) { }   // iPhone：在點擊當下播一個無聲的聲音才算解鎖
-    for (const k in SND_FILES) if (!/^m\d$|^meet$/.test(k)) sndLoad(k);
+    for (const k in SND_FILES) if (!/^[mh]\d$|^meet$/.test(k)) sndLoad(k);
   }
   if (Snd.want) sndLoad(Snd.want);
 }
@@ -5503,7 +5524,7 @@ function musStart(key, b) {
   const bus = c.createGain(), t = c.currentTime + .05;
   bus.gain.setValueAtTime(0, t); bus.gain.linearRampToValueAtTime(g0, t + 1.4); bus.connect(Snd.lp);
   const m = { key, b, bus, segs: [], loop: info.loop !== 0 };
-  for (const x in Snd.buf) if (/^m\d$/.test(x) && x !== key) delete Snd.buf[x];   // 別張地圖的音樂解開後很佔記憶體（一首幾十 MB），換地圖就丟掉
+  for (const x in Snd.buf) if (/^[mh]\d$/.test(x) && x !== key) delete Snd.buf[x];   // 別張地圖（或主畫面）的音樂解開後很佔記憶體（一首幾十 MB），換歌就丟掉
   musSeg(m, t, (Snd.pos[key] || 0) % Math.max(1, b.duration - SND_XF), 0);   // 從上次停下來的地方接著放（開完會回來不會每次都從頭）
   Snd.cur = m;
 }
@@ -5516,7 +5537,7 @@ function musSeg(m, when, off, fade) {
 }
 function musStop(m, fade) {
   const c = Snd.ctx, t = c.currentTime, last = m.segs[m.segs.length - 1];
-  if (last) Snd.pos[m.key] = Math.max(0, (t - last.when) + last.off) % m.b.duration;
+  if (last) Snd.pos[m.key] = m.adv ? 0 : Math.max(0, (t - last.when) + last.off) % m.b.duration;   // 主畫面的歌放完換下一首：下次從頭放
   try { m.bus.gain.cancelScheduledValues(t); m.bus.gain.setValueAtTime(m.bus.gain.value, t); m.bus.gain.linearRampToValueAtTime(0, t + fade); } catch (e) { }
   for (const sg of m.segs) { try { sg.s.stop(t + fade + .1); } catch (e) { } }
   setTimeout(() => { try { m.bus.disconnect(); } catch (e) { } }, (fade + .5) * 1000);
@@ -5524,6 +5545,10 @@ function musStop(m, fade) {
 function musTick() {
   const m = Snd.cur, c = Snd.ctx; if (!m || !c) return;
   const last = m.segs[m.segs.length - 1];
+  if (!m.loop && /^h\d$/.test(m.key) && last && !m.adv) {
+    if (c.currentTime > last.end - 25) sndLoad('h' + ((Snd.hi + 1) % HOME_N));          // 先把下一首載好，換歌時才不會停頓
+    if (c.currentTime > last.end - 2.4) { m.adv = true; Snd.hi = (Snd.hi + 1) % HOME_N; }
+  }   // 主畫面：快放完了就換下一首（sndFrame 會淡出、淡入）
   if (m.loop && last && !last.nx && c.currentTime > last.end - SND_XF - 1.5) {   // 快放完了：排好下一輪，前後交疊淡化
     last.nx = true; const T = Math.max(c.currentTime + .05, last.end - SND_XF);
     last.g.gain.setValueAtTime(1, T); last.g.gain.linearRampToValueAtTime(0, T + SND_XF);
@@ -5540,10 +5565,11 @@ function sndFrame(mode) {
   if (lit !== Snd.lit) { Snd.lit = lit; try { Snd.lp.frequency.setTargetAtTime(lit ? 650 : 20000, Snd.ctx.currentTime, lit ? .25 : .6); } catch (e) { } }
 }
 function sndKeyFor(mode) {
+  if ((mode === 'home' || mode === 'wait' || mode === 'lobby') && HOME_N) return 'h' + Snd.hi;   // 第 45 版：主畫面、等人、大廳輪流放四首歌
   if (!inRoom || !G) return null;
   if (mode === 'play') { const k = 'm' + Math.max(0, curMap); return SND_FILES[k] ? k : 'm0'; }
   if (mode === 'meet' || mode === 'hunt') return 'meet';
-  return null;   // 大廳、開場動畫、投票結果（漫畫有自己的音效）、結算：不放音樂
+  return null;   // 開場動畫、投票結果（漫畫有自己的音效）、結算：不放音樂
 }
 function sndSetOpt(m, s) {
   Snd.opt.m = m ? 1 : 0; Snd.opt.s = s ? 1 : 0;
@@ -6388,8 +6414,9 @@ function bindUI() {
   $('btnMenu').addEventListener('click', () => { $('menuCode').textContent = (practice ? '單人練習' : '房間 ' + code) + '・第 ' + BUILD + ' 版'; document.body.classList.add('menu-open'); });
   $('btnMenuClose').addEventListener('click', () => document.body.classList.remove('menu-open'));
   // 第 40 版：聲音開關（記在手機上）
-  const sndLbl = () => { $('btnMus').textContent = '背景音樂：' + (Snd.opt.m ? '開' : '關'); $('btnSfx').textContent = '音效：' + (Snd.opt.s ? '開' : '關'); $('btnMus').classList.toggle('off', !Snd.opt.m); $('btnSfx').classList.toggle('off', !Snd.opt.s); };
+  const sndLbl = () => { $('btnHomeMus').classList.toggle('off', !Snd.opt.m); $('btnHomeMus').setAttribute('aria-pressed', Snd.opt.m ? 'true' : 'false'); $('btnHomeMus').title = '背景音樂：' + (Snd.opt.m ? '開' : '關'); $('btnMus').textContent = '背景音樂：' + (Snd.opt.m ? '開' : '關'); $('btnSfx').textContent = '音效：' + (Snd.opt.s ? '開' : '關'); $('btnMus').classList.toggle('off', !Snd.opt.m); $('btnSfx').classList.toggle('off', !Snd.opt.s); };
   $('btnMus').addEventListener('click', () => { sndSetOpt(!Snd.opt.m, Snd.opt.s); sndLbl(); });
+  $('btnHomeMus').addEventListener('click', () => { sndSetOpt(!Snd.opt.m, Snd.opt.s); sndLbl(); });   // 第 45 版：首頁左下角的音樂開關（跟選單裡的是同一個設定）
   $('btnSfx').addEventListener('click', () => { sndSetOpt(Snd.opt.m, !Snd.opt.s); sndLbl(); });
   sndLbl();
   $('btnSkip').addEventListener('click', () => castVote('-'));
@@ -6449,7 +6476,7 @@ function main() {
   requestAnimationFrame(frame);
   window.__lw = { Snd, SND_FILES, get OUTSIDE() { return OUTSIDE; }, get OBJECTS() { return OBJECTS; }, TREES, ART_BLD, ART_PROPS, artGeom, BELL, COMIC, hostHunt, sendHunt, get EJ() { return { EJ_PANEL, EJ_STAND, EJ_VERD, EJ_BLACK, EJ_BOOM, EJ_BOARD, EJ_LEN, NONE_OUT, NONE_BOARD, NONE_LEN }; }, homeBg, sceneArt, SPR_ANI, killFx, startKillAnim, aniOf, drawCharFallen, ARTI, STATIC, drawTree, drawBuilding, get WORLD_W() { return WORLD_W; }, get WORLD_H() { return WORLD_H; }, VFX, fxBlood, fxTaskDone, fxSpark, fxDust, camShake, fxFlash, cardArt, cardW, openCard, closeCard, get cardOpen() { return cardOpen; }, SPR, NCHAR, turnChar, sprFlip, drawChar, drawCharFit, drawCharFallen, COLORS, get BUILDINGS() { return BUILDINGS; }, drawBuilding, BK, loadMap, buildGround,
     get G() { return G; }, get H() { return H; }, ME, my, players, get BOTS() { return BOTS; }, Net, get STATIONS() { return STATIONS; }, SPAWNS, grid, MAPS, loadMap, applyMap, canSee, paintMiniMap, tget, boxFree, get curMap() { return curMap; },
-    findPath, startPractice, createRoom, joinRoom, invite, inviteLink, intro, hostStart, hostKill, hostReport, hostTick, setBotCount, castVote, sendChat, finishTask, openTask, leaveRoom, uiMode, parseTasks, dealTasks, taskCur, taskMarks, get CHAINS() { return CHAINS; }, get taskState() { return taskState; }, get hs() { return hs; }, get BUILDINGS() { return BUILDINGS; }, get OCC() { return OCC; }, BUILD, get view() { return view; }, get CANDLE() { return CANDLE; }, hostBlow, hostRelight, doBlow, canBlow, killRangeOf, guideMarks, openCandle, killFx, startKillAnim, COLORS, hostResolve, hostInspect, hostExecute, hostFool, hostPet, showSlash, DOG, DOG_ART, dogPettable, bldAt, occFor, get STATIC() { return STATIC; }, art: { drawChar, drawCharFallen, drawFallen, avatarCanvas, drawVillager, wolfShape, wolfEyes, lantern, drawTree, drawDog, circ, ell }, openAltar, finishAltar, hostAltarPlace, hostAltarStart, hostAltarSolve, doAltarPlace, doAltarStart, altarWhyNot,
+    findPath, startPractice, createRoom, joinRoom, invite, inviteLink, intro, startIntro, hostStart, hostKill, hostReport, hostTick, setBotCount, castVote, sendChat, finishTask, openTask, leaveRoom, uiMode, parseTasks, dealTasks, taskCur, taskMarks, get CHAINS() { return CHAINS; }, get taskState() { return taskState; }, get hs() { return hs; }, get BUILDINGS() { return BUILDINGS; }, get OCC() { return OCC; }, BUILD, get view() { return view; }, get CANDLE() { return CANDLE; }, hostBlow, hostRelight, doBlow, canBlow, killRangeOf, guideMarks, openCandle, killFx, startKillAnim, COLORS, hostResolve, hostInspect, hostExecute, hostFool, hostPet, showSlash, DOG, DOG_ART, dogPettable, bldAt, occFor, get STATIC() { return STATIC; }, art: { drawObject, drawChar, drawCharFallen, drawFallen, avatarCanvas, drawVillager, wolfShape, wolfEyes, lantern, drawTree, drawDog, circ, ell }, openAltar, finishAltar, hostAltarPlace, hostAltarStart, hostAltarSolve, doAltarPlace, doAltarStart, altarWhyNot,
     get ctx() { return ctxA; }, get inRoom() { return inRoom; }, get isHost() { return isHost; }, get code() { return code; }
   };
 }
