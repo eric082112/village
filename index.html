@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>月光光心慌慌</title>
 <meta name="description" content="和朋友連線玩的狼人村：做完村裡的工作，找出混在裡面的狼人。">
-<meta name="lw-build" content="45">
+<meta name="lw-build" content="46">
 <meta name="theme-color" content="#0b151d">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -686,6 +686,12 @@ body[data-mode="hunt"] #hunt{display:flex}
 #btnHomeMus{position:absolute;bottom:calc(env(safe-area-inset-bottom,0px) + 12px);left:calc(env(safe-area-inset-left,0px) + 14px);z-index:5;width:44px;height:44px;border-radius:50%;border:1.5px solid rgba(242,210,122,.75);background:rgba(10,16,26,.62);color:#f2d27a;font-size:22px;line-height:1;display:flex;align-items:center;justify-content:center;cursor:pointer;-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px)}
 #btnHomeMus.off{color:rgba(242,210,122,.45);border-color:rgba(242,210,122,.3)}
 #btnHomeMus.off::after{content:'';position:absolute;width:30px;height:2px;background:rgba(242,210,122,.6);transform:rotate(-45deg);border-radius:2px}
+
+/* 第 46 版：工作小遊戲的按鍵——字用 CSS 畫上去（不是可以選的文字），按住不會跳出 iPhone 的長按選單 */
+[data-label]::after{content:attr(data-label);pointer-events:none}
+.task-box,.task-box *,.act,.hold-btn,.hit-btn,.big-tap{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none;-webkit-user-drag:none}
+.hold-btn,.hit-btn,.big-tap{touch-action:none}
+.hold-btn.down{transform:translateY(3px);box-shadow:inset 0 2px 6px rgba(90,50,0,.45),0 1px 0 #7c4f12}
 [hidden]{display:none !important}
 </style>
 </head>
@@ -783,7 +789,7 @@ body[data-mode="hunt"] #hunt{display:flex}
       <button id="btnSetMode" class="btn set-btn" type="button">遊戲玩法<small id="sumMode"></small></button>
       <button id="btnSetRole" class="btn set-btn" type="button" hidden><span id="roleSetLbl">角色設定</span><small id="sumRole"></small></button>
       <button id="btnSetWolf" class="btn set-btn" type="button">狼人設定<small id="sumWolf"></small></button>
-      <button id="btnSetTask" class="btn set-btn" type="button">任務設定<small id="sumTask"></small></button>
+      <button id="btnSetTask" class="btn set-btn" type="button">基礎設定<small id="sumTask"></small></button>
     </div>
     <button id="btnStart" class="btn primary" type="button">開始遊戲</button>
     <p id="lobbyHint" class="note"></p>
@@ -1205,7 +1211,7 @@ Object.assign(ART_BLD, {"moor_barn": {"wall": [50, 1428], "base": 840, "top": 11
 const ART_PROPS = {"moor_pine1": {"h": 80, "w": 109.8, "ax": 0.243, "iw": 516, "ih": 376, "d": "img-efd8c012cf.webp"}, "moor_pine2": {"h": 88, "w": 118.1, "ax": 0.328, "iw": 596, "ih": 444, "d": "img-dabd74cc7a.webp"}, "moor_dead": {"h": 78, "w": 82.6, "ax": 0.252, "iw": 432, "ih": 408, "d": "img-21efc87a08.webp"}, "moor_heath1": {"h": 30, "w": 39.9, "ax": 0.477, "iw": 404, "ih": 304, "d": "img-e2eaf0486e.webp"}, "moor_heath2": {"h": 28, "w": 33.5, "ax": 0.485, "iw": 340, "ih": 284, "d": "img-f4771ccf5f.webp"}, "moor_boulder": {"h": 40, "w": 60.7, "ax": 0.458, "iw": 528, "ih": 348, "d": "img-cd253ff8b5.webp"}, "moor_grave1": {"h": 38, "w": 34.3, "ax": 0.497, "iw": 332, "ih": 368, "d": "img-4c74251aa7.webp"}, "moor_grave2": {"h": 46, "w": 27.5, "ax": 0.494, "iw": 268, "ih": 448, "d": "img-605d604ae7.webp"}, "moor_rune": {"h": 54, "w": 43.8, "ax": 0.476, "iw": 380, "ih": 468, "d": "img-b2e01c15de.webp"}, "moor_peat": {"h": 34, "w": 40.1, "ax": 0.477, "iw": 420, "ih": 356, "d": "img-cbac3f99f0.webp"}, "moor_stump": {"h": 28, "w": 37.7, "ax": 0.521, "iw": 436, "ih": 324, "d": "img-021ce512cc.webp"}, "moor_trough": {"h": 28, "w": 50.1, "ax": 0.484, "iw": 480, "ih": 268, "d": "img-576ccffe83.webp"}, "moor_well": {"h": 62, "w": 58.9, "ax": 0.493, "iw": 460, "ih": 484, "d": "img-c8f537a82b.webp"}, "manor_cone": {"h": 70, "w": 47.9, "ax": 0.494, "iw": 252, "ih": 368, "d": "img-c131c0db99.webp"}, "manor_spiral": {"h": 80, "w": 49.8, "ax": 0.423, "iw": 284, "ih": 456, "d": "img-141244dd75.webp"}, "manor_ball": {"h": 78, "w": 60.6, "ax": 0.507, "iw": 292, "ih": 376, "d": "img-de4258b4d7.webp"}, "manor_hedge": {"h": 0, "w": 0, "ax": 0.498, "iw": 652, "ih": 276, "d": "img-768b832bc4.webp"}, "manor_bush": {"h": 32, "w": 33.6, "ax": 0.502, "iw": 332, "ih": 316, "d": "img-a3a2867e34.webp"}, "manor_apple1": {"h": 88, "w": 79.4, "ax": 0.53, "iw": 444, "ih": 492, "d": "img-6de827d79d.webp"}, "manor_apple2": {"h": 80, "w": 80.0, "ax": 0.514, "iw": 428, "ih": 428, "d": "img-34c2fdbcd5.webp"}, "manor_fountain": {"h": 80, "w": 77.4, "ax": 0.5, "iw": 480, "ih": 496, "d": "img-c93d74e19f.webp"}, "manor_angel": {"h": 62, "w": 42.8, "ax": 0.509, "iw": 320, "ih": 464, "d": "img-69a5016341.webp"}, "manor_bench": {"h": 32, "w": 43.2, "ax": 0.505, "iw": 432, "ih": 320, "d": "img-16a8e2820b.webp"}, "manor_roses": {"h": 32, "w": 39.7, "ax": 0.503, "iw": 456, "ih": 368, "d": "img-aca97c1ba7.webp"}, "manor_gazebo": {"h": 104, "w": 65.0, "ax": 0.49, "iw": 360, "ih": 576, "d": "img-a92993a8ec.webp"}};
 // 這個檔案由 art/harborart.py 產生：第 43 版，潮聲漁港自己的建築、樹和小物件
 
-Object.assign(ART_BLD, {"harbor_market": {"wall": [25, 1395], "base": 672, "top": 42, "wins": [194, 428, 1095], "w": 1440, "h": 716, "d": "img-ee376d5919.webp"}, "harbor_ice": {"wall": [25, 690], "base": 742, "top": 40, "wins": [413, 745], "sd": 1, "w": 824, "h": 808, "d": "img-6b38adf9b4.webp"}, "harbor_tackle": {"wall": [105, 760], "base": 762, "top": 147, "wins": [60, 487], "sd": 1, "w": 836, "h": 816, "d": "img-b39c7532bb.webp"}, "harbor_boatshed": {"wall": [25, 905], "base": 838, "top": 207, "wins": [300, 965], "sd": 1, "w": 1032, "h": 896, "d": "img-739dc3c890.webp"}, "harbor_light": {"wall": [-25, 450], "base": 1240, "wins": [205], "lamp": [160, 170], "w": 420, "h": 1288, "d": "img-3a501d8b00.webp"}, "harbor_hut": {"wall": [95, 600], "base": 690, "top": 32, "wins": [65, 390], "sd": 1, "w": 852, "h": 748, "d": "img-b0b44d0835.webp"}});
+Object.assign(ART_BLD, {"harbor_market": {"wall": [40, 1430], "base": 672, "wins": [190, 410, 1080], "pd": [640, 855], "w": 1440, "h": 716, "d": "img-9f5af78114.webp"}, "harbor_ice": {"wall": [30, 700], "base": 740, "wins": [415, 750], "sd": 1, "pd": [330, 500], "ps": [715, 480, 790, 690], "w": 824, "h": 808, "d": "img-3f8562756e.webp"}, "harbor_tackle": {"wall": [148, 760], "base": 750, "wins": [85, 460], "sd": 1, "pd": [400, 520], "ps": [50, 520, 120, 700], "w": 836, "h": 816, "d": "img-2cff87624e.webp"}, "harbor_boatshed": {"wall": [55, 960], "base": 842, "wins": [300, 985], "sd": 1, "pd": [180, 850], "ps": [960, 600, 1010, 790], "w": 1032, "h": 896, "d": "img-739dc3c890.webp"}, "harbor_light": {"wall": [-25, 450], "base": 1240, "wins": [205], "lamp": [160, 170], "pd": [165, 245], "w": 420, "h": 1288, "d": "img-3a501d8b00.webp"}, "harbor_hut": {"wall": [128, 800], "base": 690, "wins": [90, 455], "sd": 1, "pd": [405, 510], "ps": [55, 410, 125, 640], "w": 852, "h": 748, "d": "img-42b5b1df10.webp"}});
 Object.assign(ART_PROPS, {"harbor_pine1": {"h": 84, "w": 113.1, "ax": 0.334, "iw": 1384, "ih": 1028, "d": "img-48cdfb04fd.webp"}, "harbor_pine2": {"h": 84, "w": 117.2, "ax": 0.338, "iw": 1440, "ih": 1032, "d": "img-5862cfc9bb.webp"}, "harbor_casuarina": {"h": 92, "w": 126.1, "ax": 0.405, "iw": 1464, "ih": 1068, "d": "img-280ca58a6c.webp"}, "harbor_basket": {"h": 26, "w": 26.0, "ax": 0.505, "iw": 632, "ih": 632, "d": "img-609f382f90.webp"}, "harbor_barrel": {"h": 31, "w": 24.0, "ax": 0.502, "iw": 548, "ih": 708, "d": "img-de66929379.webp"}, "harbor_rack": {"h": 46, "w": 40.5, "ax": 0.526, "iw": 644, "ih": 732, "d": "img-fe7d1cef21.webp"}, "harbor_rock": {"h": 30, "w": 34.3, "ax": 0.576, "iw": 644, "ih": 564, "d": "img-57f850d6dc.webp"}, "harbor_sampan": {"h": 46, "w": 57.7, "ax": 0.695, "iw": 788, "ih": 628, "d": "img-2a404bf5a7.webp"}, "harbor_basin": {"h": 27, "w": 34.0, "ax": 0.512, "iw": 644, "ih": 512, "d": "img-78e67f2f85.webp"}, "harbor_nets": {"h": 30, "w": 31.0, "ax": 0.492, "iw": 648, "ih": 628, "d": "img-945040d3fe.webp"}, "harbor_bollard": {"h": 32, "w": 28.2, "ax": 0.52, "iw": 568, "ih": 644, "d": "img-e0687624c4.webp"}});
 // ---------- AI 圖的載入與擺放（資料在 00d-art.js，由 art/assets.py 產生；這個檔案是手寫的）----------
 // 圖片解碼好之前，樹和建築先用程式畫的
@@ -1242,7 +1248,8 @@ function artGeom(b) {
   const m = ART_BLD[artKey(b)]; if (!m) return null;
   const k = b.W / (m.wall[1] - m.wall[0]), ky = m.top != null ? b.H / (m.base - m.top) : k, left = b.X - m.wall[0] * k, top = b.Y + b.H - m.base * ky;
   const P = p => [left + p[0] * k, top + p[1] * ky];
-  return { k, ky, x: left, y: top, w: m.w * k, h: m.h * ky, wins: m.wins.map(px => left + px * k), smoke: (m.smoke || []).map(P), spark: (m.spark || []).map(P), hub: m.hub ? [left + m.hub[0] * k, top + m.hub[1] * ky, m.hub[2] * k] : null, sd: !!m.sd, lamp: m.lamp ? P(m.lamp) : null };   // 第 43 版：sd = 圖上已經畫了側門；lamp = 燈塔燈室的位置
+  return { k, ky, x: left, y: top, w: m.w * k, h: m.h * ky, wins: m.wins.map(px => left + px * k), smoke: (m.smoke || []).map(P), spark: (m.spark || []).map(P), hub: m.hub ? [left + m.hub[0] * k, top + m.hub[1] * ky, m.hub[2] * k] : null, sd: !!m.sd, lamp: m.lamp ? P(m.lamp) : null,
+    pd: m.pd ? [left + m.pd[0] * k, left + m.pd[1] * k] : null, ps: m.ps ? [left + m.ps[0] * k, top + m.ps[1] * ky, left + m.ps[2] * k, top + m.ps[3] * ky] : null };   // 第 46 版：圖上畫的正門、側門在世界座標的位置（測試用來檢查門有沒有對到）   // 第 43 版：sd = 圖上已經畫了側門；lamp = 燈塔燈室的位置
 }
 // 圖上會動的東西：煙囪的煙、鐵匠鋪的火星、磨坊的風車扇葉（畫在建築的圖上面）
 function artLive(g, b, t) {
@@ -1389,7 +1396,7 @@ function buildVillage() {
   P(40, 37, 41, 43); P(40, 43, 53, 43);
   BUILDINGS = [
     bld('shrine', '祠堂', 26, 3, 37, 10, [[31, 10], [32, 10]], [[29, 4, 29, 6], [34, 4, 34, 6], [27, 7, 27, 7], [36, 7, 36, 7]]),
-    bld('mill', '磨坊', 45, 3, 53, 10, [[48, 10], [49, 10], [53, 9]], [[46, 7, 48, 7]]),
+    bld('mill', '磨坊', 45, 3, 53, 10, [[48, 10], [49, 10], [52, 10], [53, 10]], [[46, 7, 48, 7]]),   // 第 46 版：第二個出口改成圖上塔樓那扇門（以前是程式加在塔旁邊的側門，塔上畫的門反而進不去）
     bld('barn', '倉庫', 12, 3, 21, 10, [[16, 10], [17, 10], [21, 7]], [[18, 6, 20, 6]]),
     bld('bakery', '麵包坊', 12, 15, 20, 21, [[16, 21], [12, 20]], [[16, 16, 16, 18]]),
     bld('smithy', '鐵匠鋪', 42, 37, 51, 42, [[46, 42], [47, 42], [42, 41]], [[48, 38, 48, 39]]),
@@ -1426,7 +1433,7 @@ function buildVillage() {
     { name: '煮魚湯', steps: [8, 5, 0] },
     { name: '補充飼料', steps: [3, 9] }
   ];
-  LAMPS = [[25.5, 18.3], [38.5, 18.3], [25.5, 28.3], [38.5, 28.3], [10.5, 12], [30.2, 15], [33.8, 15], [50.6, 14.6], [10.5, 24.7], [53.5, 24.7], [13.4, 34.5], [30.2, 34.7], [51.4, 34.6], [20.5, 24.7], [44, 24.5], [29.6, 11.6], [34.4, 11.6], [15, 11.6], [47, 11.6], [39.5, 37.6], [36.6, 40.4], [20.5, 14.5], [50.5, 22], [22.4, 11.6], [56.3, 21.4]];
+  LAMPS = [[25.5, 18.3], [38.5, 18.3], [25.5, 28.3], [38.5, 28.3], [10.5, 12], [30.2, 15], [33.8, 15], [50.6, 14.6], [10.5, 24.7], [53.5, 24.7], [13.4, 34.5], [30.2, 34.7], [51.4, 34.6], [20.5, 24.7], [44, 24.5], [28.6, 11.6], [34.4, 11.6], [15, 11.6], [47, 11.6], [39.5, 37.6], [36.6, 40.4], [20.5, 14.5], [50.5, 22], [22.4, 11.6], [56.3, 21.4]];
 }
 
 // ---------- 地圖二：潮聲漁港（沿海長條，碼頭是死路） ----------
@@ -1445,21 +1452,23 @@ function buildHarbor() {
   tfill(9, 30, 10, 40, T_PLANK); tfill(7, 39, 12, 40, T_PLANK); tfill(30, 30, 31, 41, T_PLANK); tfill(28, 40, 33, 41, T_PLANK); tfill(50, 30, 51, 39, T_PLANK); tfill(48, 38, 53, 39, T_PLANK);
   // 路：港口大街（中段往上彎）、西邊的路、東邊的路（在燈塔前面轉彎）
   P(8, 11, 24, 12); P(24, 10, 40, 11); P(40, 11, 57, 12); P(8, 13, 9, 26); P(52, 13, 53, 19); P(52, 20, 57, 21); P(54, 22, 55, 26);
-  P(31, 12, 32, 13); P(31, 25, 32, 26); P(14, 23, 15, 26); P(47, 23, 48, 26); P(13, 10, 13, 10); P(49, 10, 49, 10);
-  P(16, 8, 16, 10); P(43, 8, 45, 8); P(43, 9, 43, 10); P(19, 20, 24, 20); P(39, 20, 43, 20);   // 通往側門的小路
+  P(31, 12, 32, 13); P(31, 25, 32, 26); P(14, 23, 15, 26); P(47, 23, 48, 26); P(13, 10, 13, 10); P(48, 10, 49, 10);
+  P(16, 8, 16, 10); P(43, 8, 45, 8); P(43, 9, 43, 10); P(19, 20, 24, 20); P(19, 21, 19, 21); P(39, 20, 43, 20); P(43, 21, 43, 21);   // 通往側門的小路
   P(8, 2, 8, 10);                                                          // 冰庫西邊、貼著松林的小巷（接到房子後面那條路）
   tfill(25, 14, 38, 24, T_STONE);
-  tfill(37, 3, 42, 9, T_TREE, true); tfill(26, 3, 36, 4, T_TREE, true); tfill(52, 3, 53, 9, T_TREE, true); tfill(44, 3, 51, 3, T_TREE, true);   // 第 43 版：房子照圖的比例變小，空出來的地方種樹
+  tfill(38, 3, 42, 9, T_TREE, true); tfill(26, 3, 37, 4, T_TREE, true); tfill(52, 3, 53, 9, T_TREE, true); tfill(44, 3, 51, 3, T_TREE, true);   // 第 43 版：房子照圖的比例變小，空出來的地方種樹
   [[22, 14], [23, 14], [22, 23], [40, 22], [41, 14], [11, 24], [12, 26], [58, 13], [59, 20], [54, 14]].forEach(p => tset(p[0], p[1], T_TREE));
   fbox(19, 3, 23, 9, [[21, 9]], T_GRASS);   // 曬魚場
   BUILDINGS = [
     // 第 43 版：房子換成漁港自己的圖（ak）。大小照圖的比例（門跟人差不多高），所以每棟都比以前小一圈；燈塔是細細的三格寬
-    bld('market', '魚市', 26, 5, 36, 9, [[31, 9], [32, 9]], [], { ak: 'harbor_market' }),
+    // 第 46 版：每棟的大小、門的位置重新照圖量過（以前漁夫小屋的圖比實際的房子寬兩格，門差了一格）。門都對準圖上的門：
+    // 魚市中間那一格開口（兩格）；漁具倉的門兩格；造船棚整個敞開的正面（六格）都能進出；側門對準圖上側邊的小門廊
+    bld('market', '魚市', 26, 5, 37, 9, [[31, 9], [32, 9]], [], { ak: 'harbor_market' }),
     bld('ice', '冰庫', 10, 4, 15, 9, [[13, 9], [15, 8]], [], { ak: 'harbor_ice' }),
-    bld('tackle', '漁具倉', 46, 4, 51, 9, [[49, 9], [46, 8]], [], { ak: 'harbor_tackle' }),
-    bld('boat', '造船棚', 11, 17, 18, 22, [[14, 22], [15, 22], [18, 20]], [], { ak: 'harbor_boatshed' }),
+    bld('tackle', '漁具倉', 46, 4, 51, 9, [[48, 9], [49, 9], [46, 8]], [], { ak: 'harbor_tackle' }),
+    bld('boat', '造船棚', 11, 17, 18, 22, [[12, 22], [13, 22], [14, 22], [15, 22], [16, 22], [17, 22], [18, 21]], [], { ak: 'harbor_boatshed' }),
     bld('light', '燈塔', 56, 14, 58, 19, [[57, 19]], [], { ak: 'harbor_light' }),
-    bld('hut', '漁夫小屋', 44, 15, 49, 22, [[47, 22], [44, 20]], [], { ak: 'harbor_hut' })
+    bld('hut', '漁夫小屋', 44, 16, 50, 22, [[47, 22], [44, 21]], [], { ak: 'harbor_hut' })
   ];
   // 第 43 版：屋外的東西用漁港自己的圖（a）：魚簍、木桶、曬魚架、礁石、舢舨、洗魚石槽，再多擺幾堆漁網和繫船石柱。屋裡的家具沿用程式畫的
   const A = (k, list, a, ex) => list.map(p => ob(k, p[0], p[1], Object.assign({ a }, ex || {})));
@@ -1469,7 +1478,7 @@ function buildHarbor() {
     ...A('rack', [[20, 5], [22, 5], [22, 7], [22, 17], [23, 18]], 'harbor_rack'),
     ...obs('crate', [[47, 5], [48, 5], [16, 18], [17, 18]]), ...A('crate', [[40, 15], [40, 16], [41, 17], [12, 27], [13, 27], [24, 29], [25, 29], [36, 27], [37, 27], [45, 29], [53, 27]], 'harbor_basket'),
     ...obs('shelf', [[49, 5], [12, 18], [48, 17]]), ...obs('barrel', [[47, 7]]), ...A('barrel', [[19, 27], [40, 29], [52, 28]], 'harbor_barrel'),
-    ob('hull', 13, 18, { w: 3 }), ob('logs', 12, 21), ob('bed', 45, 17, { c: '#5a8a8a' }), ob('table', 48, 19), ...A('trough', [[37, 16]], 'harbor_basin'),
+    ob('hull', 13, 18, { w: 3 }), ob('logs', 12, 19), ob('bed', 45, 17, { c: '#5a8a8a' }), ob('table', 48, 19), ...A('trough', [[37, 16]], 'harbor_basin'),
     ...A('rock', [[11, 35], [26, 32], [40, 33], [54, 32], [32, 32], [24, 35]], 'harbor_rock'),
     ...A('crate', [[16, 29], [47, 28]], 'harbor_nets'), ...A('rock', [[11, 29], [32, 29], [52, 29]], 'harbor_bollard'),
     ...A('boat', [[4, 42], [16, 38], [22, 39], [36, 36], [44, 37], [57, 40], [22, 43], [42, 43]], 'harbor_sampan', { ns: true })
@@ -1786,6 +1795,7 @@ function loadMap(i) {
     for (const p of b.parts) tfill(p[0], p[1], p[2], p[3], T_BLD);
     for (const d of b.doors) { tset(d[0], d[1], T_FLOOR); dmap[d[1] * MW + d[0]] = 1; }
   });
+  for (const o of OBJECTS) if (o.k === 'bush' && !/cone|spiral/.test(o.a || '') || o.a === 'manor_bush') o.ns = true;   // 第 46 版：草叢、矮灌木不擋路，可以直接走過去（修剪成造型的樹還是會擋）
   for (const o of OBJECTS) if (!o.ns) for (let k = 0; k < (o.w || 1); k++) tset(o.x + k, o.y, T_OBJ);
   for (const s of STATIONS) { s.wx = s.x * TILE + 20; s.wy = s.y * TILE + 22; }
   { const cs = STATIONS[candleS] || STATIONS[0]; CANDLE = { s: STATIONS.indexOf(cs), x: cs.x, y: cs.y, wx: cs.wx, wy: cs.wy, area: cs.area }; }
@@ -1862,6 +1872,7 @@ function loadMap(i) {
   STATIC.sort((a, b) => a.y - b.y);
   buildOccluders();
   computeOutside();
+  buildSolids();
 }
 // 第 38 版：每張地圖自己的樹。只看位置決定（不動到亂數的順序，每台裝置的地圖才會一樣）
 // 荒原：被風吹斜的松樹兩種、枯樹；莊園：迷宮裡是樹籬（連成一道一道），果園是蘋果樹，單獨一棵的是修剪成圓錐／螺旋的造型樹，其他是圓球樹和蘋果樹
@@ -1894,11 +1905,41 @@ function computeOutside() {
   while (q2.length) { const c = q2.pop(), x = c % MW, y = (c / MW) | 0; for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) { const nx = x + dx, ny = y + dy; if (nx < 0 || ny < 0 || nx >= MW || ny >= MH) continue; const n = ny * MW + nx; if (OUTSIDE[n] && !keep[n]) { keep[n] = 1; q2.push(n); } } }
   OUTSIDE = keep;
 }
-function solidAt(wx, wy) { return SOLID[tget(Math.floor(wx / TILE), Math.floor(wy / TILE))] === 1; }
-function boxFree(x, y) { return !(solidAt(x - 10, y - 9) || solidAt(x + 10, y - 9) || solidAt(x - 10, y + 5) || solidAt(x + 10, y + 5)); }
+// 第 46 版：碰撞範圍比格子小。以前一棵樹、一個木桶都擋住整格（40×40），人貼不上去，房子和樹之間常常卡住。
+// 現在每一格擋路的東西有自己的「內縮」（左、上、右、下各縮幾個像素），只擋住看起來真的有東西的地方：樹只擋樹幹附近，圍籬只擋那一道牆，小東西只擋它自己。
+// 只有面向「可以走的格子」的那一邊才內縮；兩格擋路的東西相鄰的那一邊不縮（中間不會出現縫，人不會鑽進樹林裡面或地圖外面）。房子的牆、水不內縮。
+let SUB = new Uint8Array(MW * MH * 4);
+function buildSolids() {
+  SUB = new Uint8Array(MW * MH * 4);
+  const hedge = new Uint8Array(MW * MH); for (const t of TREES) if (t.hg) hedge[t.ty * MW + t.tx] = 1;
+  for (let y = 0; y < MH; y++) for (let x = 0; x < MW; x++) {
+    const k = y * MW + x, tp = grid[k]; if (!SOLID[tp]) continue;
+    const ins = tp === T_TREE ? (hedge[k] ? [5, 12, 5, 2] : [12, 16, 12, 6])   // 樹：只擋樹幹；莊園迷宮的樹籬很厚，只縮一點
+      : tp === T_OBJ ? [6, 13, 6, 3]                                           // 木桶、箱子、家具
+      : tp === T_FENCE ? (tget(x, y - 1) === T_FENCE || tget(x, y + 1) === T_FENCE ? [9, 3, 9, 2] : [9, 18, 9, 2]) : null;   // 圍籬、矮牆：直的只擋中間那一條；橫的只擋牆腳（人可以站在牆後面，下半身被牆擋住）
+    if (!ins) continue;
+    const nb = [[-1, 0], [0, -1], [1, 0], [0, 1]];
+    for (let s = 0; s < 4; s++) SUB[k * 4 + s] = SOLID[tget(x + nb[s][0], y + nb[s][1])] ? 0 : ins[s];
+  }
+}
+function solidAt(wx, wy) {
+  const tx = Math.floor(wx / TILE), ty = Math.floor(wy / TILE);
+  if (tx < 0 || ty < 0 || tx >= MW || ty >= MH) return true;
+  const k = ty * MW + tx; if (SOLID[grid[k]] !== 1) return false;
+  const lx = wx - tx * TILE, ly = wy - ty * TILE, q = k * 4;
+  return lx >= SUB[q] && lx < TILE - SUB[q + 2] && ly >= SUB[q + 1] && ly < TILE - SUB[q + 3];
+}
+// 人的腳邊那一塊（左右各 8、往上 7、往下 4）：四個角、四邊中點和中心都不能碰到擋路的東西
+const BOX_X = [-8, 0, 8], BOX_Y = [-7, -1.5, 4];
+function boxFree(x, y) { for (const oy of BOX_Y) for (const ox of BOX_X) if (solidAt(x + ox, y + oy)) return false; return true; }
+// 走路。被轉角卡住時（差一點點就過得去），自動往旁邊滑過去，不用玩家自己對準
 function moveCollide(p, dx, dy) {
-  if (dx) { const nx = p.x + dx; if (boxFree(nx, p.y)) p.x = nx; }
-  if (dy) { const ny = p.y + dy; if (boxFree(p.x, ny)) p.y = ny; }
+  if (dx) { const nx = p.x + dx; if (boxFree(nx, p.y)) p.x = nx; else if (Math.abs(dy) < Math.abs(dx) * .5) { const o = slipDir(d => boxFree(nx, p.y + d), dy); if (o) { const s = Math.sign(o) * Math.min(Math.abs(o), Math.abs(dx)); if (boxFree(p.x, p.y + s)) p.y += s; } } }
+  if (dy) { const ny = p.y + dy; if (boxFree(p.x, ny)) p.y = ny; else if (Math.abs(dx) < Math.abs(dy) * .5) { const o = slipDir(d => boxFree(p.x + d, ny), dx); if (o) { const s = Math.sign(o) * Math.min(Math.abs(o), Math.abs(dy)); if (boxFree(p.x + s, p.y)) p.x += s; } } }
+}
+function slipDir(free, pref) {   // 往旁邊最多 12 個像素找得到路嗎？回傳要挪多少（找不到是 0）。pref：玩家本來就有一點往那邊推，就只找那一邊
+  for (let o = 1; o <= 12; o++) { if (pref <= 0 && free(-o)) return -o; if (pref >= 0 && free(o)) return o; }
+  return 0;
 }
 // 視線：兩點之間隔著房子就看不到
 // 會擋住視線的東西：房子、樹、圍欄
@@ -3504,7 +3545,7 @@ function nameOfId(id) { const p = pubOf(id); return p ? p.n : '某人'; }
 
 // ===== 房主：遊戲規則 =====
 function hostCreate() {
-  H = { gn: 0, ph: 0, st: { w: 1, gm: 0, ir: 1, fn: 3, xr: 1, hs: 15, tl: 2, ts: 3, ga: 8, kc: 40, kr: 1, bl: 45, an: 3, at: 40, mt: 90, map: Math.max(0, curMap) }, sp: -1, su: 0, it: -1, ro: [], wf: '', dd: '', lf: '', ta: [], ga: [], lo: 0, al: { a: [], on: 0, rem: 0, lk: 1 }, bd: [], mt: null, rs: null, pg: [0, 0], win: 0, why: 0, rem: 0 };
+  H = { gn: 0, ph: 0, st: { w: 1, gm: 0, ir: 1, fn: 3, xr: 1, hs: 15, sp: 100, tl: 2, ts: 3, ga: 8, kc: 40, kr: 1, bl: 45, an: 3, at: 40, mt: 90, map: Math.max(0, curMap) }, sp: -1, su: 0, it: -1, ro: [], wf: '', dd: '', lf: '', ta: [], ga: [], lo: 0, al: { a: [], on: 0, rem: 0, lk: 1 }, bd: [], mt: null, rs: null, pg: [0, 0], win: 0, why: 0, rem: 0 };
   hs = { lastK: {}, lastR: {}, lastB: {}, lastF: {}, lastA: {}, em: {}, meetNo: 0, acc: 0, absent: {}, alCd: 0 };
   BOTS = []; G = H; hostDirty = true;
 }
@@ -3691,16 +3732,15 @@ function hostInspect(id, tid) {
   const bot = BOTS.find(x => x.id === id); if (bot && H.wf[ti] === '1') bot.know = tid;
   return true;
 }
-// 義警：一局一次的處決。處決到狼人，村民直接獲勝；處決錯人，那個人出局並且立刻開會
+// 義警：一局一次的處決。處決到狼人，村民直接獲勝。第 46 版：處決錯人（對方不是狼人），對方沒事，義警自己倒下（不再開會）
 function hostExecute(id, tid) {
   const i = H.ro.indexOf(id), ti = H.ro.indexOf(tid);
   if (H.ph !== 2 || H.st.gm !== 3 || i < 0 || i !== H.sp || H.su || ti < 0 || ti === i || !aliveIdx(i) || !aliveIdx(ti) || H.al.on) return false;
   const a = posOf(id), b = posOf(tid); if (!a || !b || dist(a.x, a.y, b.x, b.y) > execRangeOf(H.st) * 2.6) return false;
-  H.su = 1; H.it = ti; H.dd = setFlag(H.dd, ti); hostDirty = true;
-  if (H.wf[ti] === '1') { H.win = 1; H.why = 6; H.ph = 5; return true; }
-  if (hostWin()) return true;
-  hs.meetNo++; H.mt = { no: hs.meetNo, by: -2, body: ti }; H.rem = H.st.mt; H.ph = 3; H.rs = null;
-  hostLightsOn(); botsMeetInit(); H.bd = []; return true;
+  H.su = 1; H.it = ti; hostDirty = true;
+  if (H.wf[ti] === '1') { H.dd = setFlag(H.dd, ti); H.win = 1; H.why = 6; H.ph = 5; return true; }
+  H.dd = setFlag(H.dd, i); H.bd.push([i, Math.round(a.x), Math.round(a.y)]);   // 處決錯人：義警自己倒在原地（別人可以發現、舉報）
+  hostWin(); return true;
 }
 // 白癡：場上只剩三個人時變回普通村民，工作全部自動完成
 function hostFool() {
@@ -3982,7 +4022,7 @@ function botThink(b, idx, dt, now) {
       if (b.alK >= 0) {
         const a = al[b.alK];
         if (dist(b.x, b.y, a[0], a[1]) < 52) { b.m = 0; b.alW += dt; if (b.alW > 5) { const k = b.alK; b.alK = -1; hostAltarSolve(b.id, k); } }
-        else if (botStep(b, dt, BOT_SPEED)) {   // 走到那一格了：最後幾步直接靠過去；如果其實還很遠就重新找路
+        else if (botStep(b, dt, BOT_SPEED * (H.st.sp || 100) / 100)) {   // 走到那一格了：最後幾步直接靠過去；如果其實還很遠就重新找路
           if (dist(b.x, b.y, a[0], a[1]) < 90) { b.x += clamp(a[0] - b.x, -2.5, 2.5); b.y += clamp(a[1] - b.y, -2.5, 2.5); }
           else if ((b.alRe = (b.alRe || 0) - dt) <= 0) { b.alRe = 1; botGoTile(b, Math.floor(a[0] / TILE), Math.floor(a[1] / TILE)); }
         }
@@ -3997,7 +4037,7 @@ function botThink(b, idx, dt, now) {
       if (dist(b.x, b.y, CANDLE.wx, CANDLE.wy) < 46) { b.m = 0; b.fixT += dt; if (b.fixT > 4.5) hostRelight(b.id); return; }   // 點 8 根蠟燭要一點時間
       if (b.fixWait > 0) { b.fixWait -= dt; b.m = 0; }
       else if (!b.fix) { if (botGoTile(b, CANDLE.x, CANDLE.y)) { b.fix = 1; b.wait = 0; b.goalJ = -1; } else b.fixWait = 1; }
-      else if (botStep(b, dt, BOT_SPEED)) b.fix = 0;
+      else if (botStep(b, dt, BOT_SPEED * (H.st.sp || 100) / 100)) b.fix = 0;
       if (b.fix || b.fixWait > 0) return;
     }
     if (wolf) {
@@ -4035,7 +4075,7 @@ function botThink(b, idx, dt, now) {
     return;
   }
   if (b.path && b.pi < b.path.length) {
-    if (botStep(b, dt, BOT_SPEED)) { b.m = 0; b.wait = wolf ? rnd(1.2, 3.5) : (b.goalJ >= 0 ? (b.heavy ? rnd(9, 13) : rnd(5, 8)) : rnd(2, 5)); if (wolf && !dead && !H.al.on && !H.al.lk && Math.random() < .55) { b.alAt = now + ALTAR_SET * 1000; b.wait = Math.max(b.wait, ALTAR_SET + .3); } }
+    if (botStep(b, dt, BOT_SPEED * (H.st.sp || 100) / 100)) { b.m = 0; b.wait = wolf ? rnd(1.2, 3.5) : (b.goalJ >= 0 ? (b.heavy ? rnd(9, 13) : rnd(5, 8)) : rnd(2, 5)); if (wolf && !dead && !H.al.on && !H.al.lk && Math.random() < .55) { b.alAt = now + ALTAR_SET * 1000; b.wait = Math.max(b.wait, ALTAR_SET + .3); } }
     return;
   }
   let s = -1; b.goalJ = -1;
@@ -4145,7 +4185,7 @@ const str = x => typeof x === 'string' ? x : '';
 function normG(h) {
   const st = h.st || {}, rs = h.rs, mt = h.mt;
   return {
-    gn: h.gn | 0, ph: h.ph | 0, sp: h.sp == null ? -1 : h.sp | 0, su: h.su ? 1 : 0, it: h.it == null ? -1 : h.it | 0, st: { w: st.w || 1, gm: clamp(st.gm | 0, 0, 4), hs: [10, 15, 20].includes(st.hs) ? st.hs : 15, ir: st.ir == null ? 1 : clamp(st.ir | 0, 0, 2), fn: st.fn === 4 ? 4 : 3, xr: st.xr == null ? 1 : clamp(st.xr | 0, 0, 2), tl: st.tl == null ? 2 : clamp(st.tl | 0, 0, 3), ts: st.ts == null ? 3 : clamp(st.ts | 0, 0, 5), ga: [8, 12, 15].includes(st.ga) ? st.ga : 8, kc: st.kc || 40, kr: st.kr == null ? 1 : clamp(st.kr | 0, 0, 2), bl: [0, 30, 45, 60, 90].includes(st.bl) ? st.bl : 45, an: [3, 4, 5].includes(st.an) ? st.an : 3, at: [30, 40, 50].includes(st.at) ? st.at : 40, mt: st.mt || 90, map: clamp(st.map | 0, 0, MAPS.length - 1) },
+    gn: h.gn | 0, ph: h.ph | 0, sp: h.sp == null ? -1 : h.sp | 0, su: h.su ? 1 : 0, it: h.it == null ? -1 : h.it | 0, st: { w: st.w || 1, gm: clamp(st.gm | 0, 0, 4), hs: [10, 15, 20].includes(st.hs) ? st.hs : 15, ir: st.ir == null ? 1 : clamp(st.ir | 0, 0, 2), fn: st.fn === 4 ? 4 : 3, xr: st.xr == null ? 1 : clamp(st.xr | 0, 0, 2), sp: [80, 90, 100, 110, 120, 135, 150].includes(st.sp) ? st.sp : 100, tl: st.tl == null ? 2 : clamp(st.tl | 0, 0, 3), ts: st.ts == null ? 3 : clamp(st.ts | 0, 0, 5), ga: [8, 12, 15].includes(st.ga) ? st.ga : 8, kc: st.kc || 40, kr: st.kr == null ? 1 : clamp(st.kr | 0, 0, 2), bl: [0, 30, 45, 60, 90].includes(st.bl) ? st.bl : 45, an: [3, 4, 5].includes(st.an) ? st.an : 3, at: [30, 40, 50].includes(st.at) ? st.at : 40, mt: st.mt || 90, map: clamp(st.map | 0, 0, MAPS.length - 1) },
     ro: arr(h.ro), wf: str(h.wf), dd: str(h.dd), lf: str(h.lf), ta: arr(h.ta), ga: arr(h.ga), lo: h.lo ? 1 : 0, al: h.al && typeof h.al === 'object' ? { a: arr(h.al.a).filter(Array.isArray), on: h.al.on ? 1 : 0, rem: h.al.rem | 0, lk: h.al.lk ? 1 : 0 } : { a: [], on: 0, rem: 0, lk: 1 }, bd: arr(h.bd),
     mt: mt && typeof mt === 'object' ? { no: mt.no | 0, by: mt.by | 0, body: mt.body == null ? -1 : mt.body | 0 } : null,
     rs: rs && typeof rs === 'object' ? { ej: rs.ej == null ? -1 : rs.ej | 0, tie: rs.tie | 0, sk: rs.sk | 0, vt: arr(rs.vt) } : null,
@@ -4288,7 +4328,9 @@ function onStateChange() {
   }
   if (my.dead && !seen.dead) {
     seen.dead = true;
-    if (G.ph === 2) { closeTask(); document.body.classList.remove('map-open', 'menu-open'); if (my.wolf) toast('你出局了。', 4200); else startKillAnim(); }   // 被襲擊的人自己會看到一段動畫
+    if (G.ph === 2) { closeTask(); document.body.classList.remove('map-open', 'menu-open');
+      if (my.role === 4 && G.su && G.it >= 0 && G.wf[G.it] !== '1') { sfx('gun', { vol: .7 }); showSlash('vill', '你處決錯人了', nameIdx(G.it) + ' 不是狼人，你自己倒下了'); }   // 第 46 版：義警處決錯人，自己出局
+      else if (my.wolf) toast('你出局了。', 4200); else startKillAnim(); }   // 被襲擊的人自己會看到一段動畫
   }
 }
 
@@ -4302,7 +4344,7 @@ function updateMe(dt) {
   }
   const mag = Math.hypot(vx, vy); if (mag > 1) { vx /= mag; vy /= mag; }
   if (mag > .14) {
-    const sp = SPEED * (my.dead ? 1.6 : 1), dx = vx * sp * dt, dy = vy * sp * dt;
+    const sp = SPEED * (my.dead ? 1.6 : 1) * (G && G.st.sp ? G.st.sp / 100 : 1), dx = vx * sp * dt, dy = vy * sp * dt;   // 第 46 版：大廳「基礎設定」可以調移動速度
     if (my.dead) { ME.x = clamp(ME.x + dx, 60, WORLD_W - 60); ME.y = clamp(ME.y + dy, 80, WORLD_H - 60); }
     else moveCollide(ME, dx, dy);
     if (Math.abs(vx) > .15) ME.f = vx > 0 ? 1 : -1;
@@ -5710,8 +5752,8 @@ function uiTick(now) {
 // ----- 大廳 -----
 // g = 放在哪一組：base 直接顯示在大廳；wolf、task 各有一個按鈕打開
 const MODES = ['經典', '檢驗官', '白癡', '義警', '獵人'];
-const modeNote = gm => ['只有狼人和村民，最原本的玩法。', '有一位村民是檢驗官，整局可以檢驗一位靠近的玩家，查出他是不是狼人（只能用一次）。', '有一位村民是白癡，自成一方。他被投票放逐就由他獲勝；場上只剩 ' + G.st.fn + ' 個人時，他會變回普通村民，工作自動完成。', '有一位村民是義警，整局可以處決一位玩家。處決到狼人，村民立刻獲勝；處決錯人，那個人出局並且馬上開會。', '有一位村民是獵人。他被投票放逐時，可以選擇開槍帶走場上一個人，也可以不開槍。被帶走的人不公布身分。'][gm] || '';
-const ROLE_NOTE = ['', '檢驗官一局只能檢驗一次，要走到對方身邊才檢驗得到。', '白癡被投票放逐就獲勝。場上的人數降到這個數字時，他會變回普通村民。', '義警一局只能處決一次，要走到對方身邊才處決得到。', '獵人被投票放逐後，有這麼多秒可以決定要不要開槍。時間到還沒決定就當作不開槍。'];
+const modeNote = gm => ['只有狼人和村民，最原本的玩法。', '有一位村民是檢驗官，整局可以檢驗一位靠近的玩家，查出他是不是狼人（只能用一次）。', '有一位村民是白癡，自成一方。他被投票放逐就由他獲勝；場上只剩 ' + G.st.fn + ' 個人時，他會變回普通村民，工作自動完成。', '有一位村民是義警，整局可以處決一位玩家。處決到狼人，村民立刻獲勝；處決錯人，對方沒事，義警自己出局。', '有一位村民是獵人。他被投票放逐時，可以選擇開槍帶走場上一個人，也可以不開槍。被帶走的人不公布身分。'][gm] || '';
+const ROLE_NOTE = ['', '檢驗官一局只能檢驗一次，要走到對方身邊才檢驗得到。', '白癡被投票放逐就獲勝。場上的人數降到這個數字時，他會變回普通村民。', '義警一局只能處決一次，要走到對方身邊才處決得到。處決錯人的話，義警自己會出局。', '獵人被投票放逐後，有這麼多秒可以決定要不要開槍。時間到還沒決定就當作不開槍。'];
 const RNG = ['短', '中', '長'];
 const ROLE_NAME = ['村民', '狼人', '檢驗官', '白癡', '義警', '獵人'];
 const SETTINGS = [
@@ -5727,11 +5769,12 @@ const SETTINGS = [
   { g: 'wolf', k: 'bl', label: '吹燈冷卻', opts: [0, 30, 45, 60, 90], fmt: v => v ? v + ' 秒' : '關閉' },
   { g: 'wolf', k: 'an', label: '祭壇數量', opts: [3, 4, 5], fmt: v => v + ' 座' },
   { g: 'wolf', k: 'at', label: '祭壇倒數', opts: [30, 40, 50], fmt: v => v + ' 秒' },
+  { g: 'task', k: 'sp', label: '移動速度', opts: [80, 90, 100, 110, 120, 135, 150], fmt: v => v + '%' },   // 第 46 版：玩家（和電腦玩家）走路的速度
   { g: 'task', k: 'tl', label: '長任務', min: 0, max: 3, step: 1, fmt: v => v + ' 個' },
   { g: 'task', k: 'ts', label: '短任務', min: 0, max: 5, step: 1, fmt: v => v + ' 個' },
   { g: 'task', k: 'ga', label: '鬼魂自動完成任務', opts: [8, 12, 15], fmt: v => v + ' 秒' }
 ];
-const SET_GROUPS = { mode: { title: '遊戲玩法', note: '' }, role: { title: '', note: '' }, wolf: { title: '狼人設定', note: '吹燈會讓村民看不遠，直到有人去點蠟燭。祭壇啟動後，要在倒數內全部解除，否則狼人獲勝。' }, task: { title: '任務設定', note: '長任務要照順序跑兩三個地點。出局的村民會變成鬼魂，定時自動完成一步。' } };
+const SET_GROUPS = { mode: { title: '遊戲玩法', note: '' }, role: { title: '', note: '' }, wolf: { title: '狼人設定', note: '吹燈會讓村民看不遠，直到有人去點蠟燭。祭壇啟動後，要在倒數內全部解除，否則狼人獲勝。' }, task: { title: '基礎設定', note: '移動速度是所有人走路的速度。長任務要照順序跑兩三個地點。出局的村民會變成鬼魂，定時自動完成一步。' } };
 let setGroup = '';
 // 把一組設定畫成「名稱＋加減按鈕」
 function buildSettings(box, list) {
@@ -5828,7 +5871,7 @@ function renderLobby(mode) {
       $('sumMode').textContent = MODES[G.st.gm] || '經典';
       { const gm = G.st.gm, rb = $('btnSetRole'); rb.hidden = !gm; if (gm) { $('roleSetLbl').textContent = MODES[gm] + '設定'; $('sumRole').textContent = gm === 1 ? '檢驗範圍 ' + RNG[G.st.ir] : gm === 2 ? '剩 ' + G.st.fn + ' 人時變回村民' : gm === 4 ? '開槍考慮 ' + G.st.hs + ' 秒' : '處決範圍 ' + RNG[G.st.xr]; } }
       $('sumWolf').textContent = '襲擊 ' + v('kc') + '・吹燈 ' + v('bl') + '・祭壇 ' + v('an');
-      $('sumTask').textContent = '長 ' + settingVal('tl') + '・短 ' + settingVal('ts') + '・鬼魂 ' + v('ga');
+      $('sumTask').textContent = '速度 ' + v('sp') + '・長 ' + settingVal('tl') + '・短 ' + settingVal('ts');
     }
   }
   $('setGroups').hidden = !showSet;
@@ -6005,7 +6048,7 @@ function openAltar(i) {
   const box = $('taskBox'); box.textContent = '';
   const need = 3; let hits = 0, pos = 0, dir = 1, raf = 0, last = performance.now(), zw = .2, zs = rnd(.12, .68), speed = 1.2;
   const bar = el('div', 'bar altar-bar'), zone = el('div', 'bar-zone'), mark = el('div', 'bar-mark'); bar.appendChild(zone); bar.appendChild(mark);
-  const pips = el('div', 'pips'), b = el('button', 'hit-btn altar-btn', '判定'); b.type = 'button';
+  const pips = el('div', 'pips'), b = keyLabel(el('button', 'hit-btn altar-btn', '判定')); b.type = 'button';
   const show = () => { pips.textContent = ''; for (let k = 0; k < need; k++) pips.appendChild(el('span', k < hits ? 'on' : '')); zone.style.left = (zs * 100) + '%'; zone.style.width = (zw * 100) + '%'; };
   show();
   b.addEventListener('pointerdown', e => {
@@ -6031,17 +6074,20 @@ function finishAltar() {
   const box = $('taskBox'); box.textContent = ''; box.appendChild(el('div', 'task-done', '解除了'));
   setTimeout(() => { if (taskState && taskState.done) closeTask(); }, 600);
 }
+// 第 46 版：工作小遊戲的按鍵是「真正的按鍵」——上面的字不是一般文字（用 CSS 畫上去，選不到、查不到），
+// 手指按住時也不會跳出 iPhone 長按的選單、放大鏡或選字（整個工作區的 touchstart 都擋掉，見 bindUI）
+function keyLabel(b) { const t = b.textContent; b.textContent = ''; b.dataset.label = t; b.setAttribute('aria-label', t); b.draggable = false; return b; }
 function holdButton(label) {
-  const b = el('button', 'hold-btn', label); b.type = 'button'; const s = { b, down: false };
-  const up = () => { s.down = false; };
-  b.addEventListener('pointerdown', e => { e.preventDefault(); s.down = true; try { b.setPointerCapture(e.pointerId); } catch (x) { } });
+  const b = keyLabel(el('button', 'hold-btn', label)); b.type = 'button'; const s = { b, down: false };
+  const up = () => { s.down = false; b.classList.remove('down'); };
+  b.addEventListener('pointerdown', e => { e.preventDefault(); s.down = true; b.classList.add('down'); try { b.setPointerCapture(e.pointerId); } catch (x) { } });
   b.addEventListener('pointerup', up); b.addEventListener('pointercancel', up); b.addEventListener('lostpointercapture', up);
   b.addEventListener('contextmenu', e => e.preventDefault());
   return s;
 }
 function tgMash(box, st, done, heavy) {
   const need = heavy ? 30 : 18; let n = 0;
-  const b = el('button', 'big-tap', st.emoji), c = el('div', 'count', '0 / ' + need);
+  const b = keyLabel(el('button', 'big-tap', st.emoji)), c = el('div', 'count', '0 / ' + need);
   b.type = 'button';
   b.addEventListener('pointerdown', e => { e.preventDefault(); n++; c.textContent = n + ' / ' + need; if (n >= need) done(); });
   box.appendChild(el('div', 'task-tip', st.tip.replace(/\d+ 下/, need + ' 下'))); box.appendChild(b); box.appendChild(c);
@@ -6081,7 +6127,7 @@ function tgTiming(box, st, done, heavy) {
   const need = (st.n || 3) + (heavy ? 3 : 1);
   let hits = 0, pos = 0, dir = 1, raf = 0, last = performance.now(), zs = rnd(.2, .6), zw = .24, speed = .95;
   const bar = el('div', 'bar'), zone = el('div', 'bar-zone'), mark = el('div', 'bar-mark'); bar.appendChild(zone); bar.appendChild(mark);
-  const c = el('div', 'count', '0 / ' + need), b = el('button', 'hit-btn', st.emoji + ' 現在'); b.type = 'button';
+  const c = el('div', 'count', '0 / ' + need), b = keyLabel(el('button', 'hit-btn', st.emoji + ' 現在')); b.type = 'button';
   const place = () => { zone.style.left = (zs * 100) + '%'; zone.style.width = (zw * 100) + '%'; };
   place();
   b.addEventListener('pointerdown', e => {
@@ -6408,6 +6454,13 @@ function bindUI() {
   $('btnSetClose').addEventListener('click', closeSetSheet);
   $('setSheet').addEventListener('click', e => { if (e.target === $('setSheet')) closeSetSheet(); });
   $('btnTaskClose').addEventListener('click', closeTask);
+  // 第 46 版：按住按鍵時不要觸發 iPhone 的長按功能（選字、放大鏡、選單）。工作區和動作鍵都只用 pointerdown，所以直接把 touchstart 擋掉
+  { const stop = e => { if (e.cancelable) e.preventDefault(); };
+    for (const id of ['taskBox', 'btnUse', 'btnReport', 'btnKill', 'btnSp']) { const e = $(id); if (!e) continue; e.addEventListener('touchstart', stop, { passive: false }); e.addEventListener('touchmove', stop, { passive: false }); }
+    const free = e => !!(e.target && e.target.closest && e.target.closest('input,textarea,.chat,#lobbyHint'));
+    document.addEventListener('contextmenu', e => { if (!free(e)) e.preventDefault(); });
+    document.addEventListener('selectstart', e => { if (!free(e)) e.preventDefault(); });
+    document.addEventListener('dragstart', e => e.preventDefault()); }
   $('btnMap').addEventListener('click', () => { mapAcc = 0; document.body.classList.add('map-open'); });
   $('btnMapClose').addEventListener('click', () => document.body.classList.remove('map-open'));
   $('mapCv').addEventListener('click', () => document.body.classList.remove('map-open'));
@@ -6476,7 +6529,7 @@ function main() {
   requestAnimationFrame(frame);
   window.__lw = { Snd, SND_FILES, get OUTSIDE() { return OUTSIDE; }, get OBJECTS() { return OBJECTS; }, TREES, ART_BLD, ART_PROPS, artGeom, BELL, COMIC, hostHunt, sendHunt, get EJ() { return { EJ_PANEL, EJ_STAND, EJ_VERD, EJ_BLACK, EJ_BOOM, EJ_BOARD, EJ_LEN, NONE_OUT, NONE_BOARD, NONE_LEN }; }, homeBg, sceneArt, SPR_ANI, killFx, startKillAnim, aniOf, drawCharFallen, ARTI, STATIC, drawTree, drawBuilding, get WORLD_W() { return WORLD_W; }, get WORLD_H() { return WORLD_H; }, VFX, fxBlood, fxTaskDone, fxSpark, fxDust, camShake, fxFlash, cardArt, cardW, openCard, closeCard, get cardOpen() { return cardOpen; }, SPR, NCHAR, turnChar, sprFlip, drawChar, drawCharFit, drawCharFallen, COLORS, get BUILDINGS() { return BUILDINGS; }, drawBuilding, BK, loadMap, buildGround,
     get G() { return G; }, get H() { return H; }, ME, my, players, get BOTS() { return BOTS; }, Net, get STATIONS() { return STATIONS; }, SPAWNS, grid, MAPS, loadMap, applyMap, canSee, paintMiniMap, tget, boxFree, get curMap() { return curMap; },
-    findPath, startPractice, createRoom, joinRoom, invite, inviteLink, intro, startIntro, hostStart, hostKill, hostReport, hostTick, setBotCount, castVote, sendChat, finishTask, openTask, leaveRoom, uiMode, parseTasks, dealTasks, taskCur, taskMarks, get CHAINS() { return CHAINS; }, get taskState() { return taskState; }, get hs() { return hs; }, get BUILDINGS() { return BUILDINGS; }, get OCC() { return OCC; }, BUILD, get view() { return view; }, get CANDLE() { return CANDLE; }, hostBlow, hostRelight, doBlow, canBlow, killRangeOf, guideMarks, openCandle, killFx, startKillAnim, COLORS, hostResolve, hostInspect, hostExecute, hostFool, hostPet, showSlash, DOG, DOG_ART, dogPettable, bldAt, occFor, get STATIC() { return STATIC; }, art: { drawObject, drawChar, drawCharFallen, drawFallen, avatarCanvas, drawVillager, wolfShape, wolfEyes, lantern, drawTree, drawDog, circ, ell }, openAltar, finishAltar, hostAltarPlace, hostAltarStart, hostAltarSolve, doAltarPlace, doAltarStart, altarWhyNot,
+    findPath, solidAt, boxFree, moveCollide, input, updateMe, get LAMPS() { return LAMPS; }, get SUB() { return SUB; }, startPractice, createRoom, joinRoom, invite, inviteLink, intro, startIntro, hostStart, hostKill, hostReport, hostTick, setBotCount, castVote, sendChat, finishTask, openTask, leaveRoom, uiMode, parseTasks, dealTasks, taskCur, taskMarks, get CHAINS() { return CHAINS; }, get taskState() { return taskState; }, get hs() { return hs; }, get BUILDINGS() { return BUILDINGS; }, get OCC() { return OCC; }, BUILD, get view() { return view; }, get CANDLE() { return CANDLE; }, hostBlow, hostRelight, doBlow, canBlow, killRangeOf, guideMarks, openCandle, killFx, startKillAnim, COLORS, hostResolve, hostInspect, hostExecute, hostFool, hostPet, showSlash, DOG, DOG_ART, dogPettable, bldAt, occFor, get STATIC() { return STATIC; }, art: { drawObject, drawChar, drawCharFallen, drawFallen, avatarCanvas, drawVillager, wolfShape, wolfEyes, lantern, drawTree, drawDog, circ, ell }, openAltar, finishAltar, hostAltarPlace, hostAltarStart, hostAltarSolve, doAltarPlace, doAltarStart, altarWhyNot,
     get ctx() { return ctxA; }, get inRoom() { return inRoom; }, get isHost() { return isHost; }, get code() { return code; }
   };
 }
