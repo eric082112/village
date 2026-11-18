@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>月光光心慌慌</title>
 <meta name="description" content="和朋友連線玩的狼人村：做完村裡的工作，找出混在裡面的狼人。">
-<meta name="lw-build" content="46">
+<meta name="lw-build" content="51">
 <meta name="theme-color" content="#0b151d">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -692,11 +692,43 @@ body[data-mode="hunt"] #hunt{display:flex}
 .task-box,.task-box *,.act,.hold-btn,.hit-btn,.big-tap{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none;-webkit-user-drag:none}
 .hold-btn,.hit-btn,.big-tap{touch-action:none}
 .hold-btn.down{transform:translateY(3px);box-shadow:inset 0 2px 6px rgba(90,50,0,.45),0 1px 0 #7c4f12}
+
+/* 第 49 版：生死簿 */
+.ledger-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px 6px;width:100%;align-content:center}
+.ledger-cell{position:relative;display:flex;flex-direction:column;align-items:center;gap:2px;min-width:0}
+.ledger-av{position:relative;width:46px;height:54px;border-radius:9px;background:#16242f;border:1px solid var(--line);overflow:hidden;display:flex;align-items:flex-end;justify-content:center}
+.ledger-av canvas{width:44px;height:52px;display:block}
+.ledger-cell b{font-size:11.5px;font-weight:600;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--ink)}
+.ledger-cell.me b{color:#f2b84b}
+.ledger-cell.dead .ledger-av{background:#1c1416;border-color:#5a2a26}
+.ledger-cell.dead .ledger-av canvas{filter:grayscale(.9) brightness(.82)}
+.ledger-cell.dead b{color:var(--ink-dim);text-decoration:line-through}
+.ledger-cell.dead .ledger-av::before,.ledger-cell.dead .ledger-av::after{content:"";position:absolute;left:50%;top:50%;width:54px;height:6px;margin:-3px 0 0 -27px;border-radius:3px;background:#e0392b;box-shadow:0 0 0 1px rgba(40,6,4,.8);transform:rotate(45deg);z-index:1}
+.ledger-cell.dead .ledger-av::after{transform:rotate(-45deg)}
+/* 第 50 版：下水道——躲在裡面的時候畫面四周暗一圈，換口的瞬間全黑一下；兩個箭頭指向可以去的口 */
+#sewFade{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 50%,rgba(4,7,11,0) 32%,rgba(4,7,11,.82) 100%);pointer-events:none;display:none}   /* 平常完全不畫（不佔效能），躲進去才出現 */
+body.in-sewer #sewFade{display:block;animation:sewIn .22s ease both}
+body.sewer-move #sewFade{background:#04070b}
+@keyframes sewIn{from{opacity:0}to{opacity:1}}
+body.in-sewer .joy{opacity:.25;pointer-events:none}
+#sewerNav{position:fixed;inset:0;pointer-events:none;z-index:31}
+#sewerNav[hidden]{display:none}
+.sewer-go{position:absolute;transform:translate(-50%,-50%);pointer-events:auto;display:flex;flex-direction:column;align-items:center;gap:1px;min-width:74px;padding:7px 10px 6px;border-radius:14px;border:1.5px solid #f08a7e;background:rgba(28,14,16,.86);color:var(--ink);font:inherit;box-shadow:0 3px 12px rgba(0,0,0,.5);-webkit-tap-highlight-color:transparent;touch-action:manipulation;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+.sewer-go i{font-style:normal;font-size:26px;line-height:1;color:#f08a7e;display:block}
+.sewer-go span{font-size:12px;white-space:nowrap}
+.sewer-go:active{background:rgba(70,26,26,.92)}
+
+/* 第 51 版：任務小遊戲畫在一張畫布上；說明文字疊在最上面 */
+.task-box.tg{padding:0;display:block}
+.tg-cv{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none;border-radius:12px;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}
+.tg-tip{position:absolute;left:8px;right:8px;top:7px;text-align:center;font-size:13.5px;line-height:1.25;color:#f2e6c8;text-shadow:0 1px 3px rgba(0,0,0,.85),0 0 6px rgba(0,0,0,.6);pointer-events:none}
+body.task-open #task .panel{max-width:500px}
 [hidden]{display:none !important}
 </style>
 </head>
 <body data-mode="home">
 <canvas id="cv" aria-label="村莊地圖"></canvas>
+<div id="sewFade" aria-hidden="true"></div>
 
 <div id="hud" class="hud">
   <div class="hud-top">
@@ -915,6 +947,7 @@ body[data-mode="hunt"] #hunt{display:flex}
 </section>
 <section id="cardView" class="veil" aria-label="我的身分牌"><canvas id="cardCv" aria-hidden="true"></canvas><p id="cardHint">點一下關閉</p></section>
 <div id="wipe" aria-hidden="true"></div>
+<div id="sewerNav" hidden></div>
 <div id="toast" role="status"></div>
 <!-- Firebase JavaScript SDK 10.12.2 (app-compat + database-compat), Apache-2.0 -->
 <script>
@@ -1213,6 +1246,14 @@ const ART_PROPS = {"moor_pine1": {"h": 80, "w": 109.8, "ax": 0.243, "iw": 516, "
 
 Object.assign(ART_BLD, {"harbor_market": {"wall": [40, 1430], "base": 672, "wins": [190, 410, 1080], "pd": [640, 855], "w": 1440, "h": 716, "d": "img-9f5af78114.webp"}, "harbor_ice": {"wall": [30, 700], "base": 740, "wins": [415, 750], "sd": 1, "pd": [330, 500], "ps": [715, 480, 790, 690], "w": 824, "h": 808, "d": "img-3f8562756e.webp"}, "harbor_tackle": {"wall": [148, 760], "base": 750, "wins": [85, 460], "sd": 1, "pd": [400, 520], "ps": [50, 520, 120, 700], "w": 836, "h": 816, "d": "img-2cff87624e.webp"}, "harbor_boatshed": {"wall": [55, 960], "base": 842, "wins": [300, 985], "sd": 1, "pd": [180, 850], "ps": [960, 600, 1010, 790], "w": 1032, "h": 896, "d": "img-739dc3c890.webp"}, "harbor_light": {"wall": [-25, 450], "base": 1240, "wins": [205], "lamp": [160, 170], "pd": [165, 245], "w": 420, "h": 1288, "d": "img-3a501d8b00.webp"}, "harbor_hut": {"wall": [128, 800], "base": 690, "wins": [90, 455], "sd": 1, "pd": [405, 510], "ps": [55, 410, 125, 640], "w": 852, "h": 748, "d": "img-42b5b1df10.webp"}});
 Object.assign(ART_PROPS, {"harbor_pine1": {"h": 84, "w": 113.1, "ax": 0.334, "iw": 1384, "ih": 1028, "d": "img-48cdfb04fd.webp"}, "harbor_pine2": {"h": 84, "w": 117.2, "ax": 0.338, "iw": 1440, "ih": 1032, "d": "img-5862cfc9bb.webp"}, "harbor_casuarina": {"h": 92, "w": 126.1, "ax": 0.405, "iw": 1464, "ih": 1068, "d": "img-280ca58a6c.webp"}, "harbor_basket": {"h": 26, "w": 26.0, "ax": 0.505, "iw": 632, "ih": 632, "d": "img-609f382f90.webp"}, "harbor_barrel": {"h": 31, "w": 24.0, "ax": 0.502, "iw": 548, "ih": 708, "d": "img-de66929379.webp"}, "harbor_rack": {"h": 46, "w": 40.5, "ax": 0.526, "iw": 644, "ih": 732, "d": "img-fe7d1cef21.webp"}, "harbor_rock": {"h": 30, "w": 34.3, "ax": 0.576, "iw": 644, "ih": 564, "d": "img-57f850d6dc.webp"}, "harbor_sampan": {"h": 46, "w": 57.7, "ax": 0.695, "iw": 788, "ih": 628, "d": "img-2a404bf5a7.webp"}, "harbor_basin": {"h": 27, "w": 34.0, "ax": 0.512, "iw": 644, "ih": 512, "d": "img-78e67f2f85.webp"}, "harbor_nets": {"h": 30, "w": 31.0, "ax": 0.492, "iw": 648, "ih": 628, "d": "img-945040d3fe.webp"}, "harbor_bollard": {"h": 32, "w": 28.2, "ax": 0.52, "iw": 568, "ih": 644, "d": "img-e0687624c4.webp"}});
+// 這個檔案由 art/villart.py 產生：第 47 版，田園村新畫風的家具、樹和戶外小物件
+
+Object.assign(ART_PROPS, {"v2i_altar": {"h": 73.9, "w": 66, "ax": 0.5, "iw": 396, "ih": 444, "d": "img-c4e5f59b7d.webp"}, "v2i_censer": {"h": 58.2, "w": 34, "ax": 0.5, "iw": 204, "ih": 349, "d": "img-c350cfeca7.webp"}, "v2i_shrine": {"h": 63.8, "w": 46, "ax": 0.5, "iw": 276, "ih": 383, "d": "img-12fb543daa.webp"}, "v2i_mill": {"h": 60.4, "w": 50, "ax": 0.5, "iw": 300, "ih": 362, "d": "img-d088a77dc1.webp"}, "v2i_flour": {"h": 42.4, "w": 44, "ax": 0.5, "iw": 264, "ih": 254, "d": "img-70ed5fc968.webp"}, "v2i_crate": {"h": 40.0, "w": 40, "ax": 0.5, "iw": 240, "ih": 240, "d": "img-8ee3320a48.webp"}, "v2i_hay": {"h": 38.9, "w": 42, "ax": 0.5, "iw": 252, "ih": 234, "d": "img-272d535c32.webp"}, "v2i_barrel": {"h": 48.7, "w": 34, "ax": 0.5, "iw": 204, "ih": 292, "d": "img-8d4be3d2c0.webp"}, "v2i_oven": {"h": 57.1, "w": 54, "ax": 0.5, "iw": 324, "ih": 343, "d": "img-09eeb516c3.webp"}, "v2i_knead": {"h": 44.9, "w": 50, "ax": 0.5, "iw": 300, "ih": 270, "d": "img-8becd3e403.webp"}, "v2i_bread": {"h": 54.6, "w": 44, "ax": 0.5, "iw": 264, "ih": 328, "d": "img-989ea35c0d.webp"}, "v2i_forge": {"h": 64.3, "w": 50, "ax": 0.5, "iw": 300, "ih": 386, "d": "img-652f2dea10.webp"}, "v2i_anvil": {"h": 44.6, "w": 42, "ax": 0.5, "iw": 252, "ih": 268, "d": "img-98351e761e.webp"}, "v2i_tools": {"h": 53.0, "w": 52, "ax": 0.5, "iw": 312, "ih": 318, "d": "img-7695504e7c.webp"}, "v2i_quench": {"h": 34.2, "w": 46, "ax": 0.5, "iw": 276, "ih": 205, "d": "img-27499c6529.webp"}, "v2i_kang": {"h": 69.3, "w": 70, "ax": 0.5, "iw": 420, "ih": 416, "d": "img-3f10eb3eac.webp"}, "v2i_dining": {"h": 48.5, "w": 54, "ax": 0.5, "iw": 324, "ih": 291, "d": "img-0e1d3200d6.webp"}, "v2i_cupboard": {"h": 69.2, "w": 44, "ax": 0.5, "iw": 264, "ih": 415, "d": "img-f5e08f8476.webp"}, "v2i_stove": {"h": 64.0, "w": 72, "ax": 0.5, "iw": 432, "ih": 384, "d": "img-5f787b1996.webp"}, "v2i_nest": {"h": 60.2, "w": 46, "ax": 0.5, "iw": 276, "ih": 361, "d": "img-3c297d3ef0.webp"}, "v2i_feed": {"h": 32.2, "w": 46, "ax": 0.5, "iw": 276, "ih": 193, "d": "img-53689c8df5.webp"}, "v2i_jar": {"h": 49.8, "w": 38, "ax": 0.5, "iw": 228, "ih": 299, "d": "img-ed10ee25a5.webp"}, "v2o_orange": {"h": 100, "w": 88.0, "ax": 0.509, "iw": 528, "ih": 600, "d": "img-f2675210ae.webp"}, "v2o_camphor": {"h": 118, "w": 110.5, "ax": 0.566, "iw": 663, "ih": 708, "d": "img-08a5aee337.webp"}, "v2o_willow": {"h": 122, "w": 107.4, "ax": 0.486, "iw": 645, "ih": 732, "d": "img-fd7f15e4a7.webp"}, "v2o_bush": {"h": 36.8, "w": 46, "ax": 0.5, "iw": 276, "ih": 221, "d": "img-da93db431c.webp"}, "v2o_flowers": {"h": 32.0, "w": 40, "ax": 0.5, "iw": 240, "ih": 192, "d": "img-ea28643fec.webp"}, "v2o_bell": {"h": 96, "w": 80.3, "ax": 0.5, "iw": 482, "ih": 576, "d": "img-d6b87c683c.webp"}, "v2o_well": {"h": 78, "w": 65.7, "ax": 0.5, "iw": 394, "ih": 468, "d": "img-bc5f13706b.webp"}, "v2o_lamp": {"h": 62, "w": 40.0, "ax": 0.29, "iw": 240, "ih": 372, "d": "img-e92d248dc4.webp"}, "v2o_stump": {"h": 50.3, "w": 48, "ax": 0.5, "iw": 288, "ih": 302, "d": "img-5ccd44bdfe.webp"}, "v2o_logs": {"h": 41.0, "w": 48, "ax": 0.5, "iw": 288, "ih": 246, "d": "img-534609c8d0.webp"}, "v2o_scarecrow": {"h": 68, "w": 52.9, "ax": 0.5, "iw": 317, "ih": 408, "d": "img-b12739dcce.webp"}, "v2o_stack": {"h": 66, "w": 56.7, "ax": 0.5, "iw": 340, "ih": 396, "d": "img-f2e91adc4a.webp"}, "v2o_rock": {"h": 43.1, "w": 50, "ax": 0.5, "iw": 300, "ih": 259, "d": "img-24221e9404.webp"}, "v2o_cart": {"h": 63.7, "w": 74, "ax": 0.5, "iw": 444, "ih": 382, "d": "img-eaa6a06e4a.webp"}, "v2o_sign": {"h": 62, "w": 38.1, "ax": 0.5, "iw": 229, "ih": 372, "d": "img-e7238dcd60.webp"}, "v2o_rack": {"h": 71.5, "w": 68, "ax": 0.5, "iw": 408, "ih": 429, "d": "img-aac7b4e5e3.webp"}, "v2o_cabbage": {"h": 37.4, "w": 42, "ax": 0.5, "iw": 252, "ih": 225, "d": "img-4d7fd5dcd8.webp"}, "v2o_hen": {"h": 28, "w": 22.6, "ax": 0.5, "iw": 136, "ih": 168, "d": "img-e5dd9c8e97.webp"}, "v2o_fence": {"h": 43.0, "w": 60, "ax": 0.5, "iw": 360, "ih": 258, "d": "img-a83a081a8c.webp"}, "v2o_fishing": {"h": 56, "w": 43.9, "ax": 0.38, "iw": 264, "ih": 336, "d": "img-ec74699c05.webp"}});
+// 這個檔案由 art/villart.py 產生：第 48 版，潮聲漁港新畫風的家具和戶外小物件
+
+Object.assign(ART_PROPS, {"h2i_stall": {"h": 89.2, "w": 76, "ax": 0.5, "iw": 456, "ih": 535, "d": "img-2bba810561.webp"}, "h2i_scale": {"h": 61.1, "w": 44, "ax": 0.5, "iw": 264, "ih": 367, "d": "img-6744164df0.webp"}, "h2i_ice": {"h": 47.1, "w": 46, "ax": 0.5, "iw": 276, "ih": 283, "d": "img-78e881634c.webp"}, "h2i_icebox": {"h": 44.9, "w": 46, "ax": 0.5, "iw": 276, "ih": 269, "d": "img-7ef9a69963.webp"}, "h2i_barrel": {"h": 45.0, "w": 36, "ax": 0.5, "iw": 216, "ih": 270, "d": "img-d80f8d09b1.webp"}, "h2i_crate": {"h": 44.2, "w": 40, "ax": 0.5, "iw": 240, "ih": 265, "d": "img-621cfc31b0.webp"}, "h2i_basket": {"h": 44.3, "w": 40, "ax": 0.5, "iw": 240, "ih": 266, "d": "img-e06a72d6b4.webp"}, "h2i_tub": {"h": 47.7, "w": 40, "ax": 0.5, "iw": 240, "ih": 286, "d": "img-ab61179ad8.webp"}, "h2i_shelf": {"h": 60.4, "w": 50, "ax": 0.5, "iw": 300, "ih": 363, "d": "img-cc61309194.webp"}, "h2i_net": {"h": 47.3, "w": 50, "ax": 0.5, "iw": 300, "ih": 284, "d": "img-eea8fea3e3.webp"}, "h2i_floats": {"h": 44.2, "w": 44, "ax": 0.5, "iw": 264, "ih": 265, "d": "img-bf00c116f3.webp"}, "h2i_oars": {"h": 64.9, "w": 46, "ax": 0.5, "iw": 276, "ih": 390, "d": "img-38fa85063a.webp"}, "h2i_hull": {"h": 133.6, "w": 112, "ax": 0.5, "iw": 672, "ih": 802, "d": "img-8f0f5ea765.webp"}, "h2i_bench": {"h": 51.1, "w": 58, "ax": 0.5, "iw": 348, "ih": 306, "d": "img-dc44161367.webp"}, "h2i_timber": {"h": 51.4, "w": 50, "ax": 0.5, "iw": 300, "ih": 308, "d": "img-19b3d13add.webp"}, "h2o_pine": {"h": 112, "w": 80.4, "ax": 0.446, "iw": 483, "ih": 672, "d": "img-58438237f2.webp"}, "h2o_casuarina": {"h": 122, "w": 70.1, "ax": 0.426, "iw": 421, "ih": 732, "d": "img-7352f564fc.webp"}, "h2o_pandanus": {"h": 54.5, "w": 52, "ax": 0.5, "iw": 312, "ih": 327, "d": "img-437f3e0e48.webp"}, "h2o_rock": {"h": 36.8, "w": 52, "ax": 0.5, "iw": 312, "ih": 221, "d": "img-d9e14c9eac.webp"}, "h2o_sampan": {"h": 71.5, "w": 100, "ax": 0.5, "iw": 600, "ih": 429, "d": "img-5dbeb80ae0.webp"}, "h2o_boat": {"h": 104.2, "w": 128, "ax": 0.5, "iw": 768, "ih": 625, "d": "img-4b249b3006.webp"}, "h2o_rack": {"h": 59.5, "w": 62, "ax": 0.5, "iw": 372, "ih": 357, "d": "img-6ce3516179.webp"}, "h2o_netrack": {"h": 64.4, "w": 74, "ax": 0.5, "iw": 444, "ih": 386, "d": "img-5b4043a71c.webp"}, "h2o_baskets": {"h": 45.8, "w": 46, "ax": 0.5, "iw": 276, "ih": 275, "d": "img-56f490ac40.webp"}, "h2o_bollard": {"h": 41.8, "w": 34, "ax": 0.5, "iw": 204, "ih": 251, "d": "img-681cb2f6cb.webp"}, "h2o_anchor": {"h": 47.1, "w": 42, "ax": 0.5, "iw": 252, "ih": 283, "d": "img-a97afa5e4e.webp"}, "h2o_floats": {"h": 41.5, "w": 44, "ax": 0.5, "iw": 264, "ih": 249, "d": "img-5aacabdbe7.webp"}, "h2o_lamp": {"h": 64, "w": 33.1, "ax": 0.291, "iw": 199, "ih": 384, "d": "img-4c81461993.webp"}, "h2o_cart": {"h": 63.6, "w": 72, "ax": 0.5, "iw": 432, "ih": 382, "d": "img-2a407e9757.webp"}, "h2o_sign": {"h": 60, "w": 35.4, "ax": 0.5, "iw": 213, "ih": 360, "d": "img-c8a879eb9d.webp"}, "h2o_crates": {"h": 52.6, "w": 50, "ax": 0.5, "iw": 300, "ih": 316, "d": "img-2d682cabf2.webp"}, "h2o_shells": {"h": 30.8, "w": 36, "ax": 0.5, "iw": 216, "ih": 185, "d": "img-c31be56dc7.webp"}, "h2o_gull": {"h": 30, "w": 30.5, "ax": 0.5, "iw": 183, "ih": 180, "d": "img-8346be7bc8.webp"}, "h2o_railing": {"h": 42.6, "w": 60, "ax": 0.5, "iw": 360, "ih": 256, "d": "img-a48eb0e3bd.webp"}, "h2o_fishing": {"h": 58, "w": 39.8, "ax": 0.5, "iw": 239, "ih": 348, "d": "img-31801e0d49.webp"}, "h2i_beacon": {"h": 67.2, "w": 42, "ax": 0.5, "iw": 252, "ih": 403, "d": "img-36d5812be0.webp"}, "h2i_drum": {"h": 54.6, "w": 38, "ax": 0.5, "iw": 228, "ih": 328, "d": "img-19834d79e1.webp"}, "h2i_bed": {"h": 57.9, "w": 62, "ax": 0.5, "iw": 372, "ih": 347, "d": "img-8204b8922c.webp"}, "h2i_table": {"h": 59.8, "w": 56, "ax": 0.5, "iw": 336, "ih": 359, "d": "img-c79ea8cf07.webp"}, "h2i_brazier": {"h": 56.4, "w": 38, "ax": 0.5, "iw": 228, "ih": 338, "d": "img-d0a1be667a.webp"}, "h2i_cabinet": {"h": 50.8, "w": 48, "ax": 0.5, "iw": 288, "ih": 305, "d": "img-a85d9c5b7f.webp"}, "h2i_cape": {"h": 64.6, "w": 46, "ax": 0.5, "iw": 276, "ih": 388, "d": "img-7e01b0f746.webp"}});
+// 這個檔案由 art/taskart.py 產生：第 51 版，任務小遊戲的插圖（4 張拼圖）
+const TASK_ATLAS = {"t1": {"d": "img-199c67aa4c.webp", "box": {"f_log": [37, 4, 165, 232], "f_axe": [273, 4, 174, 232], "f_split": [484, 4, 232, 232], "f_lantern": [771, 4, 138, 232], "f_bucket": [993, 4, 174, 232], "f_wheat": [1235, 4, 169, 232], "f_sickle": [37, 244, 165, 232], "f_sheaf": [278, 244, 163, 232], "f_can": [484, 246, 232, 228], "f_sprout": [724, 255, 232, 210], "f_fish": [964, 289, 232, 142], "f_float": [1268, 244, 104, 232], "f_egg": [25, 484, 189, 232], "f_basket": [260, 484, 199, 232], "f_hammer": [516, 484, 167, 232], "f_iron": [724, 511, 232, 177], "f_dough": [964, 505, 232, 190], "f_bread": [1204, 504, 232, 192], "f_pumpkin": [4, 729, 232, 222], "f_corn": [260, 724, 200, 232], "f_carrot": [517, 724, 165, 232], "f_jar": [746, 724, 187, 232]}}, "t2": {"d": "img-7e1413224b.webp", "box": {"h_ice": [4, 10, 232, 219], "h_tongs": [288, 4, 143, 232], "h_hook": [524, 4, 152, 232], "h_rope": [724, 31, 232, 177], "h_spool": [980, 4, 199, 232], "h_plank": [1204, 34, 232, 171], "h_nails": [4, 244, 232, 232], "h_netfish": [272, 244, 176, 232], "h_rackempty": [489, 244, 221, 232], "h_dried": [780, 244, 119, 232], "h_needle": [1002, 244, 156, 232], "h_scallop": [1204, 252, 232, 216], "h_conch": [32, 484, 176, 232], "h_star": [247, 484, 225, 232], "h_crab": [484, 491, 232, 217], "h_shrimp": [724, 484, 232, 232], "h_octopus": [964, 485, 232, 230], "h_brush": [1204, 503, 232, 193], "h_weight": [35, 724, 170, 232], "h_redfish": [244, 747, 232, 185]}}, "t3": {"d": "img-f2a9f1d37a.webp", "box": {"s_cup": [4, 8, 232, 224], "s_scissors": [268, 4, 184, 232], "s_incense": [555, 4, 90, 232], "s_ginseng": [752, 4, 176, 232], "s_goji": [964, 39, 232, 161], "s_lingzhi": [1204, 19, 232, 202], "s_chrys": [4, 262, 232, 195], "s_anise": [244, 248, 232, 223], "s_angelica": [484, 244, 232, 232], "s_steamer": [726, 244, 227, 232], "s_bun": [964, 264, 232, 192], "s_brush": [1236, 244, 168, 232], "s_inkstone": [4, 490, 232, 220], "s_leaves": [244, 503, 232, 193], "s_broom": [527, 484, 146, 232], "s_orange": [724, 487, 232, 226], "s_persimmon": [964, 496, 232, 208], "s_cat": [1228, 484, 183, 232], "s_driedfish": [4, 784, 232, 112], "s_peg": [259, 724, 201, 232]}}, "t4": {"d": "img-7b41d46a10.webp", "box": {"m_hay": [4, 4, 232, 232], "m_rope": [249, 4, 222, 232], "m_fork": [531, 4, 137, 232], "m_horseshoe": [728, 4, 223, 232], "m_grave": [979, 4, 202, 232], "m_sheep": [1204, 5, 232, 229], "m_cabbage": [4, 247, 232, 225], "m_pot": [256, 244, 208, 232], "m_shears": [506, 244, 187, 232], "m_plate": [724, 260, 232, 200], "m_teapot": [964, 249, 232, 221], "m_cloth": [1204, 260, 232, 200], "m_bud": [29, 484, 181, 232], "m_bloom": [268, 484, 184, 232], "m_horse": [514, 484, 171, 232], "m_pie": [724, 500, 232, 199], "m_koi": [1019, 484, 122, 232], "m_apple": [1215, 484, 209, 232], "m_candle": [15, 724, 209, 232], "m_match": [271, 724, 177, 232], "m_knife": [484, 727, 232, 226], "m_whetstone": [724, 740, 232, 199]}}};
 // ---------- AI 圖的載入與擺放（資料在 00d-art.js，由 art/assets.py 產生；這個檔案是手寫的）----------
 // 圖片解碼好之前，樹和建築先用程式畫的
 const ARTI = { trees: [], pines: [], bld: {}, props: {} };
@@ -1300,6 +1341,7 @@ const SPEED = 120, BOT_SPEED = 120;   // 走路速度（每秒幾個像素）
 const VISION = 185, VISION_WOLF = 290;   // 看得清楚的半徑：村民小、狼人大（約 1.6 倍）
 const KILL_RANGE = 78, USE_RANGE = 58, REPORT_RANGE = 92, BELL_RANGE = 74;
 const MAX_PLAYERS = 10, MAX_BOTS = 8;
+const SEWER_N = 6, SEWER_RANGE = 36;   // 第 49 版：每張地圖幾個下水道口、離多近才能鑽
 const COLORS = [   // 前十三個是角色的代表色（順序和角色圖一樣），最後兩個是人太多時的備用色
   ['流浪兒', '#c49a6c'], ['旅人', '#7fb857'], ['偵探', '#5a9be0'], ['小魔女', '#e58f3c'], ['牧羊女', '#d8574b'],
   ['假面', '#ece6da'], ['遊俠', '#a3a83a'], ['發明家', '#3fa7a0'], ['聖女', '#f0cf8a'], ['伯爵', '#6b74d6'],
@@ -1348,6 +1390,8 @@ function execRangeOf(st) { return [58, 78, 104][st && st.xr != null ? st.xr : 1]
 const BELL = { x: 31, y: 22, wx: 0, wy: 0 };
 const SPAWNS = [], TREES = [], LIGHTS = [], STATIC = [];
 let curMap = -1;
+let SEWERS = [], LEDGER = null;   // 第 49 版：下水道口（只有狼人能鑽，每個口通到最近的兩個口）、鐘旁邊的生死簿
+let CUT = false;   // 第 47 版：這張地圖用「掀開屋頂」的畫法（房子不畫屋頂，直接看到牆、地板和家具）
 
 const stn = (name, area, x, y, type, emoji, tip, n) => ({ name, area, x, y, type, emoji, tip, n });
 // 房子：外圈是牆、裡面是地板；doors 是門口的格子，parts 是屋內的隔間牆
@@ -1396,19 +1440,39 @@ function buildVillage() {
   P(40, 37, 41, 43); P(40, 43, 53, 43);
   BUILDINGS = [
     bld('shrine', '祠堂', 26, 3, 37, 10, [[31, 10], [32, 10]], [[29, 4, 29, 6], [34, 4, 34, 6], [27, 7, 27, 7], [36, 7, 36, 7]]),
-    bld('mill', '磨坊', 45, 3, 53, 10, [[48, 10], [49, 10], [52, 10], [53, 10]], [[46, 7, 48, 7]]),   // 第 46 版：第二個出口改成圖上塔樓那扇門（以前是程式加在塔旁邊的側門，塔上畫的門反而進不去）
+    bld('mill', '磨坊', 45, 3, 53, 10, [[48, 10], [49, 10], [53, 9]], [[46, 7, 48, 7]]),   // 第 47 版：沒有屋頂圖了，第二個出口回到東邊的側門
     bld('barn', '倉庫', 12, 3, 21, 10, [[16, 10], [17, 10], [21, 7]], [[18, 6, 20, 6]]),
     bld('bakery', '麵包坊', 12, 15, 20, 21, [[16, 21], [12, 20]], [[16, 16, 16, 18]]),
     bld('smithy', '鐵匠鋪', 42, 37, 51, 42, [[46, 42], [47, 42], [42, 41]], [[48, 38, 48, 39]]),
     bld('coop', '雞舍', 23, 38, 28, 41, [[26, 41]], []),
     bld('farm', '農舍', 41, 15, 49, 21, [[45, 21], [49, 20]], [[45, 16, 45, 18]])
   ];
+  // 第 47 版：整張圖換成新畫風的素材（a = 圖的名字；w = 佔幾格寬；ns = 只是裝飾，不擋路）。k 留著原本的種類（決定哪些東西會發光）
+  const A = (k, a, list, ex) => list.map(p => ob(k, p[0], p[1], Object.assign({ a }, ex || {})));
+  const deco = { ns: true };
   OBJECTS = [
-    ob('stump', 5, 5), ...obs('logs', [[3, 4], [4, 4], [3, 8], [6, 9]]), ob('well', 5, 16), ...obs('bush', [[3, 15], [7, 19], [23, 15], [38, 28], [25, 11]]),
-    ...obs('altar', [[31, 4], [32, 4]]), ...obs('shelf', [[27, 4], [36, 4]]), ob('censer', 29, 11),
-    ...obs('sack', [[46, 4], [47, 4], [13, 9]]), ob('millstone', 51, 5), ...obs('crate', [[13, 4], [14, 4], [13, 5], [20, 8], [44, 38]]), ...obs('hay', [[20, 4], [20, 5], [51, 16], [52, 16], [51, 19], [24, 39], [34, 42], [36, 28]]),
-    ...obs('barrel', [[20, 9], [43, 38]]), ob('oven', 13, 16), ...obs('table', [[18, 17], [47, 18]]), ...obs('shelf', [[19, 16], [48, 16], [43, 40]]), ob('sack', 19, 20), ...obs('bed', [[42, 16], [43, 16]]),
-    ob('scarecrow', 47, 29), ob('trough', 33, 40, { c: '#c9b05a' }), ob('forge', 50, 38), ob('anvil', 49, 38), ob('rock', 10, 30), ob('rock', 58, 23), ob('stump', 38, 42), ...obs('logs', [[24, 8], [24, 9]])
+    // 祠堂：供桌在正中間，兩邊是神龕櫃，門口一對香爐
+    ...A('altar', 'v2i_altar', [[31, 4]], { w: 2 }), ...A('shelf', 'v2i_shrine', [[27, 4], [36, 4]]), ...A('censer', 'v2i_censer', [[30, 11], [33, 11]]),
+    // 磨坊：石磨、麵粉袋、水缸
+    ...A('millstone', 'v2i_mill', [[51, 5]]), ...A('sack', 'v2i_flour', [[46, 4], [47, 4], [46, 9]]), ...A('barrel', 'v2i_barrel', [[49, 4]]), ...A('barrel', 'v2i_jar', [[52, 4]]),
+    // 倉庫：木箱、乾草、木桶、麵粉袋
+    ...A('crate', 'v2i_crate', [[13, 4], [14, 4], [13, 5], [20, 8]]), ...A('hay', 'v2i_hay', [[20, 4], [20, 5], [16, 4]]), ...A('sack', 'v2i_flour', [[13, 9]]), ...A('barrel', 'v2i_barrel', [[20, 9], [14, 9]]),
+    // 麵包坊：土窯、揉麵桌、麵包架、麵粉袋、水缸
+    ...A('oven', 'v2i_oven', [[13, 16]]), ...A('table', 'v2i_knead', [[18, 18]]), ...A('shelf', 'v2i_bread', [[19, 16], [17, 16]]), ...A('sack', 'v2i_flour', [[19, 20]]), ...A('barrel', 'v2i_jar', [[13, 18]]),
+    // 農舍：炕床、灶台、碗櫃、飯桌、水缸
+    ...A('bed', 'v2i_kang', [[42, 16]], { w: 2 }), ...A('stove', 'v2i_stove', [[46, 16]], { w: 2 }), ...A('shelf', 'v2i_cupboard', [[48, 16]]), ...A('table', 'v2i_dining', [[47, 19]]), ...A('barrel', 'v2i_jar', [[42, 20]]),
+    // 鐵匠鋪：鍛造爐、鐵砧、工具架、淬火水槽、木桶
+    ...A('forge', 'v2i_forge', [[50, 38]]), ...A('anvil', 'v2i_anvil', [[49, 38]]), ...A('shelf', 'v2i_tools', [[44, 38]], { w: 2 }), ...A('trough', 'v2i_quench', [[47, 38]]), ...A('barrel', 'v2i_barrel', [[43, 38]]), ...A('crate', 'v2i_crate', [[50, 41]]),
+    // 雞舍和院子：雞窩、飼料槽、稻草垛、幾隻雞
+    ...A('hay', 'v2i_nest', [[24, 39], [27, 39]]), ...A('trough', 'v2i_feed', [[33, 40]]), ...A('hay', 'v2o_stack', [[34, 42]]), ...A('hen', 'v2o_hen', [[30, 41], [32, 39], [29, 39], [22, 42]], deco),
+    // 伐木場、水井
+    ...A('stump', 'v2o_stump', [[5, 5], [38, 42]]), ...A('logs', 'v2o_logs', [[3, 4], [4, 4], [3, 8], [6, 9], [24, 8], [24, 9]]), ...A('well', 'v2o_well', [[5, 16]]),
+    // 田邊：稻草人、稻草垛、曬穀架、板車、石頭、路牌
+    ...A('scarecrow', 'v2o_scarecrow', [[47, 29]]), ...A('hay', 'v2o_stack', [[51, 19], [36, 28], [52, 27]]), ...A('rack', 'v2o_rack', [[51, 16]], { w: 2 }), ...A('cart', 'v2o_cart', [[13, 11], [36, 33]], { w: 2 }),
+    ...A('rock', 'v2o_rock', [[10, 30], [58, 23]]), ...A('sign', 'v2o_sign', [[10, 14], [33, 34]]),
+    // 裝飾（可以直接走過去）：灌木、野花、菜園的菜、碼頭上的魚桶
+    ...A('bush', 'v2o_bush', [[3, 15], [7, 19], [38, 28], [25, 11], [10, 21], [53, 14]]), ...A('flower', 'v2o_flowers', [[11, 24], [20, 23], [38, 14], [35, 17], [53, 25], [28, 34], [44, 23], [2, 14], [57, 22]], deco),
+    ...A('veg', 'v2o_cabbage', [[23, 15], [24, 17], [23, 19], [24, 20]], deco), ...A('fishing', 'v2o_fishing', [[18, 27]], deco)
   ];
   STATIONS = [
     stn('劈柴', '伐木場', 5, 6, 'mash', '🪓', '連點 8 下把木頭劈開', 8),
@@ -1463,31 +1527,47 @@ function buildHarbor() {
     // 第 43 版：房子換成漁港自己的圖（ak）。大小照圖的比例（門跟人差不多高），所以每棟都比以前小一圈；燈塔是細細的三格寬
     // 第 46 版：每棟的大小、門的位置重新照圖量過（以前漁夫小屋的圖比實際的房子寬兩格，門差了一格）。門都對準圖上的門：
     // 魚市中間那一格開口（兩格）；漁具倉的門兩格；造船棚整個敞開的正面（六格）都能進出；側門對準圖上側邊的小門廊
-    bld('market', '魚市', 26, 5, 37, 9, [[31, 9], [32, 9]], [], { ak: 'harbor_market' }),
-    bld('ice', '冰庫', 10, 4, 15, 9, [[13, 9], [15, 8]], [], { ak: 'harbor_ice' }),
-    bld('tackle', '漁具倉', 46, 4, 51, 9, [[48, 9], [49, 9], [46, 8]], [], { ak: 'harbor_tackle' }),
-    bld('boat', '造船棚', 11, 17, 18, 22, [[12, 22], [13, 22], [14, 22], [15, 22], [16, 22], [17, 22], [18, 21]], [], { ak: 'harbor_boatshed' }),
-    bld('light', '燈塔', 56, 14, 58, 19, [[57, 19]], [], { ak: 'harbor_light' }),
-    bld('hut', '漁夫小屋', 44, 16, 50, 22, [[47, 22], [44, 21]], [], { ak: 'harbor_hut' })
+    bld('market', '魚市', 26, 5, 37, 9, [[31, 9], [32, 9]], []),
+    bld('ice', '冰庫', 10, 4, 15, 9, [[13, 9], [15, 8]], []),
+    bld('tackle', '漁具倉', 46, 4, 51, 9, [[48, 9], [49, 9], [46, 8]], []),
+    bld('boat', '造船棚', 11, 17, 18, 22, [[12, 22], [13, 22], [14, 22], [15, 22], [16, 22], [17, 22], [18, 21]], []),
+    bld('light', '燈塔', 55, 14, 58, 19, [[57, 19]], []),   // 第 48 版：掀開屋頂以後燈塔裡面要站得下人，往西寬一格
+    bld('hut', '漁夫小屋', 44, 16, 50, 22, [[47, 22], [44, 21]], [])
   ];
   // 第 43 版：屋外的東西用漁港自己的圖（a）：魚簍、木桶、曬魚架、礁石、舢舨、洗魚石槽，再多擺幾堆漁網和繫船石柱。屋裡的家具沿用程式畫的
   const A = (k, list, a, ex) => list.map(p => ob(k, p[0], p[1], Object.assign({ a }, ex || {})));
+  const H = (k, a, list, ex) => A(k, list, a, ex), deco = { ns: true };
   OBJECTS = [
-    ...obs('counter', [[27, 6], [29, 6], [34, 6]]), ob('barrel', 31, 6), ob('crate', 27, 8), ob('ice', 35, 8),
-    ...obs('ice', [[11, 5], [12, 5], [11, 6], [14, 5]]),
-    ...A('rack', [[20, 5], [22, 5], [22, 7], [22, 17], [23, 18]], 'harbor_rack'),
-    ...obs('crate', [[47, 5], [48, 5], [16, 18], [17, 18]]), ...A('crate', [[40, 15], [40, 16], [41, 17], [12, 27], [13, 27], [24, 29], [25, 29], [36, 27], [37, 27], [45, 29], [53, 27]], 'harbor_basket'),
-    ...obs('shelf', [[49, 5], [12, 18], [48, 17]]), ...obs('barrel', [[47, 7]]), ...A('barrel', [[19, 27], [40, 29], [52, 28]], 'harbor_barrel'),
-    ob('hull', 13, 18, { w: 3 }), ob('logs', 12, 19), ob('bed', 45, 17, { c: '#5a8a8a' }), ob('table', 48, 19), ...A('trough', [[37, 16]], 'harbor_basin'),
-    ...A('rock', [[11, 35], [26, 32], [40, 33], [54, 32], [32, 32], [24, 35]], 'harbor_rock'),
-    ...A('crate', [[16, 29], [47, 28]], 'harbor_nets'), ...A('rock', [[11, 29], [32, 29], [52, 29]], 'harbor_bollard'),
-    ...A('boat', [[4, 42], [16, 38], [22, 39], [36, 36], [44, 37], [57, 40], [22, 43], [42, 43]], 'harbor_sampan', { ns: true })
+    // 第 48 版：屋裡的家具換成新畫風的素材
+    // 魚市：三個魚攤、磅秤、碎冰木箱、魚簍；冰庫：冰塊和碎冰木箱
+    ...H('counter', 'h2i_stall', [[27, 6], [29, 6], [33, 6]], { w: 2 }), ...H('crate', 'h2i_basket', [[31, 6], [36, 8]]), ...H('shelf', 'h2i_scale', [[35, 6]]), ...H('crate', 'h2i_icebox', [[36, 6]]), ...H('crate', 'h2i_crate', [[27, 8]]),
+    ...H('ice', 'h2i_ice', [[11, 5], [12, 5], [14, 5], [11, 6]]), ...H('crate', 'h2i_icebox', [[11, 8]]),
+    // 屋外也全部換新：曬魚架、魚簍堆、木箱堆、浮球堆
+    ...H('rack', 'h2o_rack', [[20, 5], [22, 5], [22, 7], [22, 17], [23, 18]]),
+    ...H('crate', 'h2o_baskets', [[40, 15], [40, 16], [12, 27], [24, 29], [37, 27], [45, 29]]), ...H('crate', 'h2o_crates', [[41, 17], [13, 27], [36, 27], [53, 27], [48, 38]]), ...H('crate', 'h2o_floats', [[25, 29], [18, 29]]),
+    // 漁具倉：漁具架、船槳架、玻璃浮球、漁網、木桶
+    ...H('shelf', 'h2i_shelf', [[48, 5]]), ...H('shelf', 'h2i_oars', [[47, 5]]), ...H('crate', 'h2i_floats', [[50, 5]]), ...H('crate', 'h2i_net', [[47, 7]]), ...H('barrel', 'h2i_barrel', [[50, 8]]),
+    ...H('barrel', 'h2i_barrel', [[19, 27], [40, 29], [52, 28]]),
+    // 造船棚：造到一半的船、木工桌、木材；燈塔：大燈和煤油桶；漁夫小屋：床、飯桌、炭爐、木櫃、蓑衣架
+    ...H('hull', 'h2i_hull', [[13, 19]], { w: 3 }), ...H('logs', 'h2i_timber', [[17, 20]]), ...H('table', 'h2i_bench', [[16, 18]], { w: 2 }),   // 船的四周都留路，可以繞到船後面
+    ...H('lantern', 'h2i_beacon', [[56, 15]], { w: 2 }), ...H('barrel', 'h2i_drum', [[56, 18]]),
+    ...H('bed', 'h2i_bed', [[45, 17]], { w: 2 }), ...H('table', 'h2i_table', [[48, 19]], { w: 2 }), ...H('stove', 'h2i_brazier', [[45, 19]]), ...H('shelf', 'h2i_cabinet', [[48, 17]]), ...H('shelf', 'h2i_cape', [[49, 17]]),
+    ...H('trough', 'h2i_tub', [[37, 16]]),
+    // 礁石、曬網架（兩格寬）、纜樁、船錨、手推魚車（兩格寬）、路牌
+    ...H('rock', 'h2o_rock', [[11, 35], [26, 32], [40, 33], [54, 32], [32, 32], [24, 35]]),
+    ...H('rack', 'h2o_netrack', [[16, 29], [47, 28]], { w: 2 }), ...H('rock', 'h2o_bollard', [[11, 29], [32, 29], [52, 29]]), ...H('rock', 'h2o_anchor', [[35, 29], [14, 29]]),
+    ...H('cart', 'h2o_cart', [[27, 13]], { w: 2 }), ...H('sign', 'h2o_sign', [[30, 13], [53, 22]]),
+    // 只是裝飾、不擋路：林投灌木、沙灘上的貝殼海星、海鷗、碼頭邊的魚桶和釣竿
+    ...H('bush', 'h2o_pandanus', [[20, 25], [42, 25], [27, 26], [36, 25], [10, 22], [53, 24]]),
+    ...H('flower', 'h2o_shells', [[14, 32], [23, 33], [44, 32], [48, 33], [17, 35], [52, 31]], deco), ...H('flower', 'h2o_gull', [[12, 39], [33, 40], [49, 38], [27, 32], [46, 34]], deco), ...H('flower', 'h2o_fishing', [[11, 39]], deco),
+    // 海上：舢舨和小漁船
+    ...H('boat', 'h2o_sampan', [[4, 42], [16, 38], [36, 36], [57, 40], [42, 43]], deco), ...H('boat', 'h2o_boat', [[22, 39], [44, 37], [22, 43]], deco)
   ];
   STATIONS = [
     stn('秤魚', '魚市', 35, 7, 'timing', '🐟', '指針進到綠色區再按，成功 3 次', 3),
     stn('搬冰塊', '冰庫', 13, 6, 'mash', '🧊', '連點 8 下把冰塊搬完', 8),
     stn('整理漁具', '漁具倉', 50, 6, 'seq', '🎣', '照 1 到 5 的順序把漁具歸位', 5),
-    stn('修船', '造船棚', 14, 19, 'timing', '🔨', '指針進到綠色區再敲，成功 3 次', 3),
+    stn('修船', '造船棚', 14, 20, 'timing', '🔨', '指針進到綠色區再敲，成功 3 次', 3),
     stn('點亮燈塔', '燈塔', 57, 16, 'hold', '💡', '按住不放，把燈點亮'),
     stn('釣魚', '西碼頭', 8, 40, 'balance', '🐟', '按住收線、放開放線，讓魚留在綠色區'),
     stn('拉漁網', '中碼頭', 29, 41, 'hold', '🐟', '按住不放，把漁網拉上來'),
@@ -1727,8 +1807,8 @@ function buildManor() {
 }
 
 const MAPS = [
-  { name: '田園村', desc: '四周是樹林的農村。鄉間大路繞一圈，倉庫的後門通到林間小路。', fence: 0, build: buildVillage, fruit: .16 },
-  { name: '潮聲漁港', desc: '彎彎曲曲的海岸，兩頭是松林岬角。三座碼頭和沙灘都是死路，落單很危險。', fence: 1, build: buildHarbor, pine: .6, tart: 'harbor' },
+  { name: '田園村', desc: '四周是樹林的農村。鄉間大路繞一圈，倉庫的後門通到林間小路。', fence: 0, build: buildVillage, fruit: .16, cut: true, tart: 'village2', bell: 'v2o_bell', lamp: 'v2o_lamp' },
+  { name: '潮聲漁港', desc: '彎彎曲曲的海岸，兩頭是松林岬角。三座碼頭和沙灘都是死路，落單很危險。', fence: 1, build: buildHarbor, pine: .6, tart: 'harbor2', cut: true, bell: 'v2o_bell', lamp: 'h2o_lamp' },
   { name: '燈籠老街', desc: '巷弄交錯的老街，南邊一條水道只有三座橋。房子多、轉角多，進了屋外面就看不到你。', fence: 2, build: buildOldStreet, bloom: .5 },
   { name: '月影荒原', desc: '大片空地和矮石牆，小溪把地圖切成兩半，只有三座橋。房子少，但大多有兩個門。', fence: 3, build: buildMoor, pine: .4, tart: 'moor' },
   { name: '霧鐘莊園', desc: '大宅前的庭院、樹籬迷宮、湖心島和果園。路繞來繞去，大部分房子有兩個門。', fence: 4, build: buildManor, fruit: .5, tart: 'manor' }
@@ -1780,8 +1860,10 @@ const LOBES = [[-13, 7, 13], [13, 8, 12.5], [0, 10, 14], [-16, -4, 12], [16, -3,
 function loadMap(i) {
   i = clamp(i | 0, 0, MAPS.length - 1); curMap = i;
   grid.fill(T_GRASS); bmap.fill(-1); dmap.fill(0); BUILDINGS = []; OBJECTS = []; STATIONS = []; AREAS = []; LAMPS = []; CHAINS = [];
+  CUT = !!MAPS[i].cut;
   MAPS[i].build();
-  OBJECTS.unshift({ k: 'bell', x: BELL.x, y: BELL.y });
+  OBJECTS.unshift({ k: 'bell', x: BELL.x, y: BELL.y, a: MAPS[i].bell || null });
+  placeLedger();
   BELL.wx = (BELL.x + .5) * TILE; BELL.wy = (BELL.y + 1) * TILE;
   ground.set(grid);
   // 圍牆底下的地面跟旁邊一樣
@@ -1846,10 +1928,11 @@ function loadMap(i) {
     const tall = b.up + (k.xu || 0) + 14;
     b.cb = { x: b.X - 36, y: b.Y - tall, w: b.W + 72, h: tall + b.H + 14 };
     b.art = artGeom(b); b.artCv = null;
+    if (CUT) { b.art = null; b.ra = 0; }   // 掀開屋頂的地圖：不用屋頂圖，屋頂永遠不畫
     if (b.art) { b.wins = b.art.wins; const a = b.art, x0 = Math.min(b.cb.x, a.x), y0 = Math.min(b.cb.y, a.y); b.cb = { x: x0, y: y0, w: Math.max(b.cb.x + b.cb.w, a.x + a.w) - x0, h: Math.max(b.cb.y + b.cb.h, a.y + a.h) - y0 }; }
     STATIC.push({ y: b.Y + 1, k: 5, o: b, x0: b.X - 4, x1: b.X + b.W + 4, y0: b.Y - 4, y1: b.Y + b.H + 4 });
-    STATIC.push({ y: b.Y + b.H - 2, k: 1, o: b, x0: b.cb.x, x1: b.cb.x + b.cb.w, y0: b.cb.y, y1: b.cb.y + b.cb.h });
-    if (b.kind === 'light') LIGHTS.push(b.art && b.art.lamp ? { x: b.art.lamp[0], y: b.art.lamp[1], r: 120, beam: true } : { x: b.X + 58, y: b.Y + b.H - 3 - 248, r: 120, beam: true });
+    if (!CUT) STATIC.push({ y: b.Y + b.H - 2, k: 1, o: b, x0: b.cb.x, x1: b.cb.x + b.cb.w, y0: b.cb.y, y1: b.cb.y + b.cb.h });
+    if (b.kind === 'light') LIGHTS.push(CUT ? { x: (b.x0 + b.x1 + 1) / 2 * TILE, y: (b.y0 + 1.6) * TILE, r: 120, beam: true } : b.art && b.art.lamp ? { x: b.art.lamp[0], y: b.art.lamp[1], r: 120, beam: true } : { x: b.X + 58, y: b.Y + b.H - 3 - 248, r: 120, beam: true });
     if (!b.dim && !k.nowin) for (const wx of b.wins) LIGHTS.push({ x: wx, y: b.Y + b.H - 24, r: 62 });
     if (!b.dim) for (const d of b.dops) LIGHTS.push({ x: (d[0] + d[1]) / 2, y: b.Y + b.H + 6, r: 54 });
     for (const sd of b.sides) LIGHTS.push({ x: sd.s < 0 ? b.X - 14 : b.X + b.W + 14, y: (sd.y + 1) * TILE - 6, r: 58 });   // 側門口的燈
@@ -1861,7 +1944,7 @@ function loadMap(i) {
     if (o.k === 'bell') LIGHTS.push({ x: o.wx, y: o.wy - 30, r: 110 });
     if (o.k === 'boat') LIGHTS.push({ x: o.wx + 17, y: o.wy - 30, r: 62 });
     if (o.k === 'stall') LIGHTS.push({ x: o.wx, y: o.wy - 26, r: 58 });
-    if (o.k === 'altar' || o.k === 'forge' || o.k === 'oven' || o.k === 'desk') LIGHTS.push({ x: o.wx, y: o.wy - 24, r: 60 });
+    if (o.k === 'altar' || o.k === 'forge' || o.k === 'oven' || o.k === 'desk' || o.k === 'stove') LIGHTS.push({ x: o.wx, y: o.wy - 24, r: 60 });
     if (o.k === 'gate') { LIGHTS.push({ x: o.wx - 22, y: o.wy - 44, r: 60 }); LIGHTS.push({ x: o.wx + 22, y: o.wy - 44, r: 60 }); }
   }
   for (const l of LAMPS) {
@@ -1873,13 +1956,89 @@ function loadMap(i) {
   buildOccluders();
   computeOutside();
   buildSolids();
+  placeSewers();
+}
+// 第 49 版：生死簿——放在鐘的旁邊（隔幾格，才不會跟敲鐘搶同一個按鈕，也不會擋到開會時大家站的那一圈）
+function placeLedger() {
+  LEDGER = null;
+  const ok = (x, y) => {
+    if (x < 2 || y < 2 || x >= MW - 2 || y >= MH - 2) return false;
+    const t = tget(x, y); if (SOLID[t] || t === T_PLANK) return false;
+    for (const b of BUILDINGS) if (x >= b.x0 - 1 && x <= b.x1 + 1 && y >= b.y0 - 1 && y <= b.y1 + 2) return false;
+    for (const o of OBJECTS) if (y === o.y && x >= o.x && x < o.x + (o.w || 1)) return false;
+    for (const s of STATIONS) if (Math.abs(s.x - x) <= 1 && Math.abs(s.y - y) <= 1) return false;
+    for (const l of LAMPS) if (Math.abs(l[0] - x - .5) < 1 && Math.abs(l[1] - y - .5) < 1.2) return false;
+    return true;
+  };
+  for (const [dx, dy] of [[4, 0], [-4, 0], [4, 1], [-4, 1], [4, -1], [-4, -1], [3, 3], [-3, 3], [0, 4], [5, 0], [-5, 0], [0, -4]]) {
+    const x = BELL.x + dx, y = BELL.y + dy;
+    if (ok(x, y) && ok(x, y + 1) && (ok(x - 1, y) || ok(x + 1, y))) { LEDGER = ob('ledger', x, y); OBJECTS.push(LEDGER); return; }
+  }
+}
+// 第 49 版：下水道口——位置只看地圖決定（每台裝置算出來都一樣）。
+// 條件：走得到的戶外地面（草地、路、石板）；離門、工作點、鐘都有一段距離；南邊沒有樹或房子會把它蓋住。
+// 挑法：先挑離鐘最遠的，接著每次挑「離已經挑好的最遠」的，所以會散在地圖四周。每個口通到離它最近的兩個口。
+function placeSewers() {
+  SEWERS = [];
+  const N = MW * MH, reach = new Uint8Array(N), q = [];
+  const s0 = Math.floor(SPAWNS[0].y / TILE) * MW + Math.floor(SPAWNS[0].x / TILE); reach[s0] = 1; q.push(s0);
+  while (q.length) { const c = q.pop(), x = c % MW, y = (c / MW) | 0; for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) { const nx = x + dx, ny = y + dy; if (nx < 0 || ny < 0 || nx >= MW || ny >= MH) continue; const n = ny * MW + nx; if (!reach[n] && !SOLID[grid[n]]) { reach[n] = 1; q.push(n); } } }
+  const flat = t => t === T_GRASS || t === T_PATH || t === T_STONE || t === T_COBBLE;
+  const doors = []; for (const b of BUILDINGS) for (const d of b.doors) doors.push(d);
+  const cand = [];
+  for (let y = 3; y < MH - 3; y++) for (let x = 3; x < MW - 3; x++) {
+    const k = y * MW + x; if (!reach[k] || !flat(grid[k]) || bmap[k] >= 0) continue;
+    if (!flat(tget(x - 1, y)) && !flat(tget(x + 1, y))) continue;                                   // 至少有一邊可以站
+    let bad = false;
+    for (let dy = 1; dy <= 3 && !bad; dy++) for (let dx = -1; dx <= 1; dx++) { const t = tget(x + dx, y + dy); if (t === T_TREE || t === T_BLD || (dy === 1 && t === T_OBJ)) { bad = true; break; } }   // 南邊的樹冠、房子會蓋住它
+    if (bad || Math.hypot(x - BELL.x, y - BELL.y) < 8) continue;
+    for (const d of doors) if (Math.abs(d[0] - x) <= 2 && Math.abs(d[1] - y) <= 2) { bad = true; break; }
+    for (const s of STATIONS) if (Math.abs(s.x - x) <= 2 && Math.abs(s.y - y) <= 2) { bad = true; break; }
+    for (const o of OBJECTS) if (Math.abs(o.y - y) <= 1 && x >= o.x - 1 && x <= o.x + (o.w || 1)) { bad = true; break; }
+    for (const l of LAMPS) if (Math.abs(l[0] - x - .5) < 1.2 && Math.abs(l[1] - y - .5) < 1.5) { bad = true; break; }
+    if (!bad) cand.push([x, y]);
+  }
+  if (!cand.length) return;
+  const pick = [], md = new Float32Array(cand.length).fill(1e9);
+  let bi = 0, bd = -1; cand.forEach((c, i) => { const d = Math.hypot(c[0] - BELL.x, (c[1] - BELL.y) * 1.25); if (d > bd) { bd = d; bi = i; } });
+  for (let n = 0; n < SEWER_N; n++) {
+    const p = cand[bi]; pick.push(p);
+    let nb = -1, nd = -1; cand.forEach((c, i) => { const d = Math.hypot(c[0] - p[0], (c[1] - p[1]) * 1.25); if (d < md[i]) md[i] = d; if (md[i] > nd) { nd = md[i]; nb = i; } });
+    if (nd < 10) break;                                                                           // 再挑就太擠了（也保證兩個口離得夠遠）
+    bi = nb;
+  }
+  pick.sort((a, b) => a[1] - b[1] || a[0] - b[0]);
+  SEWERS = pick.map(p => ({ x: p[0], y: p[1], wx: p[0] * TILE + 20, wy: p[1] * TILE + 22, to: [], area: '' }));
+  SEWERS.forEach((s, i) => {
+    s.to = SEWERS.map((o, j) => [j === i ? 1e9 : Math.hypot(o.x - s.x, o.y - s.y), j]).sort((a, b) => a[0] - b[0] || a[1] - b[1]).slice(0, Math.min(2, SEWERS.length - 1)).map(e => e[1]);
+    let an = '', ad = 1e9; for (const a of AREAS) { const d = Math.hypot(a.x - s.x - .5, a.y - s.y - .5); if (d < ad) { ad = d; an = a.n; } }
+    s.area = an;
+  });
 }
 // 第 38 版：每張地圖自己的樹。只看位置決定（不動到亂數的順序，每台裝置的地圖才會一樣）
 // 荒原：被風吹斜的松樹兩種、枯樹；莊園：迷宮裡是樹籬（連成一道一道），果園是蘋果樹，單獨一棵的是修剪成圓錐／螺旋的造型樹，其他是圓球樹和蘋果樹
 const MAZE = [3, 3, 20, 21];   // 莊園的樹籬迷宮範圍（格子）
+// 沒有屋頂以後，牆和門都畫在地上：樹冠不能蓋住它們。房子正下方、門旁邊的樹種矮一點（small：太矮的時候換成本來就矮的那種樹）
+function cutShrink(t, x, y, small) {
+  const dr = (a, b) => a >= 0 && b >= 0 && a < MW && b < MH && dmap[b * MW + a] === 1;
+  let k = 1;
+  for (let dy = 1; dy <= 3; dy++) for (let dx = -1; dx <= 1; dx++) if (tget(x + dx, y - dy) === T_BLD || dr(x + dx, y - dy)) k = Math.min(k, dy <= 2 ? .6 : .86);
+  for (let dy = 0; dy <= 3; dy++) for (let dx = -2; dx <= 2; dx++) if (dr(x + dx, y - dy)) k = Math.min(k, .56);
+  if (k < 1) { t.s = Math.min(t.s, 1) * k; if (k < .7 && small) t.art = small; }
+}
 function treeArt(kind, t, x, y) {
+  if (kind === 'village2') {   // 第 47 版：田園村新畫風的樹——水邊是垂柳，其他是老樟樹和橘子樹
+    let wet = false; for (let dy = -2; dy <= 2 && !wet; dy++) for (let dx = -2; dx <= 2; dx++) if (tget(x + dx, y + dy) === T_WATER) { wet = true; break; }
+    t.art = wet ? 'v2o_willow' : ['v2o_camphor', 'v2o_orange', 'v2o_camphor', 'v2o_camphor', 'v2o_orange'][(x * 7 + y * 13) % 5];
+    cutShrink(t, x, y, 'v2o_orange');
+    return;
+  }
+  if (kind === 'harbor2') {   // 黑松的樹幹又彎又粗，擠在一起會變成一團紅褐色：樹林裡面種木麻黃（綠的多），單獨一棵、樹林最前排才種黑松
+    const tr = (a, b) => tget(a, b) === T_TREE, nb = (tr(x - 1, y) ? 1 : 0) + (tr(x + 1, y) ? 1 : 0) + (tr(x, y - 1) ? 1 : 0) + (tr(x, y + 1) ? 1 : 0);
+    t.art = nb <= 1 ? 'h2o_pine' : !tr(x, y + 1) && (x * 7 + y * 13) % 3 === 0 ? 'h2o_pine' : 'h2o_casuarina'; cutShrink(t, x, y); return;
+  }   // 第 48 版：漁港新畫風的黑松和木麻黃
   if (kind === 'moor') { t.art = ['moor_pine1', 'moor_pine2', 'moor_pine1', 'moor_pine2', 'moor_dead'][(x * 7 + y * 13) % 5]; return; }
-  if (kind === 'harbor') { t.art = ['harbor_pine1', 'harbor_pine2', 'harbor_pine1', 'harbor_pine2', 'harbor_casuarina'][(x * 7 + y * 13) % 5]; return; }   // 第 43 版：漁港的黑松兩種、木麻黃
+  if (kind === 'harbor') { t.art = ['harbor_pine1', 'harbor_pine2', 'harbor_pine1', 'harbor_pine2', 'harbor_casuarina'][(x * 7 + y * 13) % 5]; if (CUT) cutShrink(t, x, y); return; }   // 第 43 版：漁港的黑松兩種、木麻黃
   if (kind !== 'manor') return;
   const inMaze = (x, y) => x >= MAZE[0] && y >= MAZE[1] && x <= MAZE[2] && y <= MAZE[3];
   const tr = (x, y) => tget(x, y) === T_TREE;
@@ -1972,14 +2131,14 @@ function buildOccluders() {
 }
 function occFor(bi) {
   if (occCache[bi]) return occCache[bi];
-  let a = OCC_BASE.slice(); BUILDINGS.forEach((b, i) => { if (i === bi) a = a.concat(b.occIn); else a.push(b.occOut); });
+  let a = OCC_BASE.slice(); BUILDINGS.forEach((b, i) => { if (i === bi || CUT) a = a.concat(b.occIn); else a.push(b.occOut); });   // 掀開屋頂的地圖：擋視線的是每一道牆（從門口看得到屋裡）
   return occCache[bi] = a;
 }
 function bldAt(wx, wy) { const x = Math.floor(wx / TILE), y = Math.floor(wy / TILE); return (x < 0 || y < 0 || x >= MW || y >= MH) ? -1 : bmap[y * MW + x]; }
 function isDoorAt(wx, wy) { const x = Math.floor(wx / TILE), y = Math.floor(wy / TILE); return !(x < 0 || y < 0 || x >= MW || y >= MH) && dmap[y * MW + x] === 1; }
 function canSee(ax, ay, bx, by) {
   const ib = bldAt(bx, by);
-  if (ib >= 0 && bldAt(ax, ay) !== ib && !isDoorAt(bx, by)) return false;   // 屋子裡的人要進屋（或站在門口）才看得到
+  if (!CUT && ib >= 0 && bldAt(ax, ay) !== ib && !isDoorAt(bx, by)) return false;   // 屋子裡的人要進屋（或站在門口）才看得到。掀開屋頂的地圖改成只看牆有沒有擋住（從門口望進去看得到）
   const dx = bx - ax, dy = by - ay, d = Math.hypot(dx, dy);
   if (d < 26) return true;
   const n = Math.ceil(d / 12);
@@ -2113,6 +2272,8 @@ function buildGround() {
     else { g.fillStyle = '#65543f'; g.fillRect(X, Y, T, T); for (let i = 0; i < 4; i++) { g.strokeStyle = 'rgba(214,186,110,.35)'; g.lineWidth = 1; const ax = X + r() * 34, ay = Y + r() * 34; g.beginPath(); g.moveTo(ax, ay); g.lineTo(ax + 5 - r() * 10, ay + 4); g.stroke(); } }
     if (tget(x, y - 1) === T_BLD) { const sh = g.createLinearGradient(0, Y, 0, Y + 14); sh.addColorStop(0, 'rgba(0,0,0,.4)'); sh.addColorStop(1, 'rgba(0,0,0,0)'); g.fillStyle = sh; g.fillRect(X, Y, T, 14); }
   });
+  if (CUT) drawCutWalls(g);
+  for (const s of SEWERS) drawSewer(g, s.wx, s.wy, false);   // 第 49 版：下水道口的蓋子   // 第 47 版：掀開屋頂的地圖，牆直接畫在地面這一層
   // 木棧板
   layer(T_PLANK, '#3b2c1f', '#7a5f43');
   each(T_PLANK, (x, y) => {
@@ -2362,7 +2523,7 @@ const ICONS = {
 function drawObject(g, o, t) {
   const x = o.wx, y = o.wy, k = o.k;
   { const bi = bmap[o.y * MW + o.x], B = bi >= 0 ? BUILDINGS[bi] : null; if (B && B.gpatch && B.ra > .5 && artCanvas(B)) return; }   // 第 43 版：AI 圖的房子屋頂蓋著時，屋裡的家具不畫（圖沒蓋到的地方才不會看到）
-  if (k !== 'boat' && k !== 'gate') { g.fillStyle = 'rgba(6,12,16,.3)'; ell(g, x + 1, y + 1, (o.w || 1) * 17, 6); }
+  if (k !== 'boat' && k !== 'gate' && !(o.ns && o.a && k !== 'hen')) { g.fillStyle = 'rgba(6,12,16,.3)'; ell(g, x + 1, y + 1, o.a && ARTI.props[o.a] ? Math.min(ARTI.props[o.a].w * .42, (o.w || 1) * 24) : (o.w || 1) * 17, k === 'hen' ? 3 : 6); }
   // 第 38 版：有自己的圖（a）就畫圖，底部中心對齊物件站的位置
   if (o.a) { const P = ARTI.props[o.a]; if (P && P.ok) {
     g.drawImage(P.im, x - P.w * P.ax, y + 4 - P.h, P.w, P.h);
@@ -2370,6 +2531,20 @@ function drawObject(g, o, t) {
     return;
   } }
   switch (k) {
+    case 'ledger': {   // 第 49 版：生死簿——石座上的木頭書台，攤開一本紅皮的簿子
+      g.save(); g.translate(x, y); g.scale(1.28, 1.28); g.translate(-x, -y);
+      box(g, x - 13, y - 6, 26, 9, 2.5, '#8b8f98', '#33241a', 1.4);
+      box(g, x - 4, y - 30, 8, 26, 1.5, '#7a5236', '#33241a', 1.4);
+      poly(g, [x - 18, y - 30, x + 18, y - 30, x + 15, y - 46, x - 15, y - 46]); fs(g, '#9a6a42', '#33241a', 1.5);
+      poly(g, [x - 15, y - 33, x + 15, y - 33, x + 12.5, y - 45, x - 12.5, y - 45]); fs(g, '#a3382f', '#33241a', 1.2);
+      poly(g, [x - 13, y - 34.5, x - .6, y - 34.5, x - .6, y - 44, x - 11, y - 44]); fs(g, '#f3e7c9', '#5a4630', .9);
+      poly(g, [x + 13, y - 34.5, x + .6, y - 34.5, x + .6, y - 44, x + 11, y - 44]); fs(g, '#f3e7c9', '#5a4630', .9);
+      g.strokeStyle = '#8a7a5c'; g.lineWidth = .8; g.beginPath(); for (let j = 0; j < 3; j++) { g.moveTo(x - 10.5, y - 42 + j * 2.6); g.lineTo(x - 2.5, y - 42 + j * 2.6); g.moveTo(x + 2.5, y - 42 + j * 2.6); g.lineTo(x + 10.5, y - 42 + j * 2.6); } g.stroke();
+      g.strokeStyle = '#c0392b'; g.lineWidth = 1.5; g.beginPath(); g.moveTo(x + 5, y - 41.5); g.lineTo(x + 9, y - 37); g.moveTo(x + 9, y - 41.5); g.lineTo(x + 5, y - 37); g.stroke();   // 簿子上的紅叉
+      g.fillStyle = '#d8b24a'; g.fillRect(x - 1, y - 33.5, 2, 6);
+      g.restore();
+      return;
+    }
     case 'bell': {
       box(g, x - 22, y - 8, 44, 12, 3, '#7d828c', '#33363d', 1.4); box(g, x - 17, y - 14, 34, 8, 2, '#8f949e', '#33363d', 1.2);
       for (const px of [x - 15, x + 15]) box(g, px - 3, y - 62, 6, 50, 1.5, '#7a5236', '#2a1c12', 1.3);
@@ -2579,6 +2754,13 @@ function drawObject(g, o, t) {
 }
 function drawLamp(g, o) {
   g.fillStyle = 'rgba(6,12,16,.3)'; ell(g, o.wx, o.wy + 1, 7, 3);
+  const LP = MAPS[curMap] && MAPS[curMap].lamp ? ARTI.props[MAPS[curMap].lamp] : null;   // 第 47 版：這張地圖有自己的路燈圖
+  if (LP && LP.ok) {
+    g.drawImage(LP.im, o.wx - LP.w * LP.ax, o.wy + 3 - LP.h, LP.w, LP.h);
+    const lx = o.wx + LP.w * (.74 - LP.ax), ly = o.wy - LP.h * .5; g.fillStyle = 'rgba(255,196,110,' + (.2 + .06 * Math.sin(NOW / 600 + o.wx)).toFixed(3) + ')'; circ(g, lx, ly, 9);   // 燈籠的光
+    for (let i = 0; i < 2; i++) { const k = NOW / 1000 * (1.7 + i * .6) + o.wx * .13 + i * 2.4, mx = lx + Math.cos(k) * (9 + i * 4) + Math.sin(k * 2.7) * 2, my = ly + Math.sin(k * 1.3) * 7 + Math.cos(k * 3.1) * 1.5; g.fillStyle = 'rgba(255,244,214,' + (.55 + .35 * Math.sin(k * 9)).toFixed(2) + ')'; ell(g, mx, my, 1.25, .8); }
+    return;
+  }
   box(g, o.wx - 4, o.wy - 5, 8, 6, 1.5, '#4a4f58', '#1e2228', 1); g.fillStyle = '#3a2d28'; g.fillRect(o.wx - 1.7, o.wy - 38, 3.4, 34);
   g.strokeStyle = '#3a2d28'; g.lineWidth = 1.6; g.beginPath(); g.moveTo(o.wx, o.wy - 37); g.quadraticCurveTo(o.wx + 8, o.wy - 41, o.wx + 9, o.wy - 33); g.stroke();
   lantern(g, o.wx + 9, o.wy - 25, .78);
@@ -2718,6 +2900,22 @@ function drawDogOld(g, x, y, f, st, t) {
   if (st === 2 || st === 4) { g.fillStyle = '#f08a9a'; const p = (k * .9) % 1; g.globalAlpha = 1 - p; const hx = f * 2, hyy = -34 - p * 12; g.beginPath(); g.moveTo(hx, hyy + 3); g.bezierCurveTo(hx - 5, hyy - 1, hx - 2, hyy - 5, hx, hyy - 2); g.bezierCurveTo(hx + 2, hyy - 5, hx + 5, hyy - 1, hx, hyy + 3); g.fill(); g.globalAlpha = 1; }
   g.restore();
 }
+// 第 49 版：下水道口。open：有人正在鑽，蓋子掀到旁邊、露出黑黑的洞
+function drawSewer(g, x, y, open) {
+  g.fillStyle = 'rgba(6,10,14,.28)'; ell(g, x, y + 2, 18, 11.5);
+  g.fillStyle = '#6f7480'; g.strokeStyle = '#22262d'; g.lineWidth = 1.6; g.beginPath(); g.ellipse(x, y, 16.5, 10.5, 0, 0, 6.2832); g.fill(); g.stroke();
+  g.fillStyle = '#8e939d'; g.beginPath(); g.ellipse(x, y - .8, 14.6, 8.8, 0, Math.PI, 6.2832); g.fill();
+  if (open) {
+    g.fillStyle = '#05070a'; g.strokeStyle = '#22262d'; g.lineWidth = 1.2; g.beginPath(); g.ellipse(x, y, 12.5, 7.6, 0, 0, 6.2832); g.fill(); g.stroke();
+    g.fillStyle = '#454a54'; g.strokeStyle = '#1a1d22'; g.lineWidth = 1.3; g.beginPath(); g.ellipse(x + 17, y - 5, 11.5, 4.2, -.28, 0, 6.2832); g.fill(); g.stroke();
+    return;
+  }
+  g.fillStyle = '#454a54'; g.strokeStyle = '#1a1d22'; g.lineWidth = 1.3; g.beginPath(); g.ellipse(x, y, 12.5, 7.6, 0, 0, 6.2832); g.fill(); g.stroke();
+  g.save(); g.beginPath(); g.ellipse(x, y, 11.3, 6.6, 0, 0, 6.2832); g.clip();
+  g.fillStyle = '#16181d'; for (let i = -9; i <= 9; i += 4.5) g.fillRect(x + i - .9, y - 8, 1.8, 16);
+  g.fillStyle = 'rgba(255,255,255,.1)'; g.fillRect(x - 13, y - 6.4, 26, 2);
+  g.restore();
+}
 function drawName(g, x, y, text, color) {
   g.font = '600 11.5px ' + FONT_BODY; g.textAlign = 'center'; g.textBaseline = 'alphabetic';
   g.lineWidth = 3.2; g.lineJoin = 'round'; g.strokeStyle = 'rgba(6,11,18,.85)'; g.strokeText(text, x, y);
@@ -2749,6 +2947,7 @@ function paintMiniMap(m, sc, d, labels) {
       if (o(x - 1, y)) { m.moveTo(x * TILE, y * TILE); m.lineTo(x * TILE, y * TILE + TILE); } if (o(x + 1, y)) { m.moveTo(x * TILE + TILE, y * TILE); m.lineTo(x * TILE + TILE, y * TILE + TILE); } }
     m.stroke();
   }
+  for (const s of SEWERS) { m.fillStyle = '#11151b'; circ(m, s.wx, s.wy, 15); m.fillStyle = '#7d838e'; circ(m, s.wx, s.wy, 9); }   // 第 49 版：下水道口
   m.fillStyle = '#f2b84b'; circ(m, BELL.wx, BELL.wy - 20, 18);
   if (!labels) return;
   const fs2 = 13 / sc;
@@ -2767,12 +2966,12 @@ const BK = {
   smithy: { lay: 'shed', rf: 'slate', rc: '#4b515c', wl: 'stone', wc: '#8f8a82', fl: 'stone', fa: 'plain', wh: 62, rise: 46, nowin: 1, xu: 50 },
   coop: { lay: 'gable', rf: 'thatch', rc: '#c2a35e', wl: 'plank', wc: '#b08a5a', fl: 'earth', fa: 'plain', wh: 40, up: 14, rr: .45, nowin: 1, xu: 14 },
   farm: { lay: 'sanhe', rf: 'tile', rc: '#a9503a', wl: 'plaster', wc: '#e3d8c0', fl: 'wood', fa: 'plain', wh: 58, wing: .26, xu: 24 },
-  market: { lay: 'canopy', rf: 'canvas', rc: '#3f7c8c', wl: 'plank', wc: '#a98b63', fl: 'stone', fa: 'open', wh: 46, nowin: 1, xu: 30 },
-  ice: { lay: 'flat', rf: 'tar', rc: '#9fb4c2', wl: 'panel', wc: '#8d8a84', fl: 'stone', fa: 'cold', wh: 74, pw: 10, nowin: 1, xu: 30 },
+  market: { cc: '#3f7c8c', lay: 'canopy', rf: 'canvas', rc: '#3f7c8c', wl: 'plank', wc: '#a98b63', fl: 'stone', fa: 'open', wh: 46, nowin: 1, xu: 30 },
+  ice: { cc: '#9fb4c2', lay: 'flat', rf: 'tar', rc: '#9fb4c2', wl: 'panel', wc: '#8d8a84', fl: 'stone', fa: 'cold', wh: 74, pw: 10, nowin: 1, xu: 30 },
   tackle: { lay: 'shed', rf: 'tin', rc: '#6d8a78', wl: 'plank', wc: '#8a857c', fl: 'wood', fa: 'plain', wh: 66, rise: 46, flip: 1, xu: 20 },
   boat: { lay: 'barrel', rf: 'tin', rc: '#7c8a94', wl: 'plank', wc: '#6e5a44', fl: 'earth', fa: 'arch', wh: 70, gh: 96, nowin: 1, xu: 14 },
-  light: { lay: 'flat', rf: 'tar', rc: '#8b8e95', wl: 'plaster', wc: '#ece6d6', fl: 'stone', fa: 'tower', wh: 62, pw: 9, xu: 200 },
-  hut: { lay: 'gable', rf: 'turf', rc: '#5f8a4a', wl: 'lap', wc: '#8f897e', fl: 'wood', fa: 'plain', wh: 54, rr: .32, xu: 30 },
+  light: { cc: '#c2473a', lay: 'flat', rf: 'tar', rc: '#8b8e95', wl: 'plaster', wc: '#ece6d6', fl: 'stone', fa: 'tower', wh: 62, pw: 9, xu: 200 },
+  hut: { cc: '#5f8a4a', lay: 'gable', rf: 'turf', rc: '#5f8a4a', wl: 'lap', wc: '#8f897e', fl: 'wood', fa: 'plain', wh: 54, rr: .32, xu: 30 },
   tea: { lay: 'gable', rf: 'tile', rc: '#4c7758', wl: 'plank', wc: '#7a5a40', fl: 'wood', fa: 'two', wh: 102, rr: .4, xu: 24 },
   cloth: { lay: 'flat', rf: 'tar', rc: '#6f6a78', wl: 'plaster', wc: '#d9c9ad', fl: 'wood', fa: 'jp', wh: 100, pw: 10, ped: 1, xu: 40 },
   temple: { lay: 'tiers', rf: 'tile', rc: '#a23a30', wl: 'plaster', wc: '#e0cfa8', fl: 'stone', fa: 'hall', wh: 80, up: 44, xu: 52, curve: 1 },
@@ -3290,7 +3489,52 @@ const DECO = {
 };
 
 // ---------- 屋頂掀開後看到的牆和門口的暗處 ----------
+// 第 47 版：掀開屋頂的畫法。每一格牆上面是深色的牆頂；下面不是牆的那些格子（朝南的那一面）下半部畫牆面——
+// 北牆看到的是屋裡的牆面，南牆看到的是屋外的牆面。全部用平塗加深褐色描邊，跟角色、家具同一種畫法。牆是靜態的，畫在地面那一層
+function cutWallFace(g, b, k, X, Y, w, h, tx) {
+  const c = k.wc, wl = k.wl;
+  g.fillStyle = c; g.fillRect(X, Y, w, h);
+  if (wl === 'plank' || wl === 'lap') { g.fillStyle = tone(c, -.26); if (wl === 'plank') for (let i = 0; i < w; i += 10) g.fillRect(X + i, Y, 1.4, h); else for (let j = 8; j < h; j += 9) g.fillRect(X, Y + j, w, 1.4); g.fillStyle = 'rgba(255,240,210,.1)'; g.fillRect(X, Y + 3, w, 2); }
+  else if (wl === 'stone') { g.fillStyle = tone(c, -.3); for (let j = 0; j < 2; j++) { g.fillRect(X, Y + 12 + j * 13, w, 1.4); for (let i = (j + tx) % 2 ? 0 : 10; i < w; i += 20) g.fillRect(X + i, Y + j * 13, 1.4, 13); } g.fillStyle = 'rgba(255,255,255,.08)'; g.fillRect(X, Y + 2, w, 2); }
+  else { g.fillStyle = b.kind === 'shrine' ? '#a8463a' : tone(c, -.22); g.fillRect(X, Y + h - 9, w, 9); g.fillStyle = tone(c, -.42); g.fillRect(X, Y + h - 10, w, 1.4); }   // 灰泥牆：下面一條腰線（祠堂是紅的）
+  g.fillStyle = 'rgba(0,0,0,.22)'; g.fillRect(X, Y, w, 3);   // 牆頂壓下來的影子
+}
+function drawCutWalls(g) {
+  const T = TILE, LINE = '#33241a', CAPH = 14;
+  const W = (x, y) => x >= 0 && y >= 0 && x < MW && y < MH && grid[y * MW + x] === T_BLD;
+  for (const b of BUILDINGS) {
+    const k = bk(b), cb0 = k.cc || (k.wl === 'plaster' || k.wl === 'stone' ? k.rc : k.wc), cap = tone(cb0, -.52), capHi = tone(cb0, -.34);   // 牆頂用這棟房子的代表色（瓦色／木色），一眼認得出是哪一棟
+    // 房子南邊落在地上的影子
+    for (let tx = b.x0; tx <= b.x1; tx++) if (W(tx, b.y1)) { const sh = g.createLinearGradient(0, b.Y + b.H, 0, b.Y + b.H + 11); sh.addColorStop(0, 'rgba(0,0,0,.34)'); sh.addColorStop(1, 'rgba(0,0,0,0)'); g.fillStyle = sh; g.fillRect(tx * T, b.Y + b.H, T, 11); }
+    for (let ty = b.y0; ty <= b.y1; ty++) for (let tx = b.x0; tx <= b.x1; tx++) {
+      if (!W(tx, ty)) continue;
+      const X = tx * T, Y = ty * T, S = !W(tx, ty + 1), l = W(tx - 1, ty) ? 0 : 3, r = W(tx + 1, ty) ? 0 : 3, u = W(tx, ty - 1) ? 0 : 3, d = S ? 2 : 0, hh = S ? CAPH : T;
+      g.fillStyle = cap; g.fillRect(X, Y, T, hh);
+      g.fillStyle = capHi; g.fillRect(X + l, Y + u, T - l - r, hh - u - d);   // 牆頂：邊緣深一點，中間亮一點
+      if (S) cutWallFace(g, b, k, X, Y + CAPH, T, T - CAPH, tx);
+    }
+    // 屋外那面南牆上的窗戶（透出燈光）
+    if (!k.nowin) for (const wx of b.wins) { const tx = Math.floor(wx / T); if (!W(tx, b.y1)) continue; const Y = b.y1 * T + CAPH + 5;
+      box(g, wx - 10, Y, 20, 15, 2, '#f3cf7a', LINE, 1.6); g.fillStyle = LINE; g.fillRect(wx - .8, Y, 1.6, 15); g.fillRect(wx - 10, Y + 6.7, 20, 1.6); g.fillStyle = 'rgba(255,255,255,.35)'; g.fillRect(wx - 8, Y + 2, 6, 3); }
+    // 門：門檻（木頭色的一條），兩邊的門柱
+    for (const dr of b.doors) { const X = dr[0] * T, Y = dr[1] * T, side = dr[1] !== b.y1;
+      if (!side) { box(g, X - 1, Y + T - 9, T + 2, 9, 1.5, '#9a7648', LINE, 1.4); g.fillStyle = 'rgba(255,230,180,.25)'; g.fillRect(X + 2, Y + T - 7, T - 4, 2);
+        for (const s of [-1, 1]) if (W(dr[0] + s, dr[1])) box(g, s < 0 ? X - 3 : X + T - 3, Y - 2, 6, T + 2, 1.5, '#6e4a2c', LINE, 1.4); }
+      else { const ox = dr[0] === b.x0 ? X - 1 : X + T - 8; box(g, ox, Y, 9, T, 1.5, '#9a7648', LINE, 1.4); for (const s of [-1, 1]) if (W(dr[0], dr[1] + s)) box(g, X - 1, s < 0 ? Y - 3 : Y + T - 3, T + 2, 6, 1.5, '#6e4a2c', LINE, 1.4); }
+    }
+    // 描邊：牆跟不是牆的地方交界、牆頂跟牆面交界
+    g.strokeStyle = LINE; g.lineWidth = 2; g.lineCap = 'square'; g.beginPath();
+    for (let ty = b.y0; ty <= b.y1; ty++) for (let tx = b.x0; tx <= b.x1; tx++) {
+      if (!W(tx, ty)) continue; const X = tx * T, Y = ty * T, dm = (x, y) => dmap[y * MW + x] === 1 && bmap[y * MW + x] >= 0;
+      if (!W(tx - 1, ty) && !dm(tx - 1, ty)) { g.moveTo(X, Y); g.lineTo(X, Y + T); } if (!W(tx + 1, ty) && !dm(tx + 1, ty)) { g.moveTo(X + T, Y); g.lineTo(X + T, Y + T); }
+      if (!W(tx, ty - 1) && !dm(tx, ty - 1)) { g.moveTo(X, Y); g.lineTo(X + T, Y); }
+      if (!W(tx, ty + 1)) { if (!dm(tx, ty + 1)) { g.moveTo(X, Y + T); g.lineTo(X + T, Y + T); } g.moveTo(X, Y + CAPH); g.lineTo(X + T, Y + CAPH); }
+    }
+    g.stroke(); g.lineCap = 'butt';
+  }
+}
 function drawBuildingIn(g, b) {
+  if (CUT) return;   // 掀開屋頂的地圖：牆已經畫在地面那一層
   const bot = b.Y + b.H;
   if (b.gpatch && b.ra > .02 && artCanvas(b)) { const a = g.globalAlpha; g.globalAlpha = a * Math.min(1, b.ra); g.drawImage(b.gpatch, b.X, b.Y, b.W, b.H); g.globalAlpha = a; }   // 第 43 版：屋頂（圖）蓋著時，地板換成屋外的草地；走進去時淡掉，露出地板
   if (b.ra > .985) { g.fillStyle = 'rgba(14,10,8,.72)'; for (const d of b.dops) g.fillRect(d[0], bot - 40, d[1] - d[0], 40); return; }
@@ -3524,10 +3768,10 @@ const Net = {
     this.val = null; this.roomRef = null; this.meRef = null;
   }
 };
-function mePresence() { return { n: ME.n, c: ME.c, x: Math.round(ME.x), y: Math.round(ME.y), f: ME.f, m: ME.m, td: ME.td, k: ME.k, r: ME.r, bl: ME.bl, fx: ME.fx, ap: ME.ap, ax: ME.ax, as: ME.as, ins: ME.ins, ex: ME.ex, pt: ME.pt, hu: ME.hu, v: ME.v, ch: ME.ch }; }
+function mePresence() { return { n: ME.n, c: ME.c, x: Math.round(ME.x), y: Math.round(ME.y), f: ME.f, m: ME.m, td: ME.td, k: ME.k, r: ME.r, bl: ME.bl, fx: ME.fx, ap: ME.ap, ax: ME.ax, as: ME.as, ins: ME.ins, ex: ME.ex, pt: ME.pt, hu: ME.hu, v: ME.v, ch: ME.ch, sw: ME.sw }; }
 
 // ===== 共用狀態 =====
-const ME = { id: '', n: '', c: 0, x: 0, y: 0, f: 1, m: 0, td: [0, 0], k: null, r: null, bl: null, fx: null, ap: null, ax: null, as: null, ins: null, ex: null, pt: null, hu: null, v: null, ch: [] };
+const ME = { id: '', n: '', c: 0, x: 0, y: 0, f: 1, m: 0, td: [0, 0], k: null, r: null, bl: null, fx: null, ap: null, ax: null, as: null, ins: null, ex: null, pt: null, hu: null, v: null, ch: [], sw: null };
 let code = '', inRoom = false, isHost = false, practice = false;
 let H = null, hs = null, BOTS = [], hostDirty = false;   // 房主才有
 let G = null;                                            // 目前看到的遊戲狀態（房主時 G === H）
@@ -3538,6 +3782,8 @@ let hostSeenAt = 0;
 
 const isBotId = id => typeof id === 'string' && id.length < 5;
 const aliveIdx = i => H.dd[i] === '0' && H.lf[i] === '0';
+// 第 50 版：這個人正躲在下水道裡（看不到、碰不到）。可以一直待著，爬出來才會再出現
+function inSewer(p) { return !!(p && (p === ME ? sewerIn : p.sw)); }
 function botById(id) { for (const b of BOTS) if (b.id === id) return b; return null; }
 function posOf(id) { if (id === ME.id) return ME; if (isBotId(id)) return botById(id); return players.get(id) || null; }
 function pubOf(id) { return posOf(id); }
@@ -3546,7 +3792,7 @@ function nameOfId(id) { const p = pubOf(id); return p ? p.n : '某人'; }
 // ===== 房主：遊戲規則 =====
 function hostCreate() {
   H = { gn: 0, ph: 0, st: { w: 1, gm: 0, ir: 1, fn: 3, xr: 1, hs: 15, sp: 100, tl: 2, ts: 3, ga: 8, kc: 40, kr: 1, bl: 45, an: 3, at: 40, mt: 90, map: Math.max(0, curMap) }, sp: -1, su: 0, it: -1, ro: [], wf: '', dd: '', lf: '', ta: [], ga: [], lo: 0, al: { a: [], on: 0, rem: 0, lk: 1 }, bd: [], mt: null, rs: null, pg: [0, 0], win: 0, why: 0, rem: 0 };
-  hs = { lastK: {}, lastR: {}, lastB: {}, lastF: {}, lastA: {}, em: {}, meetNo: 0, acc: 0, absent: {}, alCd: 0 };
+  hs = { lastSw: {}, lastK: {}, lastR: {}, lastB: {}, lastF: {}, lastA: {}, em: {}, meetNo: 0, acc: 0, absent: {}, alCd: 0 };
   BOTS = []; G = H; hostDirty = true;
 }
 function usedColors() { const u = new Set([ME.c]); for (const p of players.values()) u.add(p.c); for (const b of BOTS) u.add(b.c); return u; }
@@ -3584,7 +3830,7 @@ function hostStart() {
   hs.tl = H.ta.map(parseTasks); hs.tlGn = H.gn;
   let tot = 0; for (let i = 0; i < n; i++) if (!wolves.has(i)) tot += hs.tl[i].length;
   H.bd = []; H.mt = null; H.rs = null; H.hu = null; H.win = 0; H.why = 0; H.pg = [0, tot]; H.ph = 1; H.rem = 11;   // 開場動畫：先「你是」再揭曉身分，總共約 10 秒
-  hs.lastK = {}; hs.lastR = {}; hs.lastB = {}; hs.lastF = {}; hs.lastS = {}; hs.em = {}; hs.mv = {}; hs.bellAt = 0; hs.hunt = false; hs.huAt = 0; hs.huWolf = false; hs.meetNo = 0; hs.absent = {}; hs.acc = 0; hs.fixer = null; H.lo = 0; hs.lastA = {}; hs.alCd = performance.now() + 20000; H.al = { a: [], on: 0, rem: 0, lk: 1 };
+  hs.lastSw = {}; hs.lastK = {}; hs.lastR = {}; hs.lastB = {}; hs.lastF = {}; hs.lastS = {}; hs.em = {}; hs.mv = {}; hs.bellAt = 0; hs.hunt = false; hs.huAt = 0; hs.huWolf = false; hs.meetNo = 0; hs.absent = {}; hs.acc = 0; hs.fixer = null; H.lo = 0; hs.lastA = {}; hs.alCd = performance.now() + 20000; H.al = { a: [], on: 0, rem: 0, lk: 1 };
   for (const [id, p] of players) { if (p.bot) continue; hs.lastK[id] = Array.isArray(p.k) ? p.k[0] : undefined; hs.lastR[id] = Array.isArray(p.r) ? p.r[0] : undefined; hs.lastB[id] = Array.isArray(p.bl) ? p.bl[0] : undefined; hs.lastHu = hs.lastHu || {}; hs.lastHu[id] = Array.isArray(p.hu) ? p.hu[0] : undefined; hs.lastS[id] = [p.ins, p.ex, p.pt].map(v => Array.isArray(v) ? v[0] : undefined); hs.lastF[id] = Array.isArray(p.fx) ? p.fx[0] : undefined; hs.lastA[id] = [p.ap, p.ax, p.as].map(v => Array.isArray(v) ? v[0] : undefined); }
   for (const b of BOTS) {
     const i = ids.indexOf(b.id), sp = SPAWNS[Math.max(0, i)];
@@ -3608,6 +3854,13 @@ function hostKill(kid, vid) {
     if (dist(b.x, b.y, kp.x, kp.y) < (H.lo ? 100 : 210) && canSee(b.x, b.y, kp.x, kp.y)) b.know = kid;
   }
   hostWin(); hostDirty = true; return true;
+}
+// 第 50 版：狼人鑽進／爬出下水道口 si 的那一刻，看得到那個口的電腦玩家會記住這個人是狼（在地底下換位置沒有人看得到）
+function hostSewer(id, si) {
+  const i = H.ro.indexOf(id), s = SEWERS[si]; if (H.ph !== 2 || i < 0 || !s || H.wf[i] !== '1' || !aliveIdx(i)) return false;
+  for (const b of BOTS) { const bi = H.ro.indexOf(b.id); if (bi < 0 || bi === i || !aliveIdx(bi) || H.wf[bi] === '1') continue;
+    if (dist(b.x, b.y, s.wx, s.wy) < (H.lo ? 100 : 210) && canSee(b.x, b.y, s.wx, s.wy)) b.know = id; }
+  return true;
 }
 // ===== 祭壇：狼人先偷偷放好，啟動後全員要在時間內全部解除，否則狼王降臨、狼人獲勝 =====
 function hostAltarPlace(id) {
@@ -3726,6 +3979,7 @@ function hostResolve() {
 // 檢驗官：一局一次，靠近一位玩家查出他是不是狼人（結果只有檢驗官自己看得到）
 function hostInspect(id, tid) {
   const i = H.ro.indexOf(id), ti = H.ro.indexOf(tid);
+  if (inSewer(posOf(tid))) return false;
   if (H.ph !== 2 || H.st.gm !== 1 || i < 0 || i !== H.sp || H.su || ti < 0 || ti === i || !aliveIdx(i) || !aliveIdx(ti)) return false;
   const a = posOf(id), b = posOf(tid); if (!a || !b || dist(a.x, a.y, b.x, b.y) > inspRangeOf(H.st) * 1.8) return false;
   H.su = 1; H.it = ti; hostDirty = true;
@@ -3735,6 +3989,7 @@ function hostInspect(id, tid) {
 // 義警：一局一次的處決。處決到狼人，村民直接獲勝。第 46 版：處決錯人（對方不是狼人），對方沒事，義警自己倒下（不再開會）
 function hostExecute(id, tid) {
   const i = H.ro.indexOf(id), ti = H.ro.indexOf(tid);
+  if (inSewer(posOf(tid))) return false;
   if (H.ph !== 2 || H.st.gm !== 3 || i < 0 || i !== H.sp || H.su || ti < 0 || ti === i || !aliveIdx(i) || !aliveIdx(ti) || H.al.on) return false;
   const a = posOf(id), b = posOf(tid); if (!a || !b || dist(a.x, a.y, b.x, b.y) > execRangeOf(H.st) * 2.6) return false;
   H.su = 1; H.it = ti; hostDirty = true;
@@ -3906,6 +4161,7 @@ function hostIntents() {
     if (Array.isArray(p.ins) && p.ins[0] !== ls[0]) { ls[0] = p.ins[0]; hostInspect(id, p.ins[1]); }
     if (Array.isArray(p.ex) && p.ex[0] !== ls[1]) { ls[1] = p.ex[0]; hostExecute(id, p.ex[1]); }
     if (Array.isArray(p.pt) && p.pt[0] !== ls[2]) { ls[2] = p.pt[0]; hostPet(id); }
+    { const was = hs.lastSw[id] || null, cur = Array.isArray(p.sw) ? p.sw : null; if (cur && !was) hostSewer(id, cur[2] | 0); else if (!cur && was) hostSewer(id, was[2] | 0); hs.lastSw[id] = cur; }   // 鑽進去、爬出來的那一刻
   }
 }
 // 只把有變動的部分送出去，省流量
@@ -4175,6 +4431,9 @@ function upsert(pr, bot, now) {
   p.n = cleanText(pr.n, 8) || '?'; p.c = Math.abs(pr.c | 0) % COLORS.length;
   p.x = +pr.x || 0; p.y = +pr.y || 0; p.f = pr.f === -1 ? -1 : 1; p.m = pr.m ? 1 : 0;
   p.td = pr.td; p.k = pr.k; p.r = pr.r; p.bl = pr.bl; p.fx = pr.fx; p.ap = pr.ap; p.ax = pr.ax; p.as = pr.as; p.ins = pr.ins; p.ex = pr.ex; p.pt = pr.pt; p.hu = pr.hu; p.v = pr.v; p.ch = pr.ch; p.bot = bot; p.seen = now;
+  { const was = p.sw || null, cur = Array.isArray(pr.sw) ? pr.sw : null;   // 第 50 版：鑽進去、爬出來的那一刻，那個口的蓋子掀開一下
+    if (cur && !was) sewerLid[cur[2] | 0] = performance.now(); else if (!cur && was) sewerLid[was[2] | 0] = performance.now();
+    p.sw = cur; }
   return p;
 }
 const arr = x => Array.isArray(x) ? x : EMPTY;
@@ -4335,7 +4594,7 @@ function onStateChange() {
 }
 
 function updateMe(dt) {
-  const canMove = inRoom && G && G.ph === 2 && my.idx >= 0 && !taskState && !document.body.classList.contains('map-open') && !document.body.classList.contains('menu-open');
+  const canMove = inRoom && G && G.ph === 2 && my.idx >= 0 && !taskState && !sewerIn && !document.body.classList.contains('map-open') && !document.body.classList.contains('menu-open');
   let vx = 0, vy = 0;
   if (canMove) {
     vx = input.x; vy = input.y; const k = input.keys;
@@ -4351,7 +4610,7 @@ function updateMe(dt) {
     ME.m = 1;
   } else ME.m = 0;
   mePhase += dt * (ME.m ? 13 : 2.2);
-  if (my.cd > 0 && G && G.ph === 2) my.cd = Math.max(0, my.cd - dt);
+  if (my.cd > 0 && G && G.ph === 2 && !sewerIn) my.cd = Math.max(0, my.cd - dt);   // 躲在下水道裡的時候，襲擊的冷卻不會倒數（不能躲著等冷卻）
   if (my.bcd > 0 && G && G.ph === 2 && !G.lo) my.bcd = Math.max(0, my.bcd - dt);
   if (my.bellCd > 0 && G && G.ph === 2) my.bellCd = Math.max(0, my.bellCd - dt);
 }
@@ -4365,14 +4624,17 @@ function sendPos(now) {
 function computeCtx() {
   ctxA.use = null; ctxA.body = null; ctxA.kill = null; ctxA.sp = null;
   if (!(G && G.ph === 2 && my.idx >= 0)) return;
+  if (sewerIn) { ctxA.use = { k: 'sewerOut' }; return; }   // 第 50 版：在下水道裡，只能換口或爬出來
+  let best = USE_RANGE;
   if (!my.wolf && !G.al.on) {   // 祭壇啟動時，任務全部暫停
-    let best = USE_RANGE;
     for (const m of taskMarks()) {
       if (m.candle) continue;
       const st = STATIONS[m.s], d = dist(ME.x, ME.y, st.wx, st.wy);
       if (d < best) { best = d; ctxA.use = { k: 'task', ti: m.ti }; }
     }
   }
+  // 第 49 版：生死簿（活人、鬼魂都能看）。比手邊的工作點還近才換成它
+  if (LEDGER && dist(ME.x, ME.y, LEDGER.wx, LEDGER.wy - 8) < best) ctxA.use = { k: 'ledger' };
   if (my.dead) { if (!ctxA.use && DOG.on && dogPettable(DOG.st) && dist(ME.x, ME.y, DOG.rx, DOG.ry) < 64) ctxA.use = { k: 'dog' }; return; }
   if (G.al.on) {   // 只能處理祭壇：不能敲鐘、不能舉報
     let ab = USE_RANGE + 18;
@@ -4381,10 +4643,12 @@ function computeCtx() {
     if (G.lo && CANDLE && dist(ME.x, ME.y, CANDLE.wx, CANDLE.wy) < USE_RANGE + 14) ctxA.use = { k: 'candle' };   // 點蠟燭優先
     if (!ctxA.use && !my.em && dist(ME.x, ME.y, BELL.wx, BELL.wy) < BELL_RANGE) ctxA.use = { k: 'bell', cd: my.bellCd > 0 };
   }
+  // 第 49 版：狼人站在下水道口上，可以鑽進去
+  if (my.wolf && !ctxA.use) for (let i = 0; i < SEWERS.length; i++) if (dist(ME.x, ME.y, SEWERS[i].wx, SEWERS[i].wy) < SEWER_RANGE) { ctxA.use = { k: 'sewer', i }; break; }
   // 檢驗官／義警：找最近、看得到的一位玩家當對象
   if ((my.role === 2 || my.role === 4) && !G.su && !G.al.on) {
     let bs = my.role === 2 ? inspRangeOf(G.st) : execRangeOf(G.st);
-    for (let i = 0; i < G.ro.length; i++) { if (G.dd[i] === '1' || G.lf[i] === '1' || G.ro[i] === ME.id) continue; const p = players.get(G.ro[i]); if (!p) continue; const d = dist(ME.x, ME.y, p.rx, p.ry); if (d < bs && canSee(ME.x, ME.y, p.rx, p.ry)) { bs = d; ctxA.sp = p; } }
+    for (let i = 0; i < G.ro.length; i++) { if (G.dd[i] === '1' || G.lf[i] === '1' || G.ro[i] === ME.id) continue; const p = players.get(G.ro[i]); if (!p) continue; if (inSewer(p)) continue; const d = dist(ME.x, ME.y, p.rx, p.ry); if (d < bs && canSee(ME.x, ME.y, p.rx, p.ry)) { bs = d; ctxA.sp = p; } }
   }
   // 小狗就在旁邊，而且沒有別的事可以做：可以摸摸牠
   if (!ctxA.use && DOG.on && dogPettable(DOG.st) && dist(ME.x, ME.y, DOG.rx, DOG.ry) < 64) ctxA.use = { k: 'dog' };
@@ -4394,7 +4658,7 @@ function computeCtx() {
     let bk = killRangeOf(G.st);
     for (let i = 0; i < G.ro.length; i++) {
       if (i === my.idx || G.wf[i] === '1' || G.dd[i] === '1' || G.lf[i] === '1') continue;
-      const p = players.get(G.ro[i]); if (!p) continue;
+      const p = players.get(G.ro[i]); if (!p || inSewer(p)) continue;
       const d = dist(ME.x, ME.y, p.rx, p.ry); if (d < bk && canSee(ME.x, ME.y, p.rx, p.ry)) { bk = d; ctxA.kill = p; }
     }
   }
@@ -4423,7 +4687,7 @@ function altarWhyNot() {
 // 安裝祭壇：按下去之後要站著不動 ALTAR_SET 秒；這段時間只要一移動就取消
 const altarSet = { on: false, t0: 0, x: 0, y: 0 };
 function doAltarPlace() {
-  if (!(G && G.ph === 2 && my.wolf && !my.dead) || altarSet.on) return;
+  if (!(G && G.ph === 2 && my.wolf && !my.dead) || altarSet.on || sewerIn) return;
   const why = altarWhyNot(); if (why) { toast(why, 2200); return; }
   altarSet.on = true; altarSet.t0 = performance.now(); altarSet.x = ME.x; altarSet.y = ME.y;
   toast('安裝祭壇中，站著別動…', Math.round(ALTAR_SET * 1000));
@@ -4443,6 +4707,38 @@ function doUse() {
   else if (u.k === 'altar') openAltar(u.i);
   else if (u.k === 'dog') { if (isHost) hostPet(ME.id); else { ME.pt = [Date.now()]; Net.set({ pt: ME.pt }); } }
   else if (u.k === 'bell') { if (u.cd || my.bellCd > 0) return; my.em = true; sendReport(''); }
+  else if (u.k === 'ledger') openLedger();
+  else if (u.k === 'sewer') sewerEnter(u.i);
+  else if (u.k === 'sewerOut') sewerExit();
+}
+// 第 50 版：下水道（只有狼人）。鑽進去以後可以一直躲著：別人看不到我、碰不到我，我也不能動、不能襲擊。
+// 畫面上有兩個箭頭，指向「我鑽進來的那個口」最近的兩個口——只能在這三個口之間換，不能一路鑽到地圖另一頭。按「爬出來」就從現在這個口出來。
+let sewerIn = null;        // { entry: 從哪個口進來, at: 現在在哪個口, grp: 可以去的三個口 }
+const sewerLid = {};       // 口的編號 → 蓋子最近一次被掀開的時間
+function sewerPub() { ME.sw = sewerIn ? [Date.now(), sewerIn.entry, sewerIn.at] : null; sentSig = ''; if (Net.on) Net.set({ sw: ME.sw, x: Math.round(ME.x), y: Math.round(ME.y), m: 0 }); }
+function sewerEnter(i) {
+  const s = SEWERS[i]; if (!s || sewerIn || altarSet.on) return;
+  if (!(G && G.ph === 2 && my.wolf && !my.dead) || dist(ME.x, ME.y, s.wx, s.wy) > SEWER_RANGE + 12) return;
+  sewerIn = { entry: i, at: i, grp: [i].concat(s.to) };
+  ME.x = s.wx; ME.y = s.wy + 3; ME.m = 0; sewerLid[i] = performance.now(); sewerPub();
+  if (isHost) hostSewer(ME.id, i);
+  sfx('whoosh'); document.body.classList.add('in-sewer');
+}
+function sewerGo(j) {
+  if (!sewerIn || j === sewerIn.at || sewerIn.grp.indexOf(j) < 0 || !SEWERS[j]) return;
+  sewerIn.at = j; ME.x = SEWERS[j].wx; ME.y = SEWERS[j].wy + 3; sewerPub(); sfx('whoosh');
+  const b = document.body; b.classList.add('sewer-move'); setTimeout(() => b.classList.remove('sewer-move'), 240);
+}
+function sewerExit(quiet) {
+  if (!sewerIn) return;
+  const at = sewerIn.at; sewerIn = null; document.body.classList.remove('in-sewer', 'sewer-move');
+  if (!quiet) { sewerLid[at] = performance.now(); if (isHost && H) hostSewer(ME.id, at); sfx('thud'); }
+  sewerPub();
+}
+function sewerTick(now) {
+  if (!sewerIn) return;
+  if (!(G && G.ph === 2 && my.wolf && !my.dead && my.idx >= 0)) { sewerExit(true); return; }   // 開會了、遊戲結束了：直接算離開（位置交給開會的站位）
+  const s = SEWERS[sewerIn.at]; ME.x = s.wx; ME.y = s.wy + 3; ME.m = 0;
 }
 function doReport() { if (ctxA.body && G) sendReport(G.ro[ctxA.body[0]]); }
 // 檢驗官的檢驗、義警的處決
@@ -4597,7 +4893,7 @@ function render(now) {
 
   // 地面記號：我的工作點、可襲擊的對象
   if (playing && G.ph === 2) {
-    const pulse = .5 + .5 * Math.sin(now / 260);
+    const pulse = .5 + .5 * Math.sin(now / 260), ghostView0 = my.dead;
     for (const m of guideMarks()) {
       const st = m;
       g.strokeStyle = m.altar ? `rgba(216,107,255,${.6 + .4 * pulse})` : m.candle ? `rgba(255,122,69,${.6 + .4 * pulse})` : m.fake ? 'rgba(157,176,191,.5)' : `rgba(242,184,75,${.55 + .4 * pulse})`; g.lineWidth = 2.6; g.beginPath(); g.ellipse(st.wx, st.wy, 18 + pulse * 2, 12 + pulse * 1.4, 0, 0, 6.2832); g.stroke();
@@ -4613,12 +4909,18 @@ function render(now) {
       if (live) { g.fillStyle = `rgba(232,120,255,${.55 + .4 * pulse})`; g.beginPath(); g.ellipse(Math.sin(now / 90) * .8, -28, 4 + pulse, 8 + pulse * 2, 0, 0, 6.2832); g.fill(); g.fillStyle = 'rgba(255,235,255,.9)'; g.beginPath(); g.ellipse(0, -26, 1.6, 3.6, 0, 0, 6.2832); g.fill(); }
       g.restore();
     }
+    // 第 49 版：有人正在鑽的下水道口，蓋子是掀開的；狼人站在口上時，腳下亮一圈
+    // 第 50 版：剛有人鑽進去或爬出來的下水道口，蓋子掀開一下；狼人站在口上時腳下亮一圈；我自己躲在裡面時，蓋子底下露出一雙眼睛（只有我看得到）
+    { for (const k in sewerLid) { const s = SEWERS[k], dt = now - sewerLid[k]; if (!s || dt > 900) { if (dt > 900) delete sewerLid[k]; continue; } if (ghostView0 || (dist(ME.x, ME.y, s.wx, s.wy) <= vis && canSee(ME.x, ME.y, s.wx, s.wy))) drawSewer(g, s.wx, s.wy, true); }
+      if (sewerIn) { const s = SEWERS[sewerIn.at]; g.fillStyle = '#05070a'; g.beginPath(); g.ellipse(s.wx, s.wy + 3, 9, 2.6, 0, 0, 6.2832); g.fill(); g.fillStyle = `rgba(255,${190 + 40 * pulse | 0},110,.95)`; circ(g, s.wx - 3.4, s.wy + 3, 1.5); circ(g, s.wx + 3.4, s.wy + 3, 1.5);
+        g.strokeStyle = 'rgba(240,138,126,.45)'; g.lineWidth = 2; g.setLineDash([5, 6]); for (const j of sewerIn.grp) if (j !== sewerIn.at) { const e = SEWERS[j]; g.beginPath(); g.moveTo(s.wx, s.wy); g.lineTo(e.wx, e.wy); g.stroke(); } g.setLineDash([]); }
+      if (ctxA.use && ctxA.use.k === 'sewer') { const s = SEWERS[ctxA.use.i]; g.strokeStyle = `rgba(240,138,126,${.5 + .4 * pulse})`; g.lineWidth = 2.4; g.beginPath(); g.ellipse(s.wx, s.wy, 21 + pulse * 2, 13.5 + pulse * 1.3, 0, 0, 6.2832); g.stroke(); } }
     if (ctxA.kill) { g.strokeStyle = 'rgba(220,90,77,.9)'; g.lineWidth = 2.6; g.beginPath(); g.ellipse(ctxA.kill.rx, ctxA.kill.ry, 16, 7, 0, 0, 6.2832); g.stroke(); }
     if (ctxA.body) { g.strokeStyle = 'rgba(236,229,211,.8)'; g.lineWidth = 2; g.beginPath(); g.ellipse(ctxA.body[1], ctxA.body[2], 26, 9, 0, 0, 6.2832); g.stroke(); }
   }
 
   // 走進屋子裡，那一棟的屋頂掀開；擋視線的方塊也換成那一棟的牆
-  { const inB = (playing || inRoom) ? bldAt(ME.x, ME.y) : -1; view.inB = inB; OCC = occFor(inB); for (let i = 0; i < BUILDINGS.length; i++) { const b = BUILDINGS[i], tg = i === inB ? 0 : 1; b.ra += (tg - b.ra) * .2; if (Math.abs(tg - b.ra) < .02) b.ra = tg; } }
+  { const inB = (playing || inRoom) ? bldAt(ME.x, ME.y) : -1; view.inB = inB; OCC = occFor(inB); for (let i = 0; i < BUILDINGS.length; i++) { const b = BUILDINGS[i], tg = i === inB || CUT ? 0 : 1; b.ra += (tg - b.ra) * .2; if (Math.abs(tg - b.ra) < .02) b.ra = tg; } }
   // 會動的東西
   dyn.length = 0;
   const ghostView = playing && my.dead;
@@ -4633,8 +4935,8 @@ function render(now) {
     for (let i = 0; i < G.ro.length; i++) {
       const id = G.ro[i], dead = G.dd[i] === '1' || G.lf[i] === '1';
       if (G.lf[i] === '1') continue;
-      if (id === ME.id) { dyn.push({ y: ME.y, k: 4, x: ME.x, c: ME.c, f: ME.f, m: ME.m, ph: mePhase, ghost: dead, n: ME.n, me: true, wolf: my.wolf, id: 'me' }); continue; }
-      const p = players.get(id); if (!p) continue;
+      if (id === ME.id) { if (sewerIn) continue; dyn.push({ y: ME.y, k: 4, x: ME.x, c: ME.c, f: ME.f, m: ME.m, ph: mePhase, ghost: dead, n: ME.n, me: true, wolf: my.wolf, id: 'me' }); continue; }
+      const p = players.get(id); if (!p || inSewer(p)) continue;
       if (dead && !ghostView) continue;
       if (!ghostView && (dist(ME.x, ME.y, p.rx, p.ry) > vis || !canSee(ME.x, ME.y, p.rx, p.ry))) continue;
       dyn.push({ y: p.ry, k: 4, x: p.rx, c: p.c, f: p.f, m: p.m, ph: p.phase, ghost: dead, n: p.n, wolf: my.wolf && G.wf[i] === '1', id });
@@ -4823,10 +5125,10 @@ function frame(now) {
     }
     if (inRoom && G && G.st && (G.st.map | 0) !== curMap) { applyMap(G.st.map | 0); derive(); }
     onStateChange();
-    if (inRoom) { updateMe(dt); altarSetTick(now); sendPos(now); computeCtx(); } else ambientTick(dt);
+    if (inRoom) { updateMe(dt); altarSetTick(now); sewerTick(now); sendPos(now); computeCtx(); } else ambientTick(dt);
     for (const p of players.values()) {
       const dx = p.x - p.rx, dy = p.y - p.ry;
-      if (Math.abs(dx) + Math.abs(dy) > 260) { p.rx = p.x; p.ry = p.y; } else { const k = Math.min(1, dt * 13); p.rx += dx * k; p.ry += dy * k; }
+      if (Math.abs(dx) + Math.abs(dy) > 260 || p.sw) { p.rx = p.x; p.ry = p.y; } else { const k = Math.min(1, dt * 13); p.rx += dx * k; p.ry += dy * k; }
       p.phase += dt * (p.m ? 13 : 2.2);
     }
     if (inRoom && G && G.ph === 1 && my.idx >= 0) drawIntro(now); else render(now);
@@ -5651,6 +5953,428 @@ function sndPhase(ph) {
 }
 // 按鈕的「喀」一聲
 document.addEventListener('pointerdown', e => { const b = e.target && e.target.closest && e.target.closest('button'); if (b && !b.disabled) sfx('click'); }, true);
+// ===== 第 51 版：任務小遊戲全部重做 =====
+// 以前是「表情符號按鈕＋進度條」，7 種玩法。現在每個任務有自己的場景（用新畫風的插圖），12 種玩法，全部畫在一張畫布上。
+// 玩法：hit 敲擊、crank 轉動、timing 看準時機、memory 記順序、pairs 配對、drag 拖曳、rub 擦拭、trace 沿線畫、catch 接東西、balance 控制火候、pour 澆灌、feed 餵食／herd 趕動物
+// 每個玩法回傳 { frame(), hint() }：frame 每一格更新＋畫；hint 回傳「現在手指該做什麼」（自動測試用它真的玩一遍）
+const TASK_SPR = {};
+for (const sk in TASK_ATLAS) { const a = TASK_ATLAS[sk], im = new Image(); a.im = im; a.ok = false; im.onload = () => { a.ok = true; }; im.src = a.d; for (const k in a.box) TASK_SPR[k] = { a, b: a.box[k] }; }
+function tSprite(key) {
+  const t = TASK_SPR[key]; if (t) return t.a.ok ? { im: t.a.im, sx: t.b[0], sy: t.b[1], sw: t.b[2], sh: t.b[3] } : null;
+  const P = ARTI.props[key]; return P && P.ok ? { im: P.im, sx: 0, sy: 0, sw: P.im.naturalWidth, sh: P.im.naturalHeight } : null;
+}
+// 畫一張圖：預設以 (x, y) 為「底部中心」、高度 h。o.c：以中心對齊，h 當成最長邊；o.rot 旋轉；o.flip 左右翻；o.a 透明度；o.sx／o.sy 拉長壓扁
+function tDraw(g, key, x, y, h, o) {
+  o = o || {};
+  g.save(); g.translate(x, y); if (o.rot) g.rotate(o.rot); g.scale((o.flip ? -1 : 1) * (o.sx || 1), o.sy || 1); if (o.a != null) g.globalAlpha *= o.a;
+  let dw = h;
+  if (key[0] === '#') tCode(g, key, h, o);
+  else { const s = tSprite(key); if (s) { let dh = h; dw = h * s.sw / s.sh; if (o.c) { const k = h / Math.max(s.sw, s.sh); dw = s.sw * k; dh = s.sh * k; } g.drawImage(s.im, s.sx, s.sy, s.sw, s.sh, -dw / 2, o.c ? -dh / 2 : -dh, dw, dh); } }
+  g.restore(); return dw;
+}
+// 幾樣沒有插圖、直接畫的東西：染好的布、書
+const T_LINE = '#33241a', T_CLOTH = ['#c4483c', '#3f6fa8', '#d9a83a', '#5c9a5a', '#8a5aa8'];
+function tCode(g, key, h, o) {
+  const n = +key.slice(-1) || 0, c = T_CLOTH[n % T_CLOTH.length];
+  g.lineJoin = 'round'; g.lineWidth = 2; g.strokeStyle = T_LINE; g.fillStyle = c;
+  if (key.startsWith('#cloth')) { const w = h * .62, top = o.c ? -h / 2 : -h; g.beginPath(); g.moveTo(-w / 2, top); g.lineTo(w / 2, top); g.lineTo(w / 2, top + h * .92); g.quadraticCurveTo(w / 4, top + h * 1.02, 0, top + h * .93); g.quadraticCurveTo(-w / 4, top + h * .86, -w / 2, top + h * .95); g.closePath(); g.fill(); g.stroke(); g.fillStyle = 'rgba(255,255,255,.16)'; g.fillRect(-w / 2 + 3, top + 3, w * .22, h * .8); }
+  else if (key.startsWith('#book')) { const w = h * (.26 + (n % 3) * .04), top = o.c ? -h / 2 : -h; g.beginPath(); g.rect(-w / 2, top, w, h); g.fill(); g.stroke(); g.fillStyle = '#f0deb0'; g.fillRect(-w / 2 + 2, top + h * .16, w - 4, 3); g.fillRect(-w / 2 + 2, top + h * .78, w - 4, 3); }
+}
+// full：整個畫面都是地面（從上面往下看的場景：拖東西、餵動物、掃地）
+function tBg(S, kind, full) {
+  const g = S.g, W = S.W, H = S.H, GY = full ? 34 : S.GY;
+  const sky = { grass: '#16302a', soil: '#1b2a22', wood: '#2b211c', stone: '#20262e', water: '#123448', sand: '#2a3038', pond: '#16302a' }[kind] || '#1a242c';
+  const gnd = { grass: '#2f5a3a', soil: '#5b4630', wood: '#6b4c34', stone: '#565c68', water: '#1f5a7a', sand: '#b79a62', pond: '#1f5a7a' }[kind] || '#3a4650';
+  g.fillStyle = sky; g.fillRect(0, 0, W, H);
+  if (full) { g.fillStyle = tone(gnd, -.22); g.fillRect(0, 0, W, H); }
+  if (kind === 'water') { g.fillStyle = gnd; g.fillRect(0, 0, W, H); g.strokeStyle = 'rgba(210,240,250,.22)'; g.lineWidth = 2; g.lineCap = 'round'; for (let i = 0; i < 9; i++) { const x = (i * 97 + S.t * 14) % (W + 40) - 20, y = 44 + (i * 53) % (H - 60); g.beginPath(); g.moveTo(x, y); g.quadraticCurveTo(x + 9, y - 4, x + 18, y); g.stroke(); } return; }
+  if (!full) { g.fillStyle = gnd; g.fillRect(0, GY - 8, W, H - GY + 8); g.fillStyle = 'rgba(0,0,0,.18)'; g.fillRect(0, GY - 8, W, 3); }
+  if (kind === 'wood') { g.strokeStyle = 'rgba(0,0,0,.2)'; g.lineWidth = 1.5; for (let x = 20; x < W + 40; x += 46) { g.beginPath(); g.moveTo(x, GY - 5); g.lineTo(x - (full ? 0 : 8), H); g.stroke(); } if (!full) { g.fillStyle = 'rgba(255,230,190,.05)'; g.fillRect(0, 0, W, GY - 8); } }
+  if (kind === 'grass' || kind === 'pond') { g.strokeStyle = '#3f7a4c'; g.lineWidth = 2; g.lineCap = 'round'; for (let i = 0; i < (full ? 22 : 12); i++) { const x = (i * 83 + 17) % W, y = GY + 2 + (i * 29) % Math.max(4, H - GY - 6); g.beginPath(); g.moveTo(x, y); g.lineTo(x - 3, y - 6); g.moveTo(x, y); g.lineTo(x + 3, y - 7); g.stroke(); } }
+  if (kind === 'pond') { g.fillStyle = '#1f5a7a'; g.beginPath(); g.ellipse(W * .5, H + 6, W * .6, 46, 0, 0, 6.2832); g.fill(); g.strokeStyle = 'rgba(210,240,250,.3)'; g.lineWidth = 2; g.beginPath(); g.ellipse(W * .5, H + 6, W * .6, 46, 0, Math.PI, 6.2832); g.stroke(); }
+  if (kind === 'stone') { g.strokeStyle = 'rgba(0,0,0,.2)'; g.lineWidth = 1.5; for (let x = 0; x < W; x += 58) { g.beginPath(); g.moveTo(x, GY - 5); g.lineTo(x, H); g.stroke(); } }
+  if (kind === 'sand') { g.fillStyle = 'rgba(90,70,40,.35)'; for (let i = 0; i < 16; i++) circ(g, (i * 71 + 13) % W, GY + (i * 17) % (H - GY), 1.5); }
+}
+function tPips(S, n, k) { const g = S.g, x0 = S.W / 2 - (n - 1) * 8; for (let i = 0; i < n; i++) { g.fillStyle = i < k ? '#f2b84b' : 'rgba(255,255,255,.18)'; g.strokeStyle = 'rgba(0,0,0,.4)'; g.lineWidth = 1; g.beginPath(); g.arc(x0 + i * 16, S.H - 10, 4.5, 0, 6.2832); g.fill(); g.stroke(); } }
+function tBar(S, p) { const g = S.g, w = S.W * .5, x = (S.W - w) / 2, y = S.H - 14; g.fillStyle = 'rgba(0,0,0,.45)'; rr(g, x, y, w, 8, 4); g.fill(); g.fillStyle = '#f2b84b'; rr(g, x, y, Math.max(8, w * clamp(p, 0, 1)), 8, 4); g.fill(); }
+function tWrap(a) { while (a > Math.PI) a -= 6.2832; while (a < -Math.PI) a += 6.2832; return a; }
+
+// ---------- 開一個任務場景 ----------
+function tgRun(box, st, sk, done, heavy) {
+  box.classList.add('tg');
+  const cv = el('canvas', 'tg-cv'), tip = el('div', 'tg-tip', sk.tip || st.tip);
+  box.appendChild(cv); box.appendChild(tip);
+  const W = Math.max(280, Math.round(box.clientWidth || 396)), H = Math.max(180, Math.round(box.clientHeight || 214)), dpr = Math.min(3, window.devicePixelRatio || 1);
+  cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
+  const g = cv.getContext('2d');
+  const S = { g, W, H, GY: H - 30, t: 0, dt: 0, heavy: !!heavy, c: sk, st, over: false, fx: [], shake: 0, p: { x: W / 2, y: H / 2, px: W / 2, py: H / 2, down: false, jd: false, ju: false }, tip };
+  S.burst = (x, y, col, n, sp) => { for (let i = 0; i < (n || 8); i++) { const a = rnd(0, 6.28), v = rnd(40, sp || 150); S.fx.push({ x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v - 60, l: rnd(.3, .6), c: col || '#f2d9a0', r: rnd(1.6, 3.4) }); } };
+  S.pop = (x, y, txt, col) => S.fx.push({ x, y, vx: 0, vy: -46, l: .8, txt, c: col || '#ffe9a8' });
+  S.win = () => { if (S.over) return; S.over = true; S.burst(W / 2, H / 2, '#f2b84b', 22, 240); S.tm = setTimeout(done, 420); };
+  const pos = e => { const r = cv.getBoundingClientRect(); S.p.x = (e.clientX - r.left) * W / r.width; S.p.y = (e.clientY - r.top) * H / r.height; };
+  cv.addEventListener('pointerdown', e => { e.preventDefault(); pos(e); S.p.px = S.p.x; S.p.py = S.p.y; S.p.down = true; S.p.jd = true; try { cv.setPointerCapture(e.pointerId); } catch (x) { } });
+  cv.addEventListener('pointermove', e => { e.preventDefault(); pos(e); });
+  const up = e => { if (!S.p.down) return; S.p.down = false; S.p.ju = true; };
+  cv.addEventListener('pointerup', up); cv.addEventListener('pointercancel', up); cv.addEventListener('lostpointercapture', up);
+  for (const ev of ['contextmenu', 'selectstart', 'dragstart']) cv.addEventListener(ev, e => e.preventDefault());
+  cv.addEventListener('touchstart', e => e.preventDefault(), { passive: false }); cv.addEventListener('touchmove', e => e.preventDefault(), { passive: false });   // iPhone：長按、捲動都不要
+  const M = TG[sk.m](S, sk); S.M = M;
+  let raf = 0, last = performance.now();
+  const loop = now => {
+    S.dt = Math.min(.05, (now - last) / 1000); last = now; S.t += S.dt;
+    g.setTransform(dpr, 0, 0, dpr, 0, 0); g.globalAlpha = 1; g.clearRect(0, 0, W, H);
+    g.save(); if (S.shake > 0) { S.shake = Math.max(0, S.shake - S.dt * 5); g.translate(Math.sin(S.t * 90) * 5 * S.shake, 0); }
+    M.frame();
+    for (let i = S.fx.length - 1; i >= 0; i--) { const f = S.fx[i]; f.l -= S.dt; if (f.l <= 0) { S.fx.splice(i, 1); continue; } f.x += f.vx * S.dt; f.y += f.vy * S.dt; if (!f.txt) f.vy += 360 * S.dt;
+      g.globalAlpha = Math.min(1, f.l * 3); g.fillStyle = f.c;
+      if (f.txt) { g.font = '700 15px ' + FONT_BODY; g.textAlign = 'center'; g.lineWidth = 3; g.strokeStyle = 'rgba(0,0,0,.6)'; g.strokeText(f.txt, f.x, f.y); g.fillText(f.txt, f.x, f.y); } else circ(g, f.x, f.y, f.r); }
+    g.globalAlpha = 1; g.restore();
+    S.p.jd = false; S.p.ju = false; S.p.px = S.p.x; S.p.py = S.p.y;
+    raf = requestAnimationFrame(loop);
+  };
+  raf = requestAnimationFrame(loop);
+  taskState.scene = S;
+  taskState.cleanup = () => { cancelAnimationFrame(raf); clearTimeout(S.tm); box.classList.remove('tg'); };
+}
+
+const TG = {
+  // 敲擊：每點一下裂一點，敲夠了這一個就完成，換下一個。pull：往上拔（蘿蔔）
+  hit(S, c) {
+    const N = (c.items || 3) + (S.heavy ? 2 : 0), HP = c.hits || 3; let i = 0, hp = HP, sw = 0; const fly = [];
+    return { frame() {
+      const g = S.g, x = S.W * .46, y = S.GY; tBg(S, c.bg || 'grass'); sw = Math.max(0, sw - S.dt * 5);
+      if (S.p.jd && !S.over) { sw = 1; hp--; S.shake = .5; S.burst(x, y - 60, c.chip || '#e6c58a', 6); sfx('thud');
+        if (hp <= 0) { fly.push({ x, y: y - 40, vx: rnd(90, 150), vy: -220, r: 0 }); i++; hp = HP; S.pop(x, y - 96, i + ' / ' + N); if (i >= N) S.win(); else sfx('ok'); } }
+      for (const f of fly) { f.x += f.vx * S.dt; f.y += f.vy * S.dt; f.vy += 520 * S.dt; f.r += S.dt * 4; if (f.y < S.H + 60) tDraw(g, c.out || c.target, f.x, f.y, 64, { c: 1, rot: f.r }); }
+      if (!S.over) {
+        if (c.pull) { const k = (HP - hp) / HP; g.save(); g.beginPath(); g.rect(0, 0, S.W, y - 4); g.clip(); tDraw(g, c.target, x, y + 58 - k * 52 - sw * 6, 104); g.restore(); g.fillStyle = '#4a3826'; g.strokeStyle = T_LINE; g.lineWidth = 2; g.beginPath(); g.ellipse(x, y - 2, 46, 11, 0, 0, 6.2832); g.fill(); g.stroke(); }
+        else { tDraw(g, c.target, x, y + 2, 100, { sy: 1 - sw * .06 }); g.strokeStyle = 'rgba(40,24,12,.85)'; g.lineWidth = 3; g.lineCap = 'round'; for (let k = 0; k < HP - hp; k++) { const cx = x - 14 + k * 16; g.beginPath(); g.moveTo(cx, y - 96); g.lineTo(cx + 5, y - 78); g.lineTo(cx - 3, y - 64); g.lineTo(cx + 4, y - 48 + k * 6); g.stroke(); } }
+      }
+      if (c.tool) tDraw(g, c.tool, x + 74 - sw * 34, y - 92 + sw * 30, 96, { c: 1, rot: .5 - sw * 1.1 });
+      tPips(S, N, i);
+    }, hint() { return [{ x: S.W * .46, y: S.GY - 50, d: 1 }, { x: S.W * .46, y: S.GY - 50, d: 0 }]; } };
+  },
+  // 轉動：手指繞著把手轉圈。rise：水桶從井裡升上來；pile：磨出來的麵粉越堆越高
+  crank(S, c) {
+    const turns = S.heavy ? 8 : 5, cx = S.W * .74, cy = S.H * .54, R = 46; let tot = 0, la = null;
+    return { frame() {
+      const g = S.g, p = S.p, bx = S.W * .3; tBg(S, c.bg || 'grass');
+      const d = Math.hypot(p.x - cx, p.y - cy);
+      if (p.down && d > 14 && d < 120 && !S.over) { const a = Math.atan2(p.y - cy, p.x - cx); if (la != null) { const da = Math.abs(tWrap(a - la)); if (da < 1.2) { tot += da; if (Math.floor(tot / 1.5) !== Math.floor((tot - da) / 1.5)) sfx('click'); } } la = a; } else la = null;
+      const pr = clamp(tot / (turns * 6.2832), 0, 1); if (pr >= 1) S.win();
+      if (c.mode === 'rise') { tDraw(g, c.base, bx, S.GY + 4, 150); g.save(); g.beginPath(); g.rect(0, 0, S.W, S.GY - 44); g.clip(); const by = S.GY + 22 - pr * 92; g.strokeStyle = '#c9a56a'; g.lineWidth = 2.5; g.beginPath(); g.moveTo(bx, S.GY - 118); g.lineTo(bx, by - 50); g.stroke(); tDraw(g, c.mover, bx, by, 54); g.restore(); }
+      else { tDraw(g, c.base, bx, S.GY + 4, 118, { rot: Math.sin(tot * 2) * .03 }); if (pr > .02) tDraw(g, c.out, bx + 96, S.GY + 4, 20 + pr * 54); }
+      g.strokeStyle = 'rgba(255,255,255,.14)'; g.lineWidth = 10; g.beginPath(); g.arc(cx, cy, R, 0, 6.2832); g.stroke();
+      g.strokeStyle = '#f2b84b'; g.lineCap = 'round'; g.beginPath(); g.arc(cx, cy, R, -1.5708, -1.5708 + pr * 6.2832); g.stroke();
+      g.fillStyle = '#7a5236'; g.strokeStyle = T_LINE; g.lineWidth = 2; circ(g, cx, cy, 12); g.stroke();
+      const ha = tot; g.lineWidth = 7; g.strokeStyle = '#7a5236'; g.beginPath(); g.moveTo(cx, cy); g.lineTo(cx + Math.cos(ha) * R, cy + Math.sin(ha) * R); g.stroke();
+      g.fillStyle = '#d8b24a'; g.strokeStyle = T_LINE; g.lineWidth = 2; g.beginPath(); g.arc(cx + Math.cos(ha) * R, cy + Math.sin(ha) * R, 11, 0, 6.2832); g.fill(); g.stroke();
+      if (tot < .5) { g.strokeStyle = 'rgba(255,255,255,' + (.35 + .25 * Math.sin(S.t * 5)) + ')'; g.lineWidth = 3; g.setLineDash([6, 7]); g.beginPath(); g.arc(cx, cy, R + 18, -.4, 3.6); g.stroke(); g.setLineDash([]); }
+    }, hint() { const a = S.t * 7; return [{ x: cx + Math.cos(a) * R, y: cy + Math.sin(a) * R, d: 1 }]; } };
+  },
+  // 看準時機：指針來回擺，進到綠色區再點
+  timing(S, c) {
+    const need = (S.heavy ? 6 : 4); let hits = 0, pos = 0, dir = 1, zs = rnd(.25, .55), zw = .22, sp = .95, sw = 0, bad = 0, popT = 0;
+    return { frame() {
+      const g = S.g, bw = S.W * .62, bx = (S.W - bw) / 2, by = S.H - 30, x = S.W * .46, y = S.GY - 22; tBg(S, c.bg || 'wood');
+      pos += dir * S.dt * sp; if (pos > 1) { pos = 1; dir = -1; } if (pos < 0) { pos = 0; dir = 1; } sw = Math.max(0, sw - S.dt * 4); bad = Math.max(0, bad - S.dt * 3); popT = Math.max(0, popT - S.dt * 1.6);
+      if (S.p.jd && !S.over) { if (pos >= zs && pos <= zs + zw) { hits++; sw = 1; popT = 1; S.burst(x, y - 50, c.spark || '#ffd27a', 10); sfx('thud'); if (hits >= need) S.win(); else { zs = rnd(.08, .7); sp = Math.min(1.5, sp + .1); } } else { bad = 1; S.shake = .6; sfx('wrong'); } }
+      if (c.kind === 'swing') {   // 一根橫竿，燈籠掛在繩子上晃；掛好的排在兩邊
+        const a = (pos - .5) * 1.05, px = S.W / 2, py = 40; g.strokeStyle = '#7a5236'; g.lineWidth = 7; g.lineCap = 'round'; g.beginPath(); g.moveTo(S.W * .08, py); g.lineTo(S.W * .92, py); g.stroke();
+        for (let k = 0; k < hits; k++) { const hx = k % 2 ? S.W * .92 - 26 - (k >> 1) * 40 : S.W * .08 + 26 + (k >> 1) * 40; tDraw(g, c.item, hx, py + 52, 50); }
+        g.fillStyle = '#d8b24a'; g.strokeStyle = T_LINE; g.lineWidth = 2; g.beginPath(); g.arc(px, py + 6, 6, 0, Math.PI); g.stroke();
+        g.save(); g.translate(px, py - 30); g.rotate(-a); g.strokeStyle = '#c9a56a'; g.lineWidth = 2; g.beginPath(); g.moveTo(0, 0); g.lineTo(0, 50); g.stroke(); tDraw(g, c.item, 0, 50 + 88, 88); g.restore(); }
+      else { tDraw(g, c.target, x, y + 14, c.th || 96, { sy: 1 - sw * .05 }); if (c.item && popT > 0) tDraw(g, c.item, x + 10, y - 60 - (1 - popT) * 34, 50, { c: 1, a: Math.min(1, popT * 2) }); if (c.tool) tDraw(g, c.tool, x + 80 - sw * 36, y - 74 + sw * 26, 92, { c: 1, rot: .55 - sw * 1.15 }); }
+      g.fillStyle = 'rgba(0,0,0,.5)'; rr(g, bx, by, bw, 14, 7); g.fill(); g.fillStyle = bad > 0 ? '#c4483c' : '#5fae5a'; rr(g, bx + zs * bw, by, zw * bw, 14, 7); g.fill();
+      g.fillStyle = '#fff'; g.strokeStyle = T_LINE; g.lineWidth = 2; rr(g, bx + pos * bw - 4, by - 5, 8, 24, 4); g.fill(); g.stroke();
+      tPips(S, need, hits);
+    }, hint() { return pos > zs + .04 && pos < zs + zw - .04 ? [{ x: S.W / 2, y: S.H / 2, d: 1 }, { x: S.W / 2, y: S.H / 2, d: 0 }] : []; } };
+  },
+  // 記順序：東西照順序亮一次，照著點回去
+  memory(S, c) {
+    const n = c.n || 5, lens = S.heavy ? [3, 4, 5] : [3, 4]; let rd = 0, seq = [], st = 'show', k = 0, tm = .6, lit = -1, litT = 0, wrong = 0;
+    const deal = () => { seq = []; let last = -1; for (let i = 0; i < lens[rd]; i++) { let v; do v = rint(0, n - 1); while (v === last); seq.push(v); last = v; } st = 'show'; k = 0; tm = .7; };
+    deal();
+    const px = i => S.W * (.5 + (i - (n - 1) / 2) * Math.min(.19, .8 / n)), py = () => S.GY + 2;
+    return { frame() {
+      const g = S.g, sz = c.h || 92; tBg(S, c.bg || 'stone'); litT = Math.max(0, litT - S.dt); wrong = Math.max(0, wrong - S.dt * 2);
+      if (st === 'show' && !S.over) { tm -= S.dt; if (tm <= 0) { if (k < seq.length) { lit = seq[k]; litT = .42; k++; tm = .62; sfx('click'); } else { st = 'in'; k = 0; lit = -1; } } }
+      else if (st === 'in' && S.p.jd && !S.over) { let hit = -1; for (let i = 0; i < n; i++) if (Math.abs(S.p.x - px(i)) < 30 && S.p.y > py() - sz - 14) hit = i;
+        if (hit >= 0) { lit = hit; litT = .3; if (hit === seq[k]) { k++; sfx('click'); if (k >= seq.length) { rd++; sfx('ok'); if (rd >= lens.length) S.win(); else { st = 'wait'; tm = .7; } } } else { wrong = 1; S.shake = .6; sfx('wrong'); st = 'wait'; tm = .8; } } }
+      else if (st === 'wait') { tm -= S.dt; if (tm <= 0 && !S.over) deal(); }
+      for (let i = 0; i < n; i++) { const on = (i === lit && litT > 0) || S.over, x = px(i), y = py();
+        if (on) { const gr = g.createRadialGradient(x, y - sz * .55, 4, x, y - sz * .55, sz * .8); gr.addColorStop(0, c.glow || 'rgba(255,190,90,.75)'); gr.addColorStop(1, 'rgba(255,190,90,0)'); g.fillStyle = gr; g.fillRect(x - sz, y - sz * 1.4, sz * 2, sz * 1.7); }
+        tDraw(g, c.item, x, y, sz, { a: on ? 1 : .55 });
+        if (on && c.flame) { g.fillStyle = '#ffb347'; g.beginPath(); g.ellipse(x + c.flame[0] * sz, y - c.flame[1] * sz, 5, 9, 0, 0, 6.2832); g.fill(); g.fillStyle = '#fff3c4'; g.beginPath(); g.ellipse(x + c.flame[0] * sz, y - c.flame[1] * sz + 2, 2.2, 4.5, 0, 0, 6.2832); g.fill(); } }
+      { const tx = st === 'in' ? '換你了：照剛剛的順序點（' + k + ' / ' + seq.length + '）' : wrong > 0 ? '順序不對，再看一次' : '看清楚亮的順序…'; if (S.tip.textContent !== tx) S.tip.textContent = tx; }
+      tPips(S, lens.length, rd);
+    }, hint() { return st === 'in' ? [{ x: px(seq[k]), y: py() - 40, d: 1 }, { x: px(seq[k]), y: py() - 40, d: 0 }] : []; } };
+  },
+  // 配對：翻開兩張，一樣就留著
+  pairs(S, c) {
+    const np = S.heavy ? 6 : 4, pool = shuffle(c.icons.slice()).slice(0, np), cards = shuffle(pool.concat(pool)).map(k => ({ k, up: 0, ok: false, f: 0 }));
+    const cols = np === 4 ? 4 : 6, cw = Math.min(74, (S.W - 24) / cols - 8), ch = Math.min(74, (S.H - 46) / 2 - 8); let open = [], lock = 0, left = np;
+    const cx = i => S.W / 2 + ((i % cols) - (cols - 1) / 2) * (cw + 8), cy = i => 36 + ch / 2 + Math.floor(i / cols) * (ch + 8);
+    return { frame() {
+      const g = S.g; g.fillStyle = '#1a242c'; g.fillRect(0, 0, S.W, S.H);
+      if (lock > 0) { lock -= S.dt; if (lock <= 0) { for (const i of open) cards[i].up = 0; open = []; } }
+      if (S.p.jd && lock <= 0 && !S.over) for (let i = 0; i < cards.length; i++) { const cd = cards[i]; if (cd.ok || cd.up || Math.abs(S.p.x - cx(i)) > cw / 2 || Math.abs(S.p.y - cy(i)) > ch / 2) continue;
+        cd.up = 1; open.push(i); sfx('click');
+        if (open.length === 2) { const a = cards[open[0]], b = cards[open[1]]; if (a.k === b.k) { a.ok = b.ok = true; open = []; left--; S.burst(cx(i), cy(i), '#f2b84b', 8); sfx('ok'); if (left <= 0) S.win(); } else lock = .65; }
+        break; }
+      cards.forEach((cd, i) => { cd.f += ((cd.up || cd.ok ? 1 : 0) - cd.f) * Math.min(1, S.dt * 14); const sx = Math.abs(cd.f * 2 - 1), face = cd.f > .5, x = cx(i), y = cy(i);
+        g.save(); g.translate(x, y); g.scale(Math.max(.04, sx), 1);
+        g.fillStyle = face ? (cd.ok ? '#3d5a3a' : '#e9dcc0') : '#6b4c34'; g.strokeStyle = T_LINE; g.lineWidth = 2; rr(g, -cw / 2, -ch / 2, cw, ch, 8); g.fill(); g.stroke();
+        if (face) tDraw(g, cd.k, 0, 0, Math.min(cw, ch) - 14, { c: 1 }); else { g.strokeStyle = 'rgba(255,225,170,.35)'; g.lineWidth = 2; rr(g, -cw / 2 + 6, -ch / 2 + 6, cw - 12, ch - 12, 5); g.stroke(); g.fillStyle = 'rgba(255,225,170,.5)'; g.font = '700 22px ' + FONT_BODY; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('？', 0, 1); }
+        g.restore(); });
+    }, hint() { if (lock > 0) return []; let a = -1, b = -1;
+        if (open.length === 1) { a = open[0]; b = cards.findIndex((cd, i) => i !== a && !cd.ok && cd.k === cards[a].k); return [{ x: cx(b), y: cy(b), d: 1 }, { x: cx(b), y: cy(b), d: 0 }]; }
+        a = cards.findIndex(cd => !cd.ok && !cd.up); return a < 0 ? [] : [{ x: cx(a), y: cy(a), d: 1 }, { x: cx(a), y: cy(a), d: 0 }]; } };
+  },
+  // 拖曳：把東西拖到該放的地方。into：全部放進同一個容器；slots：一格放一個（曬架的鉤子、竹竿、書架）；sort：照種類放進對的籃子
+  drag(S, c) {
+    const n = (c.n || 5) + (S.heavy ? 2 : 0), kinds = c.items || [c.item], W = S.W, GY = S.GY, mode = c.mode || 'into', isz = c.isz || 50;
+    const slots = [], bins = []; let held = -1, placed = 0, bounce = 0;
+    if (mode === 'slots') { const m = n; for (let i = 0; i < m; i++) slots.push({ x: W * .5 + (i - (m - 1) / 2) * Math.min(58, (W - 60) / m), y: c.sy || 62, used: false }); }
+    if (mode === 'sort') kinds.forEach((k, i) => bins.push({ k, x: W * (.5 + (i - (kinds.length - 1) / 2) * .27), y: 66 }));
+    const its = []; for (let i = 0; i < n; i++) { const k = mode === 'sort' ? i % kinds.length : rint(0, kinds.length - 1);
+      const hx = mode === 'into' ? W * (.12 + .5 * ((i % 4) + rnd(.1, .6)) / 4) : W * (.1 + .8 * (i + rnd(.2, .8)) / n), hy = mode === 'into' ? GY - 6 - Math.floor(i / 4) * 54 - rnd(0, 8) : GY + 12 - (mode === 'slots' ? rnd(0, 8) : rnd(0, 26));
+      its.push({ k: kinds[k], ki: k, x: hx, y: hy, hx, hy, done: false, sl: -1 }); }
+    const tx = W * .82, ty = GY + 6;
+    return { frame() {
+      const g = S.g, p = S.p; tBg(S, c.bg || 'wood', true); bounce = Math.max(0, bounce - S.dt * 4);
+      if (mode === 'into') { if (c.target) tDraw(g, c.target, tx, ty, c.th || 104, { sy: 1 + bounce * .06 }); }
+      else if (mode === 'slots') { if (c.target) tDraw(g, c.target, W / 2, c.ty || 118, c.th || 112); else { g.strokeStyle = '#8a6a44'; g.lineWidth = 6; g.lineCap = 'round'; g.beginPath(); g.moveTo(26, (c.sy || 62) - (c.lineDy || 8)); g.lineTo(W - 26, (c.sy || 62) - (c.lineDy || 8)); g.stroke(); if (c.shelf) { g.beginPath(); g.moveTo(26, (c.sy || 62) + 62); g.lineTo(W - 26, (c.sy || 62) + 62); g.stroke(); } }
+        for (const s of slots) if (!s.used) { g.strokeStyle = 'rgba(255,255,255,' + (.25 + .15 * Math.sin(S.t * 5)) + ')'; g.lineWidth = 2; g.setLineDash([4, 5]); g.beginPath(); g.arc(s.x, s.y + (c.slotDy || 20), 17, 0, 6.2832); g.stroke(); g.setLineDash([]); } }
+      else for (const b of bins) { g.fillStyle = '#6b4c34'; g.strokeStyle = T_LINE; g.lineWidth = 2; rr(g, b.x - 44, b.y - 30, 88, 60, 10); g.fill(); g.stroke(); g.fillStyle = 'rgba(0,0,0,.25)'; rr(g, b.x - 37, b.y - 23, 74, 46, 7); g.fill(); tDraw(g, b.k, b.x, b.y, 38, { c: 1, a: .45 }); }
+      if (p.jd && held < 0 && !S.over) { let bd = 40; its.forEach((it, i) => { if (it.done) return; const d = Math.hypot(p.x - it.x, p.y - (it.y - isz * .45)); if (d < bd) { bd = d; held = i; } }); if (held >= 0) sfx('click'); }
+      if (held >= 0) { const it = its[held]; it.x = p.x; it.y = p.y + isz * .45;
+        if (!p.down) { let ok = false;
+          if (mode === 'into' && Math.hypot(p.x - tx, p.y - (ty - 50)) < 70) { ok = true; bounce = 1; }
+          else if (mode === 'slots') { let bs = -1, bd = 46; slots.forEach((s, i) => { const d = Math.hypot(p.x - s.x, p.y - (s.y + 20)); if (!s.used && d < bd) { bd = d; bs = i; } }); if (bs >= 0) { ok = true; slots[bs].used = true; it.sl = bs; it.x = slots[bs].x; it.y = slots[bs].y + (c.hang || isz); } }
+          else if (mode === 'sort') { const b = bins.find(b => Math.abs(p.x - b.x) < 48 && Math.abs(p.y - b.y) < 44); if (b) { if (b.k === it.k) { ok = true; it.x = b.x + rnd(-18, 18); it.y = b.y + 16 + rnd(-4, 6); } else { S.shake = .6; sfx('wrong'); } } }
+          if (ok) { it.done = true; placed++; sfx('ok'); S.burst(it.x, it.y - 20, '#f2d9a0', 6); if (placed >= n) S.win(); } else { it.x = it.hx; it.y = it.hy; }
+          held = -1; } }
+      its.forEach((it, i) => { if (it.done && mode === 'into') return; if (i !== held) tDraw(g, it.k, it.x, it.y, it.done && mode === 'sort' ? isz * .7 : isz, c.top ? { c: 0 } : null); });
+      if (held >= 0) { const it = its[held]; tDraw(g, it.k, it.x, it.y, isz * 1.12); }
+      tPips(S, n, placed);
+    }, hint() { const i = its.findIndex(it => !it.done); if (i < 0) return []; const it = its[i]; let x = tx, y = ty - 50;
+        if (mode === 'slots') { const s = slots.find(s => !s.used); x = s.x; y = s.y + 20; } else if (mode === 'sort') { x = bins[it.ki].x; y = bins[it.ki].y; }
+        return [{ x: it.hx, y: it.hy - isz * .45, d: 1 }, { x: (it.hx + x) / 2, y: (it.hy + y) / 2, d: 1 }, { x, y, d: 1 }, { x, y, d: 0 }]; } };
+  },
+  // 擦拭：手指按著來回抹，把髒的地方抹掉。strokes：來回磨（磨刀）
+  rub(S, c) {
+    const W = S.W, GY = S.GY, cx = W / 2, n = S.heavy ? 16 : 10, ps = []; let prog = 0;
+    const strokes = c.kind === 'strokes', need = S.heavy ? 2600 : 1500;
+    const area = c.wide ? [34, 66, W - 68, GY - 62] : c.area || [cx - 56, GY - 106, 112, 88];
+    if (!strokes) for (let i = 0; i < n; i++) ps.push({ x: area[0] + area[2] * ((i % 5) + rnd(.15, .85)) / 5, y: area[1] + area[3] * (Math.floor(i / 5) + rnd(.15, .85)) / Math.ceil(n / 5), hp: 1, r: c.wide ? rnd(13, 19) : rnd(11, 15), a: rnd(0, 6.28) });
+    return { frame() {
+      const g = S.g, p = S.p, mv = Math.hypot(p.x - p.px, p.y - p.py); tBg(S, c.bg || 'wood', !!c.wide);
+      if (c.obj) tDraw(g, c.obj, cx, GY + 6, c.oh || 132);
+      if (strokes) { const on = p.down && Math.abs(p.y - (GY - 46)) < 60 && Math.abs(p.x - cx) < 130; if (on && !S.over) { prog += mv; if (mv > 3 && Math.random() < .5) S.burst(p.x, GY - 50, '#ffd27a', 1, 120); if (Math.floor(prog / 180) !== Math.floor((prog - mv) / 180)) sfx('click'); }
+        tDraw(g, c.tool, on ? p.x : cx + Math.sin(S.t * 2) * 40, GY - 44, 110, { c: 1, rot: -.25 }); tBar(S, prog / need); if (prog >= need) S.win(); return; }
+      let left = 0;
+      for (const d of ps) { if (d.hp <= 0) continue; left++;
+        if (p.down && mv > 0 && Math.hypot(p.x - d.x, p.y - d.y) < d.r + 16 && !S.over) { d.hp -= mv / (S.heavy ? 80 : 64); if (d.hp <= 0) { S.burst(d.x, d.y, c.kind === 'leaves' ? '#d98a3a' : '#fff6d8', 5, 110); sfx('click'); } }
+        if (c.kind === 'leaves') tDraw(g, 's_leaves', d.x, d.y, 44, { c: 1, rot: d.a, a: .35 + .65 * d.hp });
+        else { g.fillStyle = c.kind === 'tarnish' ? 'rgba(30,32,40,' + (.62 * d.hp) + ')' : 'rgba(92,64,36,' + (.9 * d.hp) + ')'; g.beginPath(); g.ellipse(d.x, d.y, d.r, d.r * .78, d.a, 0, 6.2832); g.fill(); } }
+      if (c.tool) tDraw(g, c.tool, p.x + 8, p.y + 4, 62, { c: 1, rot: p.down ? Math.sin(S.t * 22) * .12 : 0, a: p.down ? 1 : .85 });
+      tBar(S, 1 - left / ps.length); if (!left) S.win();
+    }, hint() { if (strokes) return [{ x: cx + Math.sin(S.t * 9) * 100, y: GY - 46, d: 1 }]; const d = ps.find(d => d.hp > 0); return d ? [{ x: d.x + Math.sin(S.t * 30) * 14, y: d.y + Math.cos(S.t * 23) * 8, d: 1 }] : []; } };
+  },
+  // 沿線畫：手指按著，照順序劃過每一個點
+  trace(S, c) {
+    const W = S.W, H = S.H, GY = S.GY, strokes = []; let si = 0, pi = 0;
+    const L = (x0, y0, x1, y1, n, fn) => { const a = []; for (let i = 0; i <= n; i++) { const t = i / n; a.push([x0 + (x1 - x0) * t, y0 + (y1 - y0) * t + (fn ? fn(t) : 0)]); } return a; };
+    const k = c.kind, cx = W / 2;
+    if (k === 'cut') { const ph = rnd(0, 6); strokes.push(L(W * .14, H * .56, W * .86, H * .56, 12, t => Math.sin(t * 6.3 + ph) * 22)); if (S.heavy) strokes.push(L(W * .14, H * .8, W * .86, H * .8, 12, t => Math.cos(t * 6.3 + ph) * 12)); }
+    else if (k === 'write') {   // 寫一個「大」字（長任務寫「天」）：橫、撇、捺
+      const y0 = 62; strokes.push(L(cx - 40, y0 + 34, cx + 40, y0 + 34, 4)); if (S.heavy) strokes.unshift(L(cx - 30, y0 + 10, cx + 30, y0 + 10, 3));
+      strokes.push(L(cx, y0 + (S.heavy ? 10 : 4), cx, y0 + 96, 5).map((p, i, a) => [cx - 38 * Math.pow(i / (a.length - 1), 1.6), p[1]]));
+      strokes.push(L(cx, y0 + 38, cx, y0 + 96, 4).map((p, i, a) => [cx + 2 + 38 * Math.pow(i / (a.length - 1), 1.5), p[1]])); }
+    else if (k === 'stitch') { const m = S.heavy ? 9 : 6, a = []; for (let i = 0; i <= m; i++) a.push([cx - 84 + 168 * i / m, H * .56 + (i % 2 ? 30 : -30)]); strokes.push(a); }
+    else if (k === 'reap') { strokes.push(L(W * .1, GY - 20, W * .9, GY - 20, S.heavy ? 8 : 6)); }
+    else if (k === 'trim') { strokes.push(L(W * .1, GY - 96, W * .9, GY - 96, S.heavy ? 12 : 9)); }
+    const all = () => strokes.reduce((s, a) => s + a.length, 0), doneN = () => strokes.slice(0, si).reduce((s, a) => s + a.length, 0) + pi;
+    return { frame() {
+      const g = S.g, p = S.p; tBg(S, c.bg || (k === 'reap' || k === 'trim' ? 'grass' : 'wood'), k === 'stitch');
+      // 場景
+      if (k === 'cut') { const gap = S.over ? 10 : 0; g.fillStyle = c.col || '#3f6fa8'; g.strokeStyle = T_LINE; g.lineWidth = 2; rr(g, W * .1, 40 - gap, W * .8, H - 62 + gap * 2, 8); g.fill(); g.stroke(); g.fillStyle = 'rgba(255,255,255,.12)'; for (let i = 0; i < 7; i++) g.fillRect(W * .1 + 12 + i * (W * .8 - 24) / 7, 46, 6, H - 74); }
+      else if (k === 'write') { g.fillStyle = '#c4382c'; g.strokeStyle = '#7a1f18'; g.lineWidth = 3; g.save(); g.translate(cx, H / 2 + 8); g.rotate(Math.PI / 4); rr(g, -60, -60, 120, 120, 6); g.fill(); g.stroke(); g.strokeStyle = 'rgba(255,215,120,.6)'; g.lineWidth = 2; rr(g, -53, -53, 106, 106, 4); g.stroke(); g.restore(); tDraw(g, 's_inkstone', W - 58, GY + 20, 50); }
+      else if (k === 'stitch') { g.strokeStyle = '#c9b78a'; g.lineWidth = 2; for (let x = 20; x < W; x += 22) { if (Math.abs(x - cx) < 80) { g.beginPath(); g.moveTo(x, 36); g.lineTo(x, H * .56 - 36); g.moveTo(x, H * .56 + 36); g.lineTo(x, H - 8); g.stroke(); } else { g.beginPath(); g.moveTo(x, 36); g.lineTo(x, H - 8); g.stroke(); } } for (let y = 44; y < H; y += 22) { g.beginPath(); if (Math.abs(y - H * .56) < 36) { g.moveTo(8, y); g.lineTo(cx - 84, y); g.moveTo(cx + 84, y); g.lineTo(W - 8, y); } else { g.moveTo(8, y); g.lineTo(W - 8, y); } g.stroke(); } }
+      else if (k === 'reap') { const a = strokes[0]; for (let i = 0; i < a.length; i++) { if (i < pi || si > 0) tDraw(g, c.out, a[i][0], GY + 12, 44, { rot: 1.2, c: 1 }); else tDraw(g, c.item, a[i][0], GY + 8, 96); } }
+      else if (k === 'trim') { const a = strokes[0]; g.fillStyle = '#2f6a3c'; g.strokeStyle = T_LINE; g.lineWidth = 2.5; rr(g, W * .06, GY - 96, W * .88, 104, 14); g.fill(); g.stroke(); g.fillStyle = '#3d8a4c'; for (let i = 0; i < 26; i++) circ(g, W * .08 + (i * 53) % (W * .84), GY - 82 + (i * 31) % 80, 7); for (let i = (si > 0 ? a.length : pi); i < a.length; i++) { g.fillStyle = '#3d8a4c'; g.strokeStyle = T_LINE; g.lineWidth = 2; g.beginPath(); g.moveTo(a[i][0] - 16, a[i][1] + 2); g.quadraticCurveTo(a[i][0] - 8 + (i % 3) * 5, a[i][1] - 34 - (i % 4) * 7, a[i][0] + 16, a[i][1] + 2); g.fill(); g.stroke(); } }
+      // 線
+      if (si < strokes.length && !S.over) { const a = strokes[si]; while (p.down && pi < a.length && Math.hypot(p.x - a[pi][0], p.y - a[pi][1]) < 24) { pi++; if (pi % 2 === 0) sfx('click'); if (k === 'reap' || k === 'trim') S.burst(a[pi - 1][0], a[pi - 1][1], k === 'trim' ? '#3d8a4c' : '#e8c35a', 5, 120); }
+        if (pi >= a.length) { si++; pi = 0; if (si >= strokes.length) S.win(); else sfx('ok'); } }
+      strokes.forEach((a, s) => { const nd = s < si ? a.length : s === si ? pi : 0;
+        if (k !== 'reap' && k !== 'trim' && nd > 1) { g.strokeStyle = k === 'write' ? '#1a1410' : k === 'stitch' ? '#f0e2b8' : 'rgba(10,14,20,.85)'; g.lineWidth = k === 'write' ? 10 : k === 'stitch' ? 4 : 3; g.lineCap = 'round'; g.lineJoin = 'round'; g.beginPath(); a.slice(0, nd).forEach((q, i) => i ? g.lineTo(q[0], q[1]) : g.moveTo(q[0], q[1])); g.stroke(); }
+        if (s >= si) for (let i = nd; i < a.length; i++) { const nx = s === si && i === nd; g.fillStyle = nx ? 'rgba(255,220,130,' + (.65 + .35 * Math.sin(S.t * 7)) + ')' : 'rgba(255,255,255,' + (s === si ? .5 : .2) + ')'; circ(g, a[i][0], a[i][1], nx ? 8 : 4); } });
+      const a = strokes[Math.min(si, strokes.length - 1)], q = p.down ? [p.x, p.y] : a[Math.min(pi, a.length - 1)];
+      tDraw(g, c.tool, q[0] + (c.tdx || 22), q[1] + (c.tdy || -22), 70, { c: 1, rot: c.trot || 0 });
+      tBar(S, doneN() / all());
+    }, hint() { if (si >= strokes.length) return []; const a = strokes[si]; return a.slice(pi, pi + 3).map(q => ({ x: q[0], y: q[1], d: 1 })); } };
+  },
+  // 接東西：籃子跟著手指左右移動，接住掉下來的
+  catch(S, c) {
+    const need = S.heavy ? 10 : 6, W = S.W, GY = S.GY, drops = []; let got = 0, bx = W / 2, tm = .4;
+    return { frame() {
+      const g = S.g; tBg(S, 'grass');
+      g.fillStyle = '#2f6a3c'; g.strokeStyle = T_LINE; g.lineWidth = 2.5; g.beginPath(); for (let i = 0; i <= 8; i++) { const x = -20 + (W + 40) * i / 8; g.ellipse(x, 14, 44, 30 + (i % 3) * 6, 0, 0, 6.2832); } g.fill(); g.stroke();
+      for (let i = 0; i < 7; i++) tDraw(g, c.item, 30 + (W - 60) * i / 6, 40 + (i % 2) * 10, 24, { c: 1 });
+      bx += (clamp(S.p.x, 34, W - 34) - bx) * Math.min(1, S.dt * 18);
+      tm -= S.dt; if (tm <= 0 && !S.over) { tm = rnd(.55, .9); drops.push({ x: rnd(36, W - 36), y: 46, v: rnd(105, 150), r: rnd(0, 6) }); }
+      for (let i = drops.length - 1; i >= 0; i--) { const d = drops[i]; d.y += d.v * S.dt; d.r += S.dt * 3;
+        if (d.y > GY - 44 && d.y < GY - 8 && Math.abs(d.x - bx) < 34 && !S.over) { drops.splice(i, 1); got++; sfx('click'); S.pop(bx, GY - 70, got + ' / ' + need); if (got >= need) S.win(); continue; }
+        if (d.y > S.H + 20) { drops.splice(i, 1); continue; }
+        tDraw(g, c.item, d.x, d.y, 34, { c: 1, rot: d.r }); }
+      tDraw(g, c.basket, bx, GY + 14, 70); tPips(S, need, got);
+    }, hint() { let lo = null; for (const d of drops) if (d.y < S.GY - 20 && (!lo || d.y > lo.y)) lo = d; return [{ x: lo ? lo.x : W / 2, y: GY - 20, d: 1 }]; } };
+  },
+  // 控制火候：按住往上、放開往下，讓指針留在會飄的綠色區裡，直到集滿
+  balance(S, c) {
+    const need = S.heavy ? 9 : 5.5, zw = .32; let pos = .08, vel = 0, prog = 0, ph = rnd(0, 6.28), zs = .3;
+    return { frame() {
+      const g = S.g, W = S.W, H = S.H, GY = S.GY, k = c.kind || 'heat', x = W * .4; tBg(S, c.bg || (k === 'heat' ? 'wood' : 'water')); ph += S.dt;
+      zs = (1 - zw) * (.5 + .46 * Math.sin(ph * .8) * Math.cos(ph * .33 + 1));
+      vel += (S.p.down ? 1.15 : -1.15) * S.dt; vel *= Math.pow(.14, S.dt); pos += vel * S.dt; if (pos < 0) { pos = 0; vel = 0; } if (pos > 1) { pos = 1; vel = 0; }
+      const inz = pos >= zs && pos <= zs + zw; if (!S.over) prog = clamp(prog + (inz ? S.dt / need : -S.dt / (need * 2.5)), 0, 1); if (prog >= 1) S.win();
+      if (k === 'heat') { tDraw(g, c.obj, x, GY + 6, c.oh || 128); const fl = 6 + pos * 22; g.fillStyle = 'rgba(255,150,60,' + (.25 + pos * .4) + ')'; g.beginPath(); g.ellipse(x, GY - 6, 40, fl * .5, 0, 0, 6.2832); g.fill();
+        if (c.a) tDraw(g, c.a, x + 108, GY + 4, 52, { a: 1 - prog }); if (c.b) tDraw(g, c.b, x + 108, GY + 4, 52, { a: c.a ? prog : .3 + .7 * prog });
+        if (inz) for (let i = 0; i < 2; i++) { g.fillStyle = 'rgba(255,255,255,.22)'; circ(g, x - 14 + i * 26 + Math.sin(S.t * 3 + i) * 4, GY - 126 - ((S.t * 34 + i * 20) % 30), 6); } }
+      else if (k === 'fish') { const fy = GY - 20 + Math.sin(S.t * 3) * 6, fx = x + Math.sin(S.t * 1.7) * 60 * (1 - prog); g.strokeStyle = 'rgba(240,240,230,.8)'; g.lineWidth = 1.5; g.beginPath(); g.moveTo(x - 60, 0); g.lineTo(x, 60 + pos * 10); g.stroke(); tDraw(g, c.obj, x, 96 + pos * 10 + Math.sin(S.t * 5) * (inz ? 2 : 6), 56); g.globalAlpha = .55 + .45 * prog; tDraw(g, c.b, fx, fy - prog * 60, 54 + prog * 24, { c: 1, flip: Math.cos(S.t * 1.7) < 0 }); g.globalAlpha = 1; }
+      else { g.strokeStyle = '#c9a56a'; g.lineWidth = 4; g.beginPath(); g.moveTo(x, 0); g.lineTo(x, GY - 96 - prog * 30 + 40); g.stroke(); g.save(); g.beginPath(); g.rect(0, 0, W, GY + 2 + (1 - prog) * 6); g.clip(); tDraw(g, c.obj, x + Math.sin(S.t * 4) * (inz ? 1 : 4), GY + 96 - prog * 96, 128); g.restore(); g.strokeStyle = 'rgba(210,240,250,.5)'; g.lineWidth = 3; g.beginPath(); g.ellipse(x, GY + 4, 70, 9, 0, 0, 6.2832); g.stroke(); }
+      // 右邊的量表
+      const gx = W - 54, gy = 40, gh = H - 74; g.fillStyle = 'rgba(0,0,0,.5)'; rr(g, gx, gy, 20, gh, 10); g.fill();
+      g.fillStyle = '#5fae5a'; rr(g, gx, gy + gh * (1 - zs - zw), 20, gh * zw, 8); g.fill();
+      g.fillStyle = inz ? '#fff' : '#f08a7e'; g.strokeStyle = T_LINE; g.lineWidth = 2; rr(g, gx - 6, gy + gh * (1 - pos) - 5, 32, 10, 5); g.fill(); g.stroke();
+      g.fillStyle = 'rgba(255,255,255,.75)'; g.font = '600 11px ' + FONT_BODY; g.textAlign = 'center'; g.fillText(c.label || '力道', gx + 10, gy - 6);
+      tBar(S, prog);
+    }, hint() { return [{ x: S.W / 2, y: S.H / 2, d: pos < zs + zw * .5 ? 1 : 0 }]; } };
+  },
+  // 澆灌：手指按著，把水壺移到每一株上面，澆到滿。glow：加油點燈（只有一個目標，越加越亮）
+  pour(S, c) {
+    const n = c.n || 4, W = S.W, GY = S.GY, lv = new Array(n).fill(0), dur = (c.glow ? 3.2 : 1.15) * (S.heavy ? 1.5 : 1);
+    const tx = i => W * (.5 + (i - (n - 1) / 2) * Math.min(.22, .84 / n));
+    S.p.x = W * .14; S.p.y = 78;   // 一開始水壺放在左上角，不要擋住東西
+    return { frame() {
+      const g = S.g, p = S.p; tBg(S, c.bg || 'soil'); let full = 0;
+      for (let i = 0; i < n; i++) { const x = tx(i), on = p.down && Math.abs(p.x - x) < 34 && p.y < GY - 20 && !S.over;
+        if (on && lv[i] < 1) { lv[i] = Math.min(1, lv[i] + S.dt / dur); if (Math.random() < .6) S.fx.push({ x: p.x - 22 + rnd(-4, 4), y: p.y + 18, vx: rnd(-10, 10), vy: 120, l: .4, c: c.glow ? '#e6b04a' : '#8fd0ee', r: 2.4 }); if (lv[i] >= 1) { sfx('ok'); S.burst(x, GY - 50, '#bfe8a8', 8); } }
+        if (lv[i] >= 1) full++;
+        if (c.glow) { const sz = c.oh || 130; if (lv[i] > 0) { const gr = g.createRadialGradient(x, GY - sz * .5, 6, x, GY - sz * .5, sz * (.5 + lv[i] * .7)); gr.addColorStop(0, 'rgba(255,214,120,' + (.75 * lv[i]) + ')'); gr.addColorStop(1, 'rgba(255,214,120,0)'); g.fillStyle = gr; g.fillRect(x - sz * 1.3, GY - sz * 1.7, sz * 2.6, sz * 2.4); } tDraw(g, c.a, x, GY + 6, sz, { a: .5 + .5 * lv[i] }); }
+        else { tDraw(g, c.a, x, GY + 6, c.ah || 50, { a: 1 - lv[i] }); tDraw(g, c.b, x, GY + 6, (c.bh || 64) * (.55 + .45 * lv[i]), { a: lv[i] }); }
+        g.fillStyle = 'rgba(0,0,0,.45)'; rr(g, x - 20, GY + 12, 40, 6, 3); g.fill(); g.fillStyle = c.glow ? '#e6b04a' : '#6fc1e8'; rr(g, x - 20, GY + 12, Math.max(4, 40 * lv[i]), 6, 3); g.fill(); }
+      tDraw(g, c.can, p.x + 16, p.y + 8, c.ch || 68, { c: 1, rot: p.down ? -.5 : 0 });
+      if (full >= n) S.win();
+    }, hint() { const i = lv.findIndex(v => v < 1); return i < 0 ? [] : [{ x: tx(i), y: GY - 110, d: 1 }]; } };
+  },
+  // 餵食：動物會走來走去，點到牠就餵到了。still：站著不動；swim：水裡游（照前進的方向轉）
+  feed(S, c) {
+    const W = S.W, GY = S.GY, waves = S.heavy ? 2 : 1, sz = c.h || 62; let wv = 0, an = [], left = 0;
+    const top = c.swim ? 50 : GY - 60, bot = c.swim ? S.H - 30 : GY + 14;
+    const spawn = () => { an = []; const n = c.n || 5; left = n; for (let i = 0; i < n; i++) { const a = rnd(0, 6.28), v = c.still ? 0 : rnd(34, 60); an.push({ x: c.still ? W * (.5 + (i - (n - 1) / 2) * .28) : rnd(50, W - 50), y: c.still ? GY + 10 : rnd(top, bot), vx: Math.cos(a) * v, vy: Math.sin(a) * v * (c.swim ? 1 : .3), fed: 0, t: rnd(0, 6) }); } };
+    spawn();
+    return { frame() {
+      const g = S.g, p = S.p; tBg(S, c.bg || (c.swim ? 'water' : 'grass'), !c.still);
+      if (p.jd && !S.over) { let bi = -1, bd = sz * .6 + 12; an.forEach((a, i) => { if (a.fed) return; const d = Math.hypot(p.x - a.x, p.y - (a.y - (c.swim ? 0 : sz * .45))); if (d < bd) { bd = d; bi = i; } });
+        if (bi >= 0) { const a = an[bi]; a.fed = 1; left--; sfx('click'); S.pop(a.x, a.y - sz, '♥', '#ff8fa3'); if (c.food) S.fx.push({ x: a.x, y: a.y - sz - 10, vx: 0, vy: 60, l: .35, c: '#e8c35a', r: 4 }); else S.burst(a.x, a.y - sz * .3, '#e8c35a', 6, 90);
+          if (left <= 0) { wv++; if (wv >= waves) S.win(); else { sfx('ok'); setTimeout(() => { if (!S.over) spawn(); }, 500); } } } }
+      an.slice().sort((a, b) => a.y - b.y).forEach(a => { a.t += S.dt;
+        if (!a.fed && !c.still) { a.x += a.vx * S.dt; a.y += a.vy * S.dt; if (a.x < 40 || a.x > W - 40) a.vx *= -1; if (a.y < top || a.y > bot) a.vy *= -1; a.x = clamp(a.x, 40, W - 40); a.y = clamp(a.y, top, bot); if (Math.random() < S.dt * .5) { const q = rnd(0, 6.28), v = Math.hypot(a.vx, a.vy); a.vx = Math.cos(q) * v; a.vy = Math.sin(q) * v * (c.swim ? 1 : .3); } }
+        const hop = a.fed ? Math.abs(Math.sin(a.t * 9)) * 5 : 0;
+        if (c.swim) tDraw(g, c.animal, a.x, a.y, sz, { c: 1, rot: Math.atan2(a.vy, a.vx) + Math.PI / 2 + Math.sin(a.t * 6) * .12, a: a.fed ? .7 : 1 });
+        else tDraw(g, c.animal, a.x, a.y - hop, sz, { flip: c.faceL ? a.vx > 0 : a.vx < 0 });
+        if (a.fed && c.food && !c.swim) tDraw(g, c.food, a.x + sz * .3, a.y - 2, 22, { a: .9 });
+        if (!a.fed) { g.strokeStyle = 'rgba(242,184,75,' + (.5 + .3 * Math.sin(S.t * 6)) + ')'; g.lineWidth = 2; g.beginPath(); g.ellipse(a.x, c.swim ? a.y : a.y + 2, sz * .42, c.swim ? sz * .42 : 7, 0, 0, 6.2832); g.stroke(); } });
+      tPips(S, c.n || 5, (c.n || 5) - left);
+    }, hint() { const a = an.find(a => !a.fed); if (!a) return []; const y = a.y - (c.swim ? 0 : sz * .45); return [{ x: a.x, y, d: 1 }, { x: a.x, y, d: 0 }]; } };
+  },
+  // 趕動物：手指按著當牧羊犬，羊會躲開手指；把牠們全部趕進右邊的圈裡
+  herd(S, c) {
+    const W = S.W, GY = S.GY, n = (c.n || 5) + (S.heavy ? 2 : 0), penX = W - 96, sz = 52, top = GY - 78, bot = GY + 16, an = []; let inN = 0;
+    for (let i = 0; i < n; i++) an.push({ x: rnd(40, penX - 80), y: rnd(top, bot), vx: 0, vy: 0, in: false, t: rnd(0, 6) });
+    return { frame() {
+      const g = S.g, p = S.p; tBg(S, 'grass', true);
+      g.strokeStyle = '#8a6a44'; g.lineWidth = 5; g.lineCap = 'round'; for (const yy of [top - 26, top - 12]) { g.beginPath(); g.moveTo(penX, yy); g.lineTo(W - 8, yy); g.stroke(); } for (let x = penX; x <= W - 8; x += 22) { g.beginPath(); g.moveTo(x, top - 34); g.lineTo(x, top - 4); g.stroke(); }
+      g.beginPath(); g.moveTo(penX, top - 30); g.lineTo(penX, top + 14); g.moveTo(penX, bot - 22); g.lineTo(penX, S.H); g.stroke();
+      g.fillStyle = 'rgba(255,230,150,.1)'; g.fillRect(penX, top - 4, W - penX, S.H);
+      inN = 0;
+      for (const a of an) { a.t += S.dt;
+        if (a.in) { inN++; a.vx *= .9; a.vy *= .9; }
+        else { if (p.down) { const dx = a.x - p.x, dy = a.y - 20 - p.y, d = Math.hypot(dx, dy); if (d < 78 && d > 1) { a.vx += dx / d * 520 * S.dt; a.vy += dy / d * 300 * S.dt; } }
+          a.vx += Math.sin(a.t * 1.3) * 14 * S.dt; a.vx *= Math.pow(.2, S.dt); a.vy *= Math.pow(.2, S.dt); }
+        a.x += a.vx * S.dt; a.y += a.vy * S.dt; a.y = clamp(a.y, top, bot);
+        if (!a.in && a.x > penX + 14) { a.in = true; sfx('click'); S.pop(a.x, a.y - 60, '♥', '#ff8fa3'); }
+        a.x = clamp(a.x, 30, a.in ? W - 26 : W - 30); if (a.in) a.x = Math.max(a.x, penX + 20); }
+      an.slice().sort((a, b) => a.y - b.y).forEach(a => tDraw(g, c.animal, a.x, a.y - Math.abs(Math.sin(a.t * 8)) * (Math.abs(a.vx) > 12 ? 4 : 0), sz, { flip: a.vx > 4 }));
+      if (p.down) { g.fillStyle = 'rgba(255,255,255,.25)'; circ(g, p.x, p.y, 16); }
+      tPips(S, n, inN); if (inN >= n) S.win();
+    }, hint() { const a = an.filter(a => !a.in).sort((x, y) => x.x - y.x)[0]; return a ? [{ x: a.x - 42, y: a.y - 20, d: 1 }] : []; } };
+  }
+};
+
+// ---------- 每個任務用哪個玩法、哪些圖 ----------
+// 同名的任務（不同地圖的打水、釣魚、打鐵…）共用同一個設定
+const TASK_SKIN = {
+  // 田園村
+  '劈柴': { m: 'hit', tool: 'f_axe', target: 'f_log', out: 'f_split', items: 3, tip: '一下一下把木頭劈開' },
+  '點燈': { m: 'memory', item: 'f_lantern', n: 5, bg: 'wood' },
+  '磨麵粉': { m: 'crank', base: 'v2i_mill', out: 'v2i_flour', mode: 'pile', bg: 'wood', tip: '手指繞著把手轉圈，把麥子磨成麵粉' },
+  '整理貨物': { m: 'pairs', icons: ['f_pumpkin', 'f_corn', 'f_carrot', 'f_jar', 'f_egg', 'f_sheaf'], tip: '翻開箱子，把一樣的貨物配成對' },
+  '烤麵包': { m: 'balance', obj: 'v2i_oven', a: 'f_dough', b: 'f_bread', label: '火候', tip: '按住加溫、放開降溫，讓火候留在綠色區' },
+  '打水': { m: 'crank', base: 'v2o_well', mover: 'f_bucket', mode: 'rise', tip: '手指繞著把手轉圈，把水桶搖上來' },
+  '收成': { m: 'trace', kind: 'reap', tool: 'f_sickle', item: 'f_wheat', out: 'f_sheaf', tdx: 20, tdy: -6, tip: '按著鐮刀，一路割過每一叢麥子' },
+  '澆水': { m: 'pour', can: 'f_can', a: 'f_sprout', b: 'm_cabbage', n: 4, tip: '按著水壺，移到每一株上面澆到滿' },
+  '釣魚': { m: 'balance', kind: 'fish', obj: 'f_float', b: 'f_fish', label: '收線', tip: '按住收線、放開放線，讓力道留在綠色區' },
+  '餵雞': { m: 'feed', animal: 'v2o_hen', n: 5, h: 50, tip: '雞會亂跑，每一隻都點到、餵到' },
+  '撿雞蛋': { m: 'drag', mode: 'into', item: 'f_egg', n: 6, target: 'f_basket', isz: 36, bg: 'grass', tip: '把雞蛋一顆一顆拖進籃子' },
+  '打鐵': { m: 'timing', tool: 'f_hammer', target: 'v2i_anvil', item: 'f_iron', tip: '指針進到綠色區再敲' },
+  // 潮聲漁港
+  '秤魚': { m: 'timing', target: 'h2i_scale', item: 'f_fish', th: 112, spark: '#bfe0f0', tip: '秤針進到綠色區再按，把魚秤好' },
+  '搬冰塊': { m: 'hit', tool: 'h_tongs', target: 'h_ice', out: 'h_ice', items: 3, chip: '#cfeaf5', bg: 'stone', tip: '用冰鉤一下一下把冰塊鑿開搬走' },
+  '整理漁具': { m: 'drag', mode: 'sort', items: ['h_hook', 'h_rope', 'h_spool'], n: 6, isz: 42, tip: '把漁具拖進畫著同樣東西的箱子' },
+  '修船': { m: 'timing', tool: 'f_hammer', target: 'h2i_hull', item: 'h_nails', th: 104, tip: '指針進到綠色區再敲，把釘子釘牢' },
+  '點亮燈塔': { m: 'pour', glow: 1, can: 'h2i_drum', a: 'h2i_beacon', n: 1, bg: 'stone', tip: '按著油桶移到燈上面，把油加滿，燈就亮了' },
+  '拉漁網': { m: 'balance', kind: 'pull', obj: 'h_netfish', label: '力道', tip: '按住用力、放開放鬆，讓力道留在綠色區，把網拉上來' },
+  '卸貨': { m: 'drag', mode: 'into', item: 'h2i_crate', n: 5, target: 'h2o_cart', isz: 44, th: 92, bg: 'stone', tip: '把貨箱一個一個拖到推車上' },
+  '曬魚乾': { m: 'drag', mode: 'slots', item: 'h_dried', n: 4, isz: 56, sy: 58, hang: 62, slotDy: 26, bg: 'sand', tip: '把魚一條一條拖到竹竿上掛好' },
+  '補漁網': { m: 'trace', kind: 'stitch', tool: 'h_needle', bg: 'sand', tip: '按著網針，照順序穿過每一個點，把破洞補起來' },
+  '撿貝殼': { m: 'pairs', icons: ['h_scallop', 'h_conch', 'h_star', 'h_crab', 'h_shrimp', 'h_octopus'], tip: '翻開沙堆，把一樣的配成對' },
+  '洗魚箱': { m: 'rub', obj: 'h2i_crate', tool: 'h_brush', kind: 'mud', bg: 'stone', tip: '按著刷子來回刷，把魚箱刷乾淨' },
+  // 燈籠老街
+  '泡茶': { m: 'balance', obj: 'h2i_brazier', b: 's_cup', label: '水溫', oh: 120, tip: '按住加熱、放開降溫，讓水溫留在綠色區' },
+  '裁布': { m: 'trace', kind: 'cut', tool: 's_scissors', tip: '按著剪刀，沿著虛線把布剪開' },
+  '上香': { m: 'memory', item: 's_incense', n: 4, h: 104, bg: 'wood', glow: 'rgba(255,150,90,.6)' },
+  '抓藥': { m: 'pairs', icons: ['s_ginseng', 's_goji', 's_lingzhi', 's_chrys', 's_anise', 's_angelica'], tip: '翻開藥櫃的抽屜，把一樣的藥材配成對' },
+  '蒸包子': { m: 'timing', target: 's_steamer', item: 's_bun', th: 104, spark: '#ffffff', tip: '指針進到綠色區再掀蓋，包子才剛好熟' },
+  '寫春聯': { m: 'trace', kind: 'write', tool: 's_brush', tdx: 20, tdy: -26, tip: '按著毛筆，照順序一筆一筆寫' },
+  '晾布': { m: 'drag', mode: 'slots', items: ['#cloth0', '#cloth1', '#cloth2', '#cloth3'], n: 4, isz: 64, sy: 50, hang: 70, slotDy: 26, bg: 'stone', tip: '把染好的布一塊一塊拖到竹竿上晾' },
+  '掃地': { m: 'rub', tool: 's_broom', kind: 'leaves', bg: 'stone', wide: 1, tip: '按著掃帚來回掃，把落葉掃乾淨' },
+  '收攤': { m: 'drag', mode: 'into', items: ['s_orange', 's_persimmon', 'm_apple', 'f_pumpkin'], n: 6, target: 'h2i_crate', isz: 40, th: 96, tip: '把攤上的水果一個一個拖進箱子' },
+  '餵貓': { m: 'feed', animal: 's_cat', food: 's_driedfish', n: 4, h: 64, bg: 'stone', tip: '貓會跑來跑去，每一隻都點到、餵到' },
+  '掛燈籠': { m: 'timing', kind: 'swing', item: 'f_lantern', bg: 'stone', tip: '燈籠晃到綠色區的時候按下去，把它掛好' },
+  // 月影荒原
+  '整理草料': { m: 'pairs', icons: ['m_hay', 'm_rope', 'm_fork', 'm_horseshoe', 'f_carrot', 'f_bucket'], tip: '翻開箱子，把一樣的東西配成對' },
+  '掃墓': { m: 'rub', obj: 'm_grave', tool: 's_broom', kind: 'leaves', bg: 'grass', oh: 140, tip: '按著掃帚來回掃，把墓碑上的落葉掃掉' },
+  '趕羊': { m: 'herd', animal: 'm_sheep', n: 5, tip: '按著畫面當牧羊犬，把羊全部趕進右邊的圈裡' },
+  '收菜': { m: 'drag', mode: 'into', item: 'm_cabbage', n: 5, target: 'f_basket', isz: 46, bg: 'soil', tip: '把菜一顆一顆拖進籃子' },
+  '煮湯': { m: 'balance', obj: 'm_pot', label: '火候', oh: 112, tip: '按住加火、放開降溫，讓火候留在綠色區' },
+  '祈福': { m: 'memory', item: 'moor_rune', n: 5, bg: 'grass', glow: 'rgba(120,190,255,.7)' },
+  // 霧鐘莊園
+  '修剪樹籬': { m: 'trace', kind: 'trim', tool: 'm_shears', tdx: 18, tdy: -20, tip: '按著園藝剪，沿著樹籬頂端把長出來的全部剪平' },
+  '擦銀器': { m: 'rub', obj: 'm_teapot', tool: 'm_cloth', kind: 'tarnish', oh: 136, tip: '按著抹布來回擦，把銀器擦亮' },
+  '整理書房': { m: 'drag', mode: 'slots', items: ['#book0', '#book1', '#book2', '#book3', '#book4'], n: 5, isz: 58, sy: 44, hang: 60, slotDy: 30, shelf: 1, lineDy: 2, tip: '把書一本一本拖回書架上' },
+  '澆花': { m: 'pour', can: 'f_can', a: 'm_bud', b: 'm_bloom', n: 4, ah: 70, bh: 74, bg: 'wood', tip: '按著水壺，移到每一盆上面澆到開花' },
+  '餵馬': { m: 'feed', animal: 'm_horse', food: 'f_carrot', n: 3, h: 104, still: 1, bg: 'wood', tip: '每一匹馬都點一下，餵牠吃胡蘿蔔' },
+  '烤派': { m: 'balance', obj: 'v2i_oven', b: 'm_pie', label: '火候', tip: '按住加溫、放開降溫，讓火候留在綠色區' },
+  '餵鯉魚': { m: 'feed', animal: 'm_koi', n: 5, h: 66, swim: 1, tip: '鯉魚游來游去，把飼料撒給每一條' },
+  '摘蘋果': { m: 'catch', item: 'm_apple', basket: 'f_basket', tip: '左右移動籃子，接住掉下來的蘋果' },
+  '澆菜': { m: 'pour', can: 'f_can', a: 'f_sprout', b: 'm_cabbage', n: 4, tip: '按著水壺，移到每一株上面澆到滿' },
+  '拔蘿蔔': { m: 'hit', pull: 1, target: 'f_carrot', items: 3, chip: '#6b5236', bg: 'soil', tip: '一下一下把蘿蔔拔出來' },
+  '點蠟燭': { m: 'memory', item: 'm_candle', n: 5, bg: 'wood', flame: [-.12, .98] },
+  '磨刀': { m: 'rub', kind: 'strokes', obj: 'm_whetstone', tool: 'm_knife', oh: 70, tip: '按著刀在磨刀石上來回磨' }
+};
 // ===== 介面 =====
 let toastTimer = 0;
 function toast(msg, ms) { const t = $('toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove('show'), ms || 2600); }
@@ -5737,6 +6461,9 @@ function uiTick(now) {
     // 換場：切換的瞬間蓋一層黑，再淡掉，畫面就不會硬生生跳過去
     const w = $('wipe'); if (w) { w.classList.remove('go'); void w.offsetWidth; w.classList.add('go'); }
   }
+  // 第 49 版：生死簿開著的時候有人死了就重畫；離開遊戲畫面、或狼人變成鬼魂時，把生死簿／下水道的面板關掉
+  if (taskState && taskState.ledger) { if (mode !== 'play') closeTask(); else if (taskState.sig !== ledgerSig()) ledgerFill(); }
+  sewerNav(mode);
   if (mode === 'home') return;
   if (mode === 'lobby' || mode === 'wait' || mode === 'spectate') renderLobby(mode);
   else if (mode === 'intro') renderHud();
@@ -5948,7 +6675,7 @@ function renderHud() {
   }
   const use = $('btnUse'), rep = $('btnReport'), kill = $('btnKill');
   const u = ctxA.use;
-  const ul = u ? (u.k === 'task' ? '工作' : u.k === 'candle' ? '點燃蠟燭' : u.k === 'altar' ? '解除祭壇' : u.k === 'dog' ? '摸摸' : u.cd ? '敲鐘' + Math.ceil(my.bellCd) + '秒' : '敲鐘') : '使用';   // 鐘還在冷卻：顯示剩幾秒
+  const ul = u ? (u.k === 'task' ? '工作' : u.k === 'candle' ? '點燃蠟燭' : u.k === 'altar' ? '解除祭壇' : u.k === 'dog' ? '摸摸' : u.k === 'ledger' ? '生死簿' : u.k === 'sewer' ? '下水道' : u.k === 'sewerOut' ? '爬出來' : u.cd ? '敲鐘' + Math.ceil(my.bellCd) + '秒' : '敲鐘') : '使用';   // 鐘還在冷卻：顯示剩幾秒
   if (changed('useL', ul)) { use.textContent = ul.length > 3 ? ul.slice(0, 2) + '\n' + ul.slice(2) : ul; use.classList.toggle('long', ul.length > 3); }   // 四個字以上分成兩行
   use.disabled = !u || !!u.cd; rep.disabled = !ctxA.body;
   const showKill = my.wolf && !my.dead;
@@ -5991,8 +6718,10 @@ function openTask(ti) {
   $('taskArea').textContent = tk.long ? tk.name + '　第 ' + (k + 1) + ' / ' + tk.steps.length + ' 步' : st.area;
   const box = $('taskBox'); box.textContent = '';
   const done = () => finishTask();
-  ({ mash: tgMash, scatter: tgScatter, hold: tgHold, timing: tgTiming, seq: tgSeq, pairs: tgPairs, balance: tgBalance })[st.type](box, st, done, tk.long);
-  document.body.classList.add('task-open');
+  document.body.classList.add('task-open');   // 先打開面板（畫布要量得到寬度）
+  const sk = TASK_SKIN[st.name];   // 第 51 版：新的任務小遊戲（有場景、有插圖）；沒有設定的才用舊的
+  if (sk && TG[sk.m]) tgRun(box, st, sk, done, tk.long);
+  else ({ mash: tgMash, scatter: tgScatter, hold: tgHold, timing: tgTiming, seq: tgSeq, pairs: tgPairs, balance: tgBalance })[st.type](box, st, done, tk.long);
 }
 function finishTask() {
   if (!taskState || taskState.done || !G) return;
@@ -6011,6 +6740,54 @@ function closeTask() {
   if (taskState && taskState.fx && G && G.ph === 2) fxTaskDone(ME.x, ME.y, taskState.fx === 2);
   if (taskState && taskState.cleanup) taskState.cleanup();
   taskState = null; document.body.classList.remove('task-open');
+}
+// 第 49 版：生死簿——每個人的頭像；死掉（或離開）的人頭像上打一個紅色的叉。開著的時候有人死了會馬上更新
+function ledgerSig() { return G ? G.gn + '|' + G.dd + '|' + G.lf + '|' + G.ro.length : ''; }
+function ledgerFill() {
+  const box = $('taskBox'); box.textContent = '';
+  const gridEl = el('div', 'ledger-grid'); let dead = 0;
+  for (let i = 0; i < G.ro.length; i++) {
+    const gone = G.dd[i] === '1' || G.lf[i] === '1'; if (gone) dead++;
+    const c = el('div', 'ledger-cell' + (gone ? ' dead' : '') + (G.ro[i] === ME.id ? ' me' : ''));
+    const av = el('div', 'ledger-av'); av.appendChild(avatarCanvas(colorIdx(i), false)); c.appendChild(av);
+    c.appendChild(el('b', '', nameIdx(i)));
+    gridEl.appendChild(c);
+  }
+  box.appendChild(gridEl);
+  $('taskArea').textContent = '活著 ' + (G.ro.length - dead) + ' 人・死亡 ' + dead + ' 人';
+  taskState.sig = ledgerSig();
+}
+function openLedger() {
+  closeTask();
+  if (!G || G.ph !== 2) return;
+  taskState = { ledger: true, bit: -1, done: false, cleanup: null, sig: '' };
+  $('taskTitle').textContent = '生死簿';
+  ledgerFill(); sfx('click');
+  document.body.classList.add('task-open');
+}
+// 第 50 版：躲在下水道裡的時候，畫面上有兩個箭頭，指向可以去的另外兩個口；點箭頭就換到那個口（人還是躲在地底下）
+let sewerNavSig = '';
+function sewerNav(mode) {
+  const nav = $('sewerNav'); if (!nav) return;
+  const on = mode === 'play' && !!sewerIn;
+  if (nav.hidden === on) nav.hidden = !on;
+  if (!on) { sewerNavSig = ''; return; }
+  const sig = sewerIn.entry + ':' + sewerIn.at;
+  if (sig !== sewerNavSig) {
+    sewerNavSig = sig; nav.textContent = '';
+    for (const j of sewerIn.grp) { if (j === sewerIn.at) continue;
+      const b = el('button', 'sewer-go'); b.type = 'button'; b.dataset.to = j;
+      b.appendChild(el('i', '', '➜')); b.appendChild(el('span', '', SEWERS[j].area ? SEWERS[j].area : '下水道口'));
+      b.addEventListener('pointerdown', ev => { ev.preventDefault(); ev.stopPropagation(); sewerGo(j); });
+      nav.appendChild(b); }
+  }
+  // 箭頭排在角色（現在這個口）四周，朝著那個口的方向；兩個方向太接近就稍微錯開
+  const s = SEWERS[sewerIn.at], cx = (ME.x - view.cx) * view.z + view.w / 2, cy = (ME.y - 10 - view.cy) * view.z + view.h / 2, R = Math.min(118, view.h * .33);
+  const bs = [...nav.children], an = bs.map(b => { const e = SEWERS[+b.dataset.to]; return Math.atan2(e.wy - s.wy, e.wx - s.wx); });
+  const pos = an.slice();
+  if (pos.length === 2) { let d = pos[1] - pos[0]; while (d > Math.PI) d -= 2 * Math.PI; while (d < -Math.PI) d += 2 * Math.PI; if (Math.abs(d) < .9) { const k = (.9 - Math.abs(d)) / 2 * (d >= 0 ? 1 : -1); pos[0] -= k; pos[1] += k; } }
+  bs.forEach((b, i) => { const x = clamp(cx + Math.cos(pos[i]) * R * 1.25, 60, view.w - 60), y = clamp(cy + Math.sin(pos[i]) * R, 44, view.h - 44);
+    b.style.left = x.toFixed(0) + 'px'; b.style.top = y.toFixed(0) + 'px'; b.firstChild.style.transform = 'rotate(' + (an[i] * 180 / Math.PI).toFixed(0) + 'deg)'; });
 }
 // 燈被吹熄後：要把 8 根蠟燭一根一根點亮，燈才會恢復
 function openCandle() {
@@ -6529,7 +7306,7 @@ function main() {
   requestAnimationFrame(frame);
   window.__lw = { Snd, SND_FILES, get OUTSIDE() { return OUTSIDE; }, get OBJECTS() { return OBJECTS; }, TREES, ART_BLD, ART_PROPS, artGeom, BELL, COMIC, hostHunt, sendHunt, get EJ() { return { EJ_PANEL, EJ_STAND, EJ_VERD, EJ_BLACK, EJ_BOOM, EJ_BOARD, EJ_LEN, NONE_OUT, NONE_BOARD, NONE_LEN }; }, homeBg, sceneArt, SPR_ANI, killFx, startKillAnim, aniOf, drawCharFallen, ARTI, STATIC, drawTree, drawBuilding, get WORLD_W() { return WORLD_W; }, get WORLD_H() { return WORLD_H; }, VFX, fxBlood, fxTaskDone, fxSpark, fxDust, camShake, fxFlash, cardArt, cardW, openCard, closeCard, get cardOpen() { return cardOpen; }, SPR, NCHAR, turnChar, sprFlip, drawChar, drawCharFit, drawCharFallen, COLORS, get BUILDINGS() { return BUILDINGS; }, drawBuilding, BK, loadMap, buildGround,
     get G() { return G; }, get H() { return H; }, ME, my, players, get BOTS() { return BOTS; }, Net, get STATIONS() { return STATIONS; }, SPAWNS, grid, MAPS, loadMap, applyMap, canSee, paintMiniMap, tget, boxFree, get curMap() { return curMap; },
-    findPath, solidAt, boxFree, moveCollide, input, updateMe, get LAMPS() { return LAMPS; }, get SUB() { return SUB; }, startPractice, createRoom, joinRoom, invite, inviteLink, intro, startIntro, hostStart, hostKill, hostReport, hostTick, setBotCount, castVote, sendChat, finishTask, openTask, leaveRoom, uiMode, parseTasks, dealTasks, taskCur, taskMarks, get CHAINS() { return CHAINS; }, get taskState() { return taskState; }, get hs() { return hs; }, get BUILDINGS() { return BUILDINGS; }, get OCC() { return OCC; }, BUILD, get view() { return view; }, get CANDLE() { return CANDLE; }, hostBlow, hostRelight, doBlow, canBlow, killRangeOf, guideMarks, openCandle, killFx, startKillAnim, COLORS, hostResolve, hostInspect, hostExecute, hostFool, hostPet, showSlash, DOG, DOG_ART, dogPettable, bldAt, occFor, get STATIC() { return STATIC; }, art: { drawObject, drawChar, drawCharFallen, drawFallen, avatarCanvas, drawVillager, wolfShape, wolfEyes, lantern, drawTree, drawDog, circ, ell }, openAltar, finishAltar, hostAltarPlace, hostAltarStart, hostAltarSolve, doAltarPlace, doAltarStart, altarWhyNot,
+    findPath, TASK_SKIN, TG, TASK_SPR, tSprite, get CUT() { return CUT; }, get SEWERS() { return SEWERS; }, get LEDGER() { return LEDGER; }, sewerEnter, sewerGo, sewerExit, get sewerIn() { return sewerIn; }, openLedger, inSewer, hostSewer, computeCtx, solidAt, boxFree, moveCollide, input, updateMe, get LAMPS() { return LAMPS; }, get SUB() { return SUB; }, startPractice, createRoom, joinRoom, invite, inviteLink, intro, startIntro, hostStart, hostKill, hostReport, hostTick, setBotCount, castVote, sendChat, finishTask, openTask, leaveRoom, uiMode, parseTasks, dealTasks, taskCur, taskMarks, get CHAINS() { return CHAINS; }, get taskState() { return taskState; }, get hs() { return hs; }, get BUILDINGS() { return BUILDINGS; }, get OCC() { return OCC; }, BUILD, get view() { return view; }, get CANDLE() { return CANDLE; }, hostBlow, hostRelight, doBlow, canBlow, killRangeOf, guideMarks, openCandle, killFx, startKillAnim, COLORS, hostResolve, hostInspect, hostExecute, hostFool, hostPet, showSlash, DOG, DOG_ART, dogPettable, bldAt, occFor, get STATIC() { return STATIC; }, art: { drawObject, drawChar, drawCharFallen, drawFallen, avatarCanvas, drawVillager, wolfShape, wolfEyes, lantern, drawTree, drawDog, circ, ell }, openAltar, finishAltar, hostAltarPlace, hostAltarStart, hostAltarSolve, doAltarPlace, doAltarStart, altarWhyNot,
     get ctx() { return ctxA; }, get inRoom() { return inRoom; }, get isHost() { return isHost; }, get code() { return code; }
   };
 }
