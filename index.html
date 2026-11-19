@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>月光光心慌慌</title>
 <meta name="description" content="和朋友連線玩的狼人村：做完村裡的工作，找出混在裡面的狼人。">
-<meta name="lw-build" content="56">
+<meta name="lw-build" content="57">
 <meta name="theme-color" content="#0b151d">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -1341,10 +1341,10 @@ function artCanvas(b) {
 // 這個檔案由 art/scenes.py 產生：開場揭曉身分時的橫式職業卡（使用者提供）
 const ROLE_SCENE_DEF = {"0": {"w": 1672, "h": 941, "d": "img-8c7e554875.webp"}, "1": {"w": 1672, "h": 941, "d": "img-fd9850f922.webp"}, "2": {"w": 1672, "h": 941, "d": "img-4f8ae1f6e9.webp"}, "3": {"w": 1672, "h": 941, "d": "img-65c3d5b3a6.webp"}, "4": {"w": 1672, "h": 941, "d": "img-2fbd53f1bd.webp"}, "5": {"w": 1672, "h": 941, "d": "img-7f7fc667c6.webp"}};
 // 這個檔案由 art/comic.py 產生：投票放逐的漫畫（使用者提供）
-const COMIC_DEF = {"ej": [{"w": 1672, "h": 941, "d": "img-799435197e.webp"}, {"w": 1672, "h": 941, "d": "img-8743da2e02.webp"}, {"w": 1672, "h": 941, "d": "img-5157534406.webp"}, {"w": 1672, "h": 941, "d": "img-b2dcd46d08.webp"}, {"w": 1672, "h": 941, "d": "img-27dfc46984.webp"}, {"w": 1672, "h": 941, "d": "img-b8a9c5932f.webp"}, {"w": 1672, "h": 941, "d": "img-c3c43d5cdd.webp"}], "none": [{"w": 1672, "h": 941, "d": "img-799435197e.webp"}, {"w": 1672, "h": 941, "d": "img-8743da2e02.webp"}, {"w": 1672, "h": 941, "d": "img-5157534406.webp"}, {"w": 1672, "h": 941, "d": "img-f951f0537c.webp"}], "boom": {"w": 1321, "h": 737, "d": "img-3c6b521bf7.webp"}};
+const COMIC_DEF = {"ej": [{"w": 1672, "h": 941, "d": "img-799435197e.webp"}, {"w": 1672, "h": 941, "d": "img-8743da2e02.webp"}, {"w": 1672, "h": 941, "d": "img-5157534406.webp"}, {"w": 1672, "h": 941, "d": "img-b2dcd46d08.webp"}, {"w": 1672, "h": 941, "d": "img-27dfc46984.webp"}, {"w": 1672, "h": 941, "d": "img-b8a9c5932f.webp"}, {"w": 1672, "h": 941, "d": "img-c3c43d5cdd.webp"}], "none": [{"w": 1672, "h": 941, "d": "img-799435197e.webp"}, {"w": 1672, "h": 941, "d": "img-8743da2e02.webp"}, {"w": 1672, "h": 941, "d": "img-5157534406.webp"}, {"w": 1672, "h": 941, "d": "img-f951f0537c.webp"}], "ev": [{"w": 1672, "h": 941, "d": "img-d30540d56c.webp"}, {"w": 1672, "h": 941, "d": "img-d1836bab35.webp"}, {"w": 1672, "h": 941, "d": "img-8eb5262257.webp"}, {"w": 1671, "h": 941, "d": "img-c56b7db8f8.webp"}, {"w": 1672, "h": 941, "d": "img-296f0ff687.webp"}], "ew": [{"w": 1672, "h": 941, "d": "img-af3d02c2e1.webp"}, {"w": 1672, "h": 941, "d": "img-d1ad177b50.webp"}, {"w": 1672, "h": 941, "d": "img-9f985c59e0.webp"}, {"w": 1671, "h": 941, "d": "img-cda0faaa44.webp"}, {"w": 1672, "h": 941, "d": "img-f8bdeff711.webp"}], "ef": [{"w": 1672, "h": 941, "d": "img-941a269b54.webp"}, {"w": 1671, "h": 941, "d": "img-5f34fe878b.webp"}, {"w": 1672, "h": 941, "d": "img-df408ecc9a.webp"}, {"w": 1672, "h": 941, "d": "img-03e7698b00.webp"}, {"w": 1672, "h": 941, "d": "img-0588c16bda.webp"}], "boom": {"w": 1321, "h": 737, "d": "img-3c6b521bf7.webp"}};
 // 這個檔案由 art/audio.py 產生：聲音檔（audio/ 底下，打包時複製到 dist/）
 // f：檔名；d：長度（秒）；g：音樂播放時再乘上的音量；loop：可以循環
-const SND_FILES = {"m0": {"f": "snd-cd26099553.mp3", "d": 136.0, "g": 1.121, "loop": 1}, "m1": {"f": "snd-3ecc5ae8a0.mp3", "d": 87.9, "g": 1.492, "loop": 1}, "m2": {"f": "snd-b101ea4430.mp3", "d": 47.85, "g": 1.139, "loop": 1}, "m3": {"f": "snd-b3c2caee08.mp3", "d": 120.059, "g": 1.0, "loop": 1}, "m4": {"f": "snd-9f942a7362.mp3", "d": 187.0, "g": 1.851, "loop": 1}, "m5": {"f": "snd-63df9b2e7d.mp3", "d": 259.85, "g": 1.0, "loop": 1}, "meet": {"f": "snd-c8f6db0bb4.mp3", "d": 100.35, "g": 1.0, "loop": 1}, "tense": {"f": "snd-3f87b61c0b.mp3", "d": 10.5, "g": 1.0, "loop": 0}, "h0": {"f": "snd-dfb126a389.mp3", "d": 185.678, "g": 1.309, "loop": 0}, "h1": {"f": "snd-ba2a481e09.mp3", "d": 158.224, "g": 1.0, "loop": 0}, "h2": {"f": "snd-d6b345b4bc.mp3", "d": 137.953, "g": 1.116, "loop": 0}, "h3": {"f": "snd-1cae790c30.mp3", "d": 93.701, "g": 1.321, "loop": 0}, "click": {"f": "snd-7073cd290a.mp3", "d": 0.091}, "ok": {"f": "snd-7d421678e3.mp3", "d": 0.29}, "done": {"f": "snd-7035523a9c.mp3", "d": 0.797}, "win": {"f": "snd-4e8e2fe376.mp3", "d": 0.797}, "lose": {"f": "snd-b07d5c8f49.mp3", "d": 1.739}, "report": {"f": "snd-3a4ee8b9e2.mp3", "d": 0.607}, "wrong": {"f": "snd-64fe54ec5a.mp3", "d": 1.324}, "bell": {"f": "snd-9811ba8b3b.mp3", "d": 1.326}, "hit0": {"f": "snd-d9ec04603c.mp3", "d": 0.544}, "hit1": {"f": "snd-a94f330098.mp3", "d": 0.464}, "hit2": {"f": "snd-e73ecbc2c5.mp3", "d": 0.414}, "hit3": {"f": "snd-49f5b1885c.mp3", "d": 0.416}, "thud": {"f": "snd-7d45089c54.mp3", "d": 0.569}, "slash": {"f": "snd-7b09fd3779.mp3", "d": 0.422}, "vote": {"f": "snd-c489725646.mp3", "d": 0.653}, "gong": {"f": "snd-468f4e1d4e.mp3", "d": 1.413}, "blow": {"f": "snd-61d7d39515.mp3", "d": 2.637}, "whoosh": {"f": "snd-f88369d099.mp3", "d": 1.053}, "roar": {"f": "snd-9295c3bdbd.mp3", "d": 0.927}, "growl": {"f": "snd-25dbd856e9.mp3", "d": 0.608}, "magic": {"f": "snd-b338b77971.mp3", "d": 0.578}, "altar": {"f": "snd-f6a8ab7390.mp3", "d": 0.479}, "fire": {"f": "snd-fbbabe7faa.mp3", "d": 0.889}, "gun": {"f": "snd-5860a8e2b1.mp3", "d": 1.139}, "empty": {"f": "snd-de1e3e0ba8.mp3", "d": 0.428}, "r_vill": {"f": "snd-22d64404c6.mp3", "d": 1.793}, "r_wolf": {"f": "snd-e85f845d0c.mp3", "d": 3.25}, "r_seer": {"f": "snd-aa425ed5bc.mp3", "d": 1.82}, "r_fool": {"f": "snd-6205bf9068.mp3", "d": 1.26}, "r_vigil": {"f": "snd-b1f9d151c9.mp3", "d": 2.67}, "r_hunt": {"f": "snd-c970c89799.mp3", "d": 2.35}, "trainWarn": {"f": "snd-cad189313f.mp3", "d": 3.354}, "trainPass": {"f": "snd-329071f328.mp3", "d": 4.45}};
+const SND_FILES = {"m0": {"f": "snd-cd26099553.mp3", "d": 136.0, "g": 1.121, "loop": 1}, "m1": {"f": "snd-3ecc5ae8a0.mp3", "d": 87.9, "g": 1.492, "loop": 1}, "m2": {"f": "snd-b101ea4430.mp3", "d": 47.85, "g": 1.139, "loop": 1}, "m3": {"f": "snd-b3c2caee08.mp3", "d": 120.059, "g": 1.0, "loop": 1}, "m4": {"f": "snd-9f942a7362.mp3", "d": 187.0, "g": 1.851, "loop": 1}, "m5": {"f": "snd-63df9b2e7d.mp3", "d": 259.85, "g": 1.0, "loop": 1}, "meet": {"f": "snd-c8f6db0bb4.mp3", "d": 100.35, "g": 1.0, "loop": 1}, "tense": {"f": "snd-3f87b61c0b.mp3", "d": 10.5, "g": 1.0, "loop": 0}, "h0": {"f": "snd-dfb126a389.mp3", "d": 185.678, "g": 1.309, "loop": 0}, "h1": {"f": "snd-ba2a481e09.mp3", "d": 158.224, "g": 1.0, "loop": 0}, "h2": {"f": "snd-d6b345b4bc.mp3", "d": 137.953, "g": 1.116, "loop": 0}, "h3": {"f": "snd-1cae790c30.mp3", "d": 93.701, "g": 1.321, "loop": 0}, "click": {"f": "snd-7073cd290a.mp3", "d": 0.091}, "ok": {"f": "snd-7d421678e3.mp3", "d": 0.29}, "done": {"f": "snd-7035523a9c.mp3", "d": 0.797}, "win": {"f": "snd-4e8e2fe376.mp3", "d": 0.797}, "lose": {"f": "snd-b07d5c8f49.mp3", "d": 1.739}, "report": {"f": "snd-3a4ee8b9e2.mp3", "d": 0.607}, "wrong": {"f": "snd-64fe54ec5a.mp3", "d": 1.324}, "bell": {"f": "snd-9811ba8b3b.mp3", "d": 1.326}, "hit0": {"f": "snd-d9ec04603c.mp3", "d": 0.544}, "hit1": {"f": "snd-a94f330098.mp3", "d": 0.464}, "hit2": {"f": "snd-e73ecbc2c5.mp3", "d": 0.414}, "hit3": {"f": "snd-49f5b1885c.mp3", "d": 0.416}, "thud": {"f": "snd-7d45089c54.mp3", "d": 0.569}, "slash": {"f": "snd-7b09fd3779.mp3", "d": 0.422}, "vote": {"f": "snd-c489725646.mp3", "d": 0.653}, "gong": {"f": "snd-468f4e1d4e.mp3", "d": 1.413}, "blow": {"f": "snd-61d7d39515.mp3", "d": 2.637}, "whoosh": {"f": "snd-f88369d099.mp3", "d": 1.053}, "roar": {"f": "snd-9295c3bdbd.mp3", "d": 0.927}, "growl": {"f": "snd-25dbd856e9.mp3", "d": 0.608}, "magic": {"f": "snd-b338b77971.mp3", "d": 0.578}, "altar": {"f": "snd-f6a8ab7390.mp3", "d": 0.479}, "fire": {"f": "snd-fbbabe7faa.mp3", "d": 0.889}, "gun": {"f": "snd-5860a8e2b1.mp3", "d": 1.139}, "empty": {"f": "snd-de1e3e0ba8.mp3", "d": 0.428}, "door": {"f": "snd-db5793ec17.mp3", "d": 0.414}, "glassbreak": {"f": "snd-04f1d024f6.mp3", "d": 0.814}, "creak": {"f": "snd-8d89e2bf33.mp3", "d": 0.807}, "gasp": {"f": "snd-237404ba4f.mp3", "d": 1.52}, "r_vill": {"f": "snd-22d64404c6.mp3", "d": 1.793}, "r_wolf": {"f": "snd-e85f845d0c.mp3", "d": 3.25}, "r_seer": {"f": "snd-aa425ed5bc.mp3", "d": 1.82}, "r_fool": {"f": "snd-6205bf9068.mp3", "d": 1.26}, "r_vigil": {"f": "snd-b1f9d151c9.mp3", "d": 2.67}, "r_hunt": {"f": "snd-c970c89799.mp3", "d": 2.35}, "trainWarn": {"f": "snd-cad189313f.mp3", "d": 3.354}, "jingle": {"f": "snd-a98438f95d.mp3", "d": 0.62}, "dawn": {"f": "snd-4f9d3e8fd9.mp3", "d": 3.728}, "trainPass": {"f": "snd-329071f328.mp3", "d": 4.45}};
 // 這個檔案由 art/prep_dog.py 產生：場景裡小白狗的動畫（第 42 版，使用者提供的圖）
 // rows：每個動作的每一格 [x, y, 寬, 高, 腳底中心 x, 腳底 y]（圖上的像素）；face：這個動作畫的時候臉朝哪邊（1 右、-1 左、0 正面）；tall：站著時大約多高（像素）
 const DOG_ART = {"d": "img-4cc8d91ee6.webp", "w": 2960, "h": 2112, "rows": {"idle": [[8, 8, 220, 206, 104.8, 192.0], [304, 8, 226, 212, 110.2, 198.0], [600, 8, 220, 212, 106.5, 198.0], [896, 8, 222, 212, 108.0, 198.0], [1192, 8, 218, 212, 103.2, 198.0], [1488, 8, 222, 212, 107.9, 198.0], [1784, 8, 216, 212, 102.3, 198.0], [2080, 8, 222, 212, 106.3, 198.0]], "runR": [[2376, 8, 182, 172, 90.3, 148.0], [2672, 8, 182, 172, 89.3, 148.0], [8, 272, 178, 180, 88.5, 156.0], [304, 272, 176, 180, 86.8, 156.0], [600, 272, 170, 180, 83.3, 156.0], [896, 272, 176, 180, 86.5, 156.0], [1192, 272, 178, 180, 86.9, 156.0], [1488, 272, 178, 180, 89.0, 154.0]], "runL": [[1784, 272, 178, 172, 87.4, 148.0], [2080, 272, 178, 172, 88.5, 148.0], [2376, 272, 182, 174, 89.6, 148.0], [2672, 272, 176, 178, 86.0, 154.0], [8, 536, 176, 182, 87.0, 156.0], [304, 536, 178, 180, 87.6, 156.0], [600, 536, 180, 182, 87.8, 156.0], [896, 536, 178, 180, 89.7, 156.0]], "dig": [[1192, 536, 228, 186, 118.9, 172.0], [1488, 536, 236, 196, 116.1, 182.0], [1784, 536, 276, 198, 119.8, 184.0], [2080, 536, 280, 206, 119.4, 192.0], [2376, 536, 274, 206, 123.8, 192.0], [2672, 536, 274, 206, 120.1, 192.0], [8, 800, 244, 206, 118.4, 192.0], [304, 800, 236, 206, 121.3, 192.0]], "carryR": [[600, 800, 190, 164, 91.7, 150.0], [896, 800, 182, 164, 86.2, 150.0], [1192, 800, 184, 164, 87.4, 150.0], [1488, 800, 180, 174, 87.2, 160.0], [1784, 800, 180, 176, 84.7, 162.0], [2080, 800, 180, 176, 83.9, 162.0], [2376, 800, 180, 176, 85.2, 162.0], [2672, 800, 180, 176, 86.4, 162.0]], "carryL": [[8, 1064, 180, 166, 91.4, 152.0], [304, 1064, 180, 166, 91.2, 152.0], [600, 1064, 180, 166, 91.7, 152.0], [896, 1064, 178, 166, 90.2, 152.0], [1192, 1064, 182, 176, 92.0, 162.0], [1488, 1064, 182, 174, 93.1, 160.0], [1784, 1064, 184, 176, 91.9, 162.0], [2080, 1064, 182, 176, 94.2, 162.0]], "bury": [[2376, 1064, 200, 178, 98.2, 164.0], [2672, 1064, 196, 178, 94.6, 164.0], [8, 1328, 194, 184, 95.3, 170.0], [304, 1328, 190, 180, 96.4, 166.0], [600, 1328, 194, 178, 98.7, 164.0], [896, 1328, 224, 186, 100.5, 172.0], [1192, 1328, 246, 186, 99.9, 172.0], [1488, 1328, 250, 186, 101.3, 172.0], [1784, 1328, 240, 186, 103.7, 172.0], [2080, 1328, 222, 186, 99.4, 172.0], [2376, 1328, 176, 186, 87.0, 172.0], [2672, 1328, 218, 186, 83.7, 172.0]], "belly": [[8, 1592, 190, 202, 90.3, 188.0], [304, 1592, 242, 202, 112.5, 188.0], [600, 1592, 250, 212, 119.9, 198.0], [896, 1592, 266, 212, 127.6, 198.0], [1192, 1592, 270, 210, 135.9, 196.0], [1488, 1592, 276, 206, 130.7, 192.0], [1784, 1592, 228, 212, 106.8, 198.0], [2080, 1592, 200, 212, 97.4, 198.0]], "dig_out": [[2376, 1592, 248, 232, 108.7, 218.0], [2672, 1592, 224, 220, 111.6, 206.0], [8, 1856, 238, 214, 109.3, 200.0], [304, 1856, 244, 220, 113.5, 206.0], [600, 1856, 230, 220, 112.0, 206.0], [896, 1856, 226, 230, 115.5, 216.0], [1192, 1856, 226, 234, 113.7, 220.0], [1488, 1856, 226, 234, 107.5, 220.0], [1784, 1856, 222, 234, 105.3, 220.0], [2080, 1856, 224, 234, 107.5, 220.0], [2376, 1856, 212, 232, 99.0, 218.0], [2672, 1856, 236, 248, 92.5, 234.0]]}, "fps": {"idle": 6, "runR": 12, "runL": 12, "dig": 10, "carryR": 12, "carryL": 12, "bury": 0, "belly": 8, "dig_out": 0}, "sc": {"idle": 1, "runR": 1.42, "runL": 1.42, "dig": 1.08, "carryR": 1.46, "carryL": 1.46, "bury": 1.3, "belly": 1.02, "dig_out": 1.12}, "face": {"idle": 0, "runR": 1, "runL": -1, "dig": 1, "carryR": 1, "carryL": -1, "bury": 1, "belly": 0, "dig_out": 1}, "tall": 198.0};
@@ -4935,6 +4935,8 @@ function onStateChange() {
   }
   if (taskState && taskState.altar != null && !taskState.done && (!G.al.on || !G.al.a[taskState.altar] || G.al.a[taskState.altar][2])) closeTask();   // 別人先解掉了
   if (G.ph === 5 && G.why === 4 && seen.king !== G.gn && my.idx >= 0) { seen.king = G.gn; closeTask(); startKillAnim(3); }
+  // 第 57 版：遊戲結束先播結局漫畫，再看結算（白癡獲勝的漫畫在投票那一段就播過了；祭壇的狼王降臨播完會自己接上）
+  if (G.ph === 5 && G.why !== 4 && (G.win === 1 || G.win === 2) && seen.end !== G.gn && my.idx >= 0) { seen.end = G.gn; closeTask(); startKillAnim(6); }
   // 獵人決定好了：所有人看開槍（或沒開槍）的結果
   if (G.ph === 6 && G.hu && G.hu.t !== -2 && my.idx >= 0) { const k = G.gn + ':' + (G.mt ? G.mt.no : 0); if (seen.hunt !== k) { seen.hunt = k; startKillAnim(5); } }
   // 燈被吹熄／重新點亮
@@ -5846,13 +5848,14 @@ function startKillAnim(kind) {
   }
   if (k === 4) {   // 放逐：先把這一刻的結果記下來
     const rs = G.rs, e = rs.ej;
-    killFx.ej = e >= 0 ? { name: nameIdx(e), col: COLORS[colorIdx(e)][1], me: G.ro[e] === ME.id, w: G.wf[e] === '1' ? 1 : 0 } : { none: true, tie: !!rs.tie };   // w：他是不是狼人，決定漫畫最後一張用哪張
+    killFx.ej = e >= 0 ? { name: nameIdx(e), col: COLORS[colorIdx(e)][1], me: G.ro[e] === ME.id, w: G.wf[e] === '1' ? 1 : 0, fool: G.st.gm === 2 && e === G.sp && !G.su } : { none: true, tie: !!rs.tie };   // fool（第 57 版）：被投出去的是白癡（白癡獲勝），改播白癡的漫畫   // w：他是不是狼人，決定漫畫最後一張用哪張
     killFx.len = e >= 0 ? EJ_LEN : NONE_LEN; comicLoad();
     { const cnt = {}; for (const v of rs.vt || []) if (v[1] >= 0) cnt[v[1]] = (cnt[v[1]] || 0) + 1;   // 每個人得到幾票，畫在動畫裡
       killFx.votes = Object.keys(cnt).map(i => ({ n: nameIdx(+i), c: COLORS[colorIdx(+i)][1], v: cnt[i], out: +i === e })).sort((a, b) => b.v - a.v).slice(0, 6); if (rs.sk) killFx.votes.push({ n: '棄票', c: '#8fa3b3', v: rs.sk, skip: true }); }
   }
+  if (k === 6) { killFx.end = G.win; killFx.len = END_LEN; comicLoad(); }   // 結局漫畫
   killFx.kind = k; if (k < 3) killFx.last = k; killFx.t0 = performance.now(); killFx.col = COLORS[ME.c][1]; killFx.fix = null; killFx.on = true;
-  $('killSr').textContent = k === 5 ? (killFx.hu.shot ? (killFx.hu.me ? '你被獵人帶走了。' : killFx.hu.name + ' 被獵人帶走了。') : '獵人沒有開槍。') : k === 4 ? (killFx.ej.none ? '沒有人被放逐。' : killFx.ej.me ? '你被放逐了。' : killFx.ej.name + ' 被放逐了。') : k === 3 ? '祭壇沒有在時間內解除，狼王降臨，狼人獲勝。' : '你被狼人襲擊了。你變成了鬼魂，還能繼續幫忙把工作做完。';
+  $('killSr').textContent = k === 6 ? (killFx.end === 2 ? '狼人獲勝。村子裡再也沒有燈亮起。' : '村民獲勝。狼人被趕出村子，天亮了。') : k === 5 ? (killFx.hu.shot ? (killFx.hu.me ? '你被獵人帶走了。' : killFx.hu.name + ' 被獵人帶走了。') : '獵人沒有開槍。') : k === 4 ? (killFx.ej.none ? '沒有人被放逐。' : killFx.ej.me ? '你被放逐了。' : killFx.ej.name + ' 被放逐了。') : k === 3 ? '祭壇沒有在時間內解除，狼王降臨，狼人獲勝。' : '你被狼人襲擊了。你變成了鬼魂，還能繼續幫忙把工作做完。';
   document.body.classList.add('kill-open');
   sndKillAnim(k);
 }
@@ -5864,10 +5867,11 @@ function drawKill(now) {
   const g = c.getContext('2d'), kind = killFx.kind, col = killFx.col, calm = reduceMotion();
   const t = killFx.fix != null ? killFx.fix : (now - killFx.t0) / 1000;
   let tt = t; if ((kind === 4 || kind === 5) && killFx.fix == null && G && G.ph === (kind === 4 ? 4 : 6) && t > killFx.len - .56) { killFx.t0 = now - (killFx.len - .56) * 1000; tt = killFx.len - .56; }   // 放逐動畫停在最後一幕，等下一個階段開始才淡出
-  if (tt >= (kind === 3 ? KING_LEN : kind >= 4 ? killFx.len : KILL_LEN) && killFx.fix == null) { stopKillAnim(); return; }
+  if (tt >= (kind === 3 ? KING_LEN : kind >= 4 ? killFx.len : KILL_LEN) && killFx.fix == null) { stopKillAnim(); if (kind === 3 && G && G.ph === 5 && G.win === 2) startKillAnim(6); return; }   // 狼王降臨之後，接狼人獲勝的漫畫
   if (kind === 3) { drawKing(g, W, H, d, t, calm); return; }
   if (kind === 4) { drawEject(g, W, H, d, tt, calm); return; }
   if (kind === 5) { drawHuntShot(g, W, H, d, tt, calm); return; }
+  if (kind === 6) { drawEnding(g, W, H, d, tt, calm); return; }
   const land = W > H * 1.15, u = land ? Math.min(H / 360, W / 640) : Math.min(W / 360, H / 640);
   const vx = land ? W * .33 : W / 2, vy = land ? H * .74 : H * .6, tx = land ? W * .69 : W / 2, ty = land ? H * .42 : H * .2;
   const hit = KILL_HIT[kind], ht = t - hit, E = (x, y, rx, ry) => { g.beginPath(); g.ellipse(x, y, rx, ry, 0, 0, 6.2832); g.fill(); };
@@ -6017,14 +6021,17 @@ function drawKing(g, W, H, d, t, calm) {
 // ===== 投票結束：用漫畫演出放逐（使用者提供的圖，所有人都會看到）=====
 // 四格依序出現（左上、右上、左下、右下，每格隔 1 秒）→ 全螢幕：主角站起來 → 投出狼人／不是狼人 → 黑屏 0.5 秒 →「蹦!!!」0.5 秒 → 黑底的投票結果
 // 沒有人被放逐時（平手、票數不夠）：另一組四格，同樣每格隔 1 秒 → 黑底的「沒有人被放逐」和票數
-const COMIC = { ej: [], none: [], boom: null, go: false };
+const COMIC = { ej: [], none: [], ev: [], ew: [], ef: [], boom: null, go: false };   // ev／ew／ef（第 57 版）：村民獲勝、狼人獲勝、白癡獲勝的結局漫畫，各 5 張
 function comicLoad() {
   if (COMIC.go || typeof COMIC_DEF === 'undefined') return; COMIC.go = true;
   const mk = D => { const o = { ok: false, im: new Image(), w: D.w, h: D.h }; o.im.decoding = 'async'; o.im.onload = () => { const done = () => { o.ok = true; }; if (o.im.decode) o.im.decode().then(done, done); else done(); }; o.im.src = D.d; return o; };
   COMIC.ej = COMIC_DEF.ej.map(mk); COMIC.none = (COMIC_DEF.none || []).map(mk); COMIC.boom = mk(COMIC_DEF.boom);
+  for (const k of ['ev', 'ew', 'ef']) COMIC[k] = (COMIC_DEF[k] || []).map(mk);
 }
 setTimeout(comicLoad, 2500);   // 首頁先載完，再在背景把漫畫載好
 const EJ_PANEL = [.25, 1.25, 2.25, 3.25], EJ_STAND = 4.6, EJ_VERD = 6.7, EJ_BLACK = 8.9, EJ_BOOM = 9.4, EJ_BOARD = 9.9, EJ_LEN = 14;
+// 第 57 版：結局漫畫（村民獲勝／狼人獲勝）：四格一格一格出現（每格隔 1.2 秒）→ 最後一張全螢幕 → 淡出，露出結算畫面
+const END_PANEL = [.3, 1.5, 2.7, 3.9], END_FULL = 5.7, END_LEN = 10.8;
 const NONE_OUT = 4.6, NONE_BOARD = 5.0, NONE_LEN = 9;   // 沒人被放逐：四格到 4.6 秒，淡出，5 秒起是票數
 const easeOut = x => x <= 0 ? 0 : x >= 1 ? 1 : 1 - Math.pow(1 - x, 3);
 // 整張圖放進畫面（不裁切，邊框才完整），多的地方是黑的
@@ -6038,21 +6045,22 @@ function comicGrid(W, H, a) {
   const x0 = Math.max(sl, m) + (AW - gw) / 2, y0 = (H - gh) / 2;
   return [0, 1, 2, 3].map(k => ({ x: x0 + (k % 2) * (pw + gap), y: y0 + (k >> 1) * (ph + gap), w: pw, h: ph }));
 }
-function drawComicPage(g, W, H, u, panels, t, calm) {
+function drawComicPage(g, W, H, u, panels, t, calm, TM, tEnd) {
+  TM = TM || EJ_PANEL; tEnd = tEnd || EJ_STAND;   // TM：四格各在第幾秒出現
   const bg = g.createRadialGradient(W / 2, H / 2, 0, W / 2, H / 2, Math.max(W, H) * .7); bg.addColorStop(0, '#1a110b'); bg.addColorStop(1, '#050304'); g.fillStyle = bg; g.fillRect(0, 0, W, H);
   const o0 = panels.find(o => o) || { w: 16, h: 9 }, R = comicGrid(W, H, o0.w / o0.h);
   g.save();
-  if (!calm) { const z = 1 + .025 * smooth(t / EJ_STAND); g.translate(W / 2, H / 2); g.scale(z, z); g.translate(-W / 2, -H / 2); }
+  if (!calm) { const z = 1 + .025 * smooth(t / tEnd); g.translate(W / 2, H / 2); g.scale(z, z); g.translate(-W / 2, -H / 2); }
   // 每一格落下時，整頁輕輕震一下
-  if (!calm) for (const p of EJ_PANEL) { const q = t - p - .2; if (q > 0 && q < .16) { const k = (1 - q / .16) * 3 * u; g.translate((Math.random() - .5) * k, (Math.random() - .5) * k); } }
+  if (!calm) for (const p of TM) { const q = t - p - .2; if (q > 0 && q < .16) { const k = (1 - q / .16) * 3 * u; g.translate((Math.random() - .5) * k, (Math.random() - .5) * k); } }
   for (let k = 0; k < 4; k++) {
-    const q = (t - EJ_PANEL[k]) / .3, o = panels[k], r = R[k]; if (q <= 0) continue;
+    const q = (t - TM[k]) / .3, o = panels[k], r = R[k]; if (q <= 0) continue;
     const e = easeOut(q), s = calm ? 1 : 1 + .14 * (1 - e), dx = calm ? 0 : (k % 2 ? 1 : -1) * (1 - e) * 16 * u, dy = calm ? 0 : (k >> 1 ? 1 : -1) * (1 - e) * 10 * u;
     g.save(); g.globalAlpha = smooth(q * 1.6);
     g.translate(r.x + r.w / 2 + dx, r.y + r.h / 2 + dy); g.scale(s, s);
     g.shadowColor = 'rgba(0,0,0,.7)'; g.shadowBlur = 14 * u; g.fillStyle = '#000'; g.fillRect(-r.w / 2, -r.h / 2, r.w, r.h); g.shadowBlur = 0;
     if (!comicImg(g, o, -r.w / 2, -r.h / 2, r.w, r.h)) { g.fillStyle = '#2a1d14'; g.fillRect(-r.w / 2, -r.h / 2, r.w, r.h); }
-    const f = calm ? 0 : 1 - (t - EJ_PANEL[k] - .2) / .25; if (f > 0 && f <= 1) { g.fillStyle = 'rgba(255,244,220,' + (f * .32).toFixed(3) + ')'; g.fillRect(-r.w / 2, -r.h / 2, r.w, r.h); }
+    const f = calm ? 0 : 1 - (t - TM[k] - .2) / .25; if (f > 0 && f <= 1) { g.fillStyle = 'rgba(255,244,220,' + (f * .32).toFixed(3) + ')'; g.fillRect(-r.w / 2, -r.h / 2, r.w, r.h); }
     g.restore();
   }
   g.restore();
@@ -6105,6 +6113,18 @@ function drawEject(g, W, H, d, t, calm) {
   g.setTransform(d, 0, 0, d, 0, 0); g.globalCompositeOperation = 'source-over'; g.shadowBlur = 0; g.globalAlpha = 1; g.clearRect(0, 0, W, H);
   g.globalAlpha = 1 - smooth((t - (LEN - .5)) / .5);   // 最後淡出，回到遊戲（或結算畫面）
   const P = COMIC.ej;
+  if (ej.fool && COMIC.ef.length === 5) {   // 第 57 版：被投出去的是白癡——改播白癡的漫畫（四格 → 他騎著布馬飛過月亮 → 票數）
+    const F = COMIC.ef;
+    if (t < EJ_STAND) drawComicPage(g, W, H, u, F.slice(0, 4), t, calm);
+    else if (t < EJ_BOARD) {
+      drawComicFull(g, W, H, u, F[4], t - EJ_STAND, EJ_BOARD - EJ_STAND, calm, 'rise');
+      const q = (t - EJ_STAND) / .35; if (q < 1 && !calm) { g.save(); g.globalAlpha *= 1 - smooth(q); const z = 1 + .1 * q; g.translate(W / 2, H / 2); g.scale(z, z); g.translate(-W / 2, -H / 2); drawComicPage(g, W, H, u, F.slice(0, 4), EJ_STAND, false); g.restore(); }
+      comicCaption(g, W, H, u, F[4], '大家都上當了', t - EJ_STAND - 1.3);
+      const q2 = (t - (EJ_BOARD - .4)) / .4; if (q2 > 0) { g.fillStyle = 'rgba(0,0,0,' + smooth(q2).toFixed(3) + ')'; g.fillRect(0, 0, W, H); }
+    }
+    else drawVoteBoard(g, W, H, u, t - EJ_BOARD - .25, ej, vs, land, calm);
+    g.globalAlpha = 1; return;
+  }
   if (ej.none) {
     if (t < NONE_OUT) drawComicPage(g, W, H, u, COMIC.none, t, calm);
     else if (t < NONE_BOARD) { g.fillStyle = '#000'; g.fillRect(0, 0, W, H); const q = (t - NONE_OUT) / .35; if (q < 1) { g.save(); g.globalAlpha *= 1 - smooth(q); if (!calm) { const z = 1 + .06 * q; g.translate(W / 2, H / 2); g.scale(z, z); g.translate(-W / 2, -H / 2); } drawComicPage(g, W, H, u, COMIC.none, NONE_OUT, calm); g.restore(); } }   // 四格那一頁淡出到黑
@@ -6127,6 +6147,29 @@ function drawEject(g, W, H, d, t, calm) {
     } else { g.save(); g.fillStyle = '#b30000'; g.font = '900 ' + Math.round(96 * u) + 'px ' + FONT_DISP; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('蹦!!!', W / 2, H / 2); g.restore(); }
   }
   else drawVoteBoard(g, W, H, u, t - EJ_BOARD - .25, ej, vs, land, calm);
+  g.globalAlpha = 1;
+}
+
+// 全螢幕那一張底下的一行字（畫在圖的下緣裡面，慢慢浮出來）
+function comicCaption(g, W, H, u, o, txt, ts) {
+  const a = smooth(ts / .6); if (a <= 0 || !o) return; const f = comicFit(o, W, H), px = Math.round(Math.min(30 * u, f.h * .075)), y = f.y + f.h * .875 + (1 - a) * 8 * u;
+  g.save(); g.globalAlpha *= a; g.font = '700 ' + px + 'px ' + FONT_DISP; g.textAlign = 'center'; g.textBaseline = 'middle'; g.lineJoin = 'round';
+  g.shadowColor = 'rgba(0,0,0,.9)'; g.shadowBlur = px * .6; g.strokeStyle = 'rgba(12,6,4,.88)'; g.lineWidth = Math.max(3, px * .26); g.strokeText(txt, W / 2, y); g.shadowBlur = 0; g.fillStyle = '#f6e7c4'; g.fillText(txt, W / 2, y); g.restore();
+}
+// ===== 第 57 版：遊戲結束的漫畫（村民獲勝：把狼人踢出村子；狼人獲勝：村子裡再也沒有燈）。播完淡出，底下就是結算畫面 =====
+function drawEnding(g, W, H, d, t, calm) {
+  const wolf = killFx.end === 2, P = wolf ? COMIC.ew : COMIC.ev;
+  const land = W > H * 1.15, u = land ? Math.min(H / 360, W / 640) : Math.min(W / 360, H / 640);
+  comicLoad();
+  g.setTransform(d, 0, 0, d, 0, 0); g.globalCompositeOperation = 'source-over'; g.shadowBlur = 0; g.globalAlpha = 1; g.clearRect(0, 0, W, H);
+  g.globalAlpha = 1 - smooth((t - (END_LEN - .6)) / .6);
+  if (t < END_FULL) drawComicPage(g, W, H, u, P.slice(0, 4), t, calm, END_PANEL, END_FULL);
+  else {
+    const ts = t - END_FULL;
+    drawComicFull(g, W, H, u, P[4], ts, END_LEN - END_FULL, calm, 'rise');
+    const q = ts / .35; if (q < 1 && !calm) { g.save(); g.globalAlpha *= 1 - smooth(q); const z = 1 + .1 * q; g.translate(W / 2, H / 2); g.scale(z, z); g.translate(-W / 2, -H / 2); drawComicPage(g, W, H, u, P.slice(0, 4), END_FULL, false, END_PANEL, END_FULL); g.restore(); }
+    comicCaption(g, W, H, u, P[4], wolf ? '村子裡，再也沒有燈亮起' : '天亮了，村子平安了', ts - 1.3);
+  }
   g.globalAlpha = 1;
 }
 
@@ -6193,7 +6236,7 @@ function drawPinwheel(g, x, y, r, a) {
 const SND_VOL = { music: .30, meet: .22, sfx: .58 };  // 背景音樂適中、開會時再小一點。音效那一路有壓縮限幅（會自動補一點音量），第 41 版整體比上一版大約 +3 dB
 const SND_XF = 1.6;                                   // 音樂循環接回開頭時，前後交疊淡化幾秒
 const SND_GAIN = { click: .3, ok: .5, done: .6, win: .8, lose: .8, r_vill: .8, r_wolf: .95, r_seer: .8, r_fool: .85, r_vigil: .9, r_hunt: .9, report: .85, wrong: .85, bell: .85, thud: .8, slash: .9, vote: .6, gong: .65,
-  blow: .7, whoosh: .55, roar: 1, growl: .8, magic: .7, altar: .85, fire: .6, gun: 1, empty: .7, tense: 1, hit0: .8, hit1: .8, hit2: .8, hit3: .8 };
+  blow: .7, whoosh: .55, roar: 1, growl: .8, magic: .7, altar: .85, fire: .6, gun: 1, empty: .7, tense: 1, hit0: .8, hit1: .8, hit2: .8, hit3: .8, door: .9, glassbreak: .8, creak: .85, gasp: .8, jingle: .7, dawn: .8 };
 const Snd = { ctx: null, out: null, mus: null, lp: null, fx: null, buf: {}, wait: {}, opt: { m: 1, s: 1 }, cur: null, want: null, pos: {}, on: false, log: [], lit: 0, hi: 0 };
 const HOME_N = Object.keys(SND_FILES).filter(k => /^h\d$/.test(k)).length;   // 第 45 版：主畫面的歌有幾首（輪流放）
 Snd.hi = Math.floor(Math.random() * Math.max(1, HOME_N));                   // 每次打開從隨機一首開始
@@ -6336,6 +6379,12 @@ function sndKillAnim(k) {
       T(NONE_OUT, 'whoosh'); T(NONE_BOARD + .1, 'gong', .4);
       return;
     }
+    if (ej.fool) {   // 第 57 版：投出去的是白癡——鈴鐺、滑哨、大家倒抽一口氣，最後他騎著布馬飛走
+      EJ_PANEL.forEach((p, i) => T(p, 'hit' + i, .8));
+      T(EJ_PANEL[1] + .12, 'jingle'); T(EJ_PANEL[2] + .05, 'r_fool'); T(EJ_PANEL[3] + .08, 'gasp', .9);
+      T(EJ_STAND, 'whoosh'); T(EJ_STAND + .25, 'jingle'); T(EJ_STAND + .7, 'done'); T(EJ_STAND + 1.5, 'jingle', .6); T(EJ_BOARD + .1, 'gong', .4);
+      return;
+    }
     sfx('tense', { cut: EJ_BLACK - .6 });                     // 懸疑的底音，黑屏前淡掉
     EJ_PANEL.forEach((p, i) => T(p, 'hit' + i));               // 四格漫畫一格一格出現
     T(EJ_STAND, 'thud'); T(EJ_STAND + .05, 'whoosh');          // 主角站起來
@@ -6345,13 +6394,25 @@ function sndKillAnim(k) {
     T(EJ_BOARD + .1, 'gong');                                  // 票數
   } else if (k === 5) {   // 獵人開槍
     const hu = killFx.hu || {}; T(.3, hu.shot ? 'gun' : 'empty');
+  } else if (k === 6) {   // 第 57 版：結局漫畫
+    const P = END_PANEL;
+    if (killFx.end === 2) {   // 狼人獲勝：懸疑的底音 → 低吼 → 燈籠碎掉 → 門吱呀一聲、風聲 → 月光下的狼嚎
+      sfx('tense', { cut: END_FULL - .3 });
+      T(P[0], 'hit0', .6); T(P[1], 'hit1', .6); T(P[1] + .15, 'growl', .7);
+      T(P[2], 'glassbreak'); T(P[2] + .12, 'thud'); T(P[3], 'creak'); T(P[3] + .35, 'blow', .6);
+      T(END_FULL, 'r_wolf');
+    } else {                  // 村民獲勝：揭穿 → 拎起來 → 一腳踢出門 → 逃走 → 天亮的鐘聲
+      T(P[0], 'hit0'); T(P[0] + .06, 'report', .5); T(P[1], 'hit1'); T(P[1] + .12, 'whoosh');
+      T(P[2], 'door'); T(P[2] + .08, 'hit2'); T(P[2] + .3, 'whoosh', .7); T(P[3], 'hit3', .6); T(P[3] + .2, 'blow', .7);
+      T(END_FULL, 'dawn');
+    }
   } else if (k === 3) { T(0, 'roar'); T(.45, 'gong', .6); }   // 狼王降臨
   else { if (k === 0) T(.1, 'growl'); T(.45, 'slash'); T(.58, 'thud', .6); }   // 自己被襲擊
 }
 // 換階段的音效：開會（有人倒下＝驚嚇的重音；敲鐘＝鐘聲兩下）、結算（自己這邊贏了／輸了）
 function sndPhase(ph) {
   if (ph === 3 && G && G.mt) { if (G.mt.body >= 0 || G.mt.by === -2) sfx('report'); else { sfx('bell'); sfx('bell', { at: .42, vol: .6 }); } }
-  if (ph === 5 && G && my.idx >= 0) { const w = G.win, mine = w === 2 ? my.wolf : w === 1 ? !my.wolf : my.role === 3; sfx(mine ? 'win' : 'lose', { at: G.why === 4 ? 1.2 : .2 }); }
+  if (ph === 5 && G && my.idx >= 0) { const w = G.win, mine = w === 2 ? my.wolf : w === 1 ? !my.wolf : my.role === 3; sfx(mine ? 'win' : 'lose', { at: w === 3 ? .2 : (G.why === 4 ? KING_LEN : 0) + END_FULL + (w === 2 ? 3.4 : 2.2) }); }   // 第 57 版：有結局漫畫的時候，等最後一張出來、鐘聲／狼嚎過了再響
 }
 // 按鈕的「喀」一聲
 document.addEventListener('pointerdown', e => { const b = e.target && e.target.closest && e.target.closest('button'); if (b && !b.disabled) sfx('click'); }, true);
