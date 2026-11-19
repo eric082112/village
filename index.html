@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>月光光心慌慌</title>
 <meta name="description" content="和朋友連線玩的狼人村：做完村裡的工作，找出混在裡面的狼人。">
-<meta name="lw-build" content="52">
+<meta name="lw-build" content="56">
 <meta name="theme-color" content="#0b151d">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -711,6 +711,8 @@ body.in-sewer #sewFade{display:block;animation:sewIn .22s ease both}
 body.sewer-move #sewFade{background:#04070b}
 @keyframes sewIn{from{opacity:0}to{opacity:1}}
 body.in-sewer .joy{opacity:.25;pointer-events:none}
+/* 第 56 版：被列車撞暈的 2 秒，搖桿和按鈕都不能用 */
+body.stunned .joy,body.stunned .acts{opacity:.3;pointer-events:none}
 #sewerNav{position:fixed;inset:0;pointer-events:none;z-index:31}
 #sewerNav[hidden]{display:none}
 .sewer-go{position:absolute;transform:translate(-50%,-50%);pointer-events:auto;display:flex;flex-direction:column;align-items:center;gap:1px;min-width:74px;padding:7px 10px 6px;border-radius:14px;border:1.5px solid #f08a7e;background:rgba(28,14,16,.86);color:var(--ink);font:inherit;box-shadow:0 3px 12px rgba(0,0,0,.5);-webkit-tap-highlight-color:transparent;touch-action:manipulation;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
@@ -927,7 +929,7 @@ body.task-open #task .panel{max-width:500px}
     </ol>
     <div class="snd-row"><button id="btnMus" class="btn snd-btn" type="button">背景音樂：開</button><button id="btnSfx" class="btn snd-btn" type="button">音效：開</button></div>
     <details class="credits"><summary>音樂與音效來源</summary>
-      <p>背景音樂來自 FreePD（公眾領域）：田園村〈Magic in the Garden〉、開會〈Asking Questions〉Rafael Krux；潮聲漁港〈Windy Old Weather〉、燈籠老街〈Coy Koi〉、霧鐘莊園〈Night in the Castle〉Kevin MacLeod；月影荒原〈Creepy Hallow〉Alexander Nakarada；投票懸疑底音〈Horror Mytery〉；主畫面〈Witch Waltz〉〈Dancing at the Inn〉〈Creepy Comedy〉〈Brewing Potions〉。</p>
+      <p>背景音樂來自 FreePD（公眾領域）：田園村〈Magic in the Garden〉、開會〈Asking Questions〉Rafael Krux；潮聲漁港〈Windy Old Weather〉、燈籠老街〈Coy Koi〉、霧鐘莊園〈Night in the Castle〉、捷運站〈Shenzhen Nightlife〉Kevin MacLeod；月影荒原〈Creepy Hallow〉Alexander Nakarada；投票懸疑底音〈Horror Mytery〉；主畫面〈Witch Waltz〉〈Dancing at the Inn〉〈Creepy Comedy〉〈Brewing Potions〉。</p>
       <p>音效（CC0）：Kenney（kenney.nl）、rubberduck（OpenGameArt）、Warfork（Team Forbidden）、Ben Burnes（滑哨、大提琴、頌缽）。</p>
     </details>
     <button id="btnMenuClose" class="btn primary" type="button">繼續遊戲</button>
@@ -1253,7 +1255,19 @@ Object.assign(ART_PROPS, {"v2i_altar": {"h": 72.9, "w": 66, "ax": 0.5, "iw": 396
 
 Object.assign(ART_PROPS, {"h2i_stall": {"h": 87.2, "w": 76, "ax": 0.5, "iw": 456, "ih": 523, "d": "img-73a3607dc1.webp"}, "h2i_scale": {"h": 60.4, "w": 44, "ax": 0.5, "iw": 264, "ih": 362, "d": "img-0df29b7744.webp"}, "h2i_ice": {"h": 45.7, "w": 46, "ax": 0.5, "iw": 276, "ih": 274, "d": "img-7e29d93930.webp"}, "h2i_icebox": {"h": 41.8, "w": 46, "ax": 0.5, "iw": 276, "ih": 251, "d": "img-2a1ff3d182.webp"}, "h2i_barrel": {"h": 44.7, "w": 36, "ax": 0.5, "iw": 216, "ih": 268, "d": "img-b9d6fcc4e3.webp"}, "h2i_crate": {"h": 42.3, "w": 40, "ax": 0.5, "iw": 240, "ih": 254, "d": "img-1bb313edc7.webp"}, "h2i_basket": {"h": 40.2, "w": 40, "ax": 0.5, "iw": 240, "ih": 241, "d": "img-d96348634d.webp"}, "h2i_tub": {"h": 42.0, "w": 40, "ax": 0.5, "iw": 240, "ih": 252, "d": "img-761a9bc204.webp"}, "h2i_shelf": {"h": 59.8, "w": 50, "ax": 0.5, "iw": 300, "ih": 359, "d": "img-6ce3592ea0.webp"}, "h2i_net": {"h": 45.9, "w": 50, "ax": 0.5, "iw": 300, "ih": 275, "d": "img-13c1bc58fb.webp"}, "h2i_floats": {"h": 42.2, "w": 44, "ax": 0.5, "iw": 264, "ih": 253, "d": "img-83c64511df.webp"}, "h2i_oars": {"h": 64.9, "w": 46, "ax": 0.5, "iw": 276, "ih": 390, "d": "img-38fa85063a.webp"}, "h2i_hull": {"h": 125.7, "w": 112, "ax": 0.5, "iw": 672, "ih": 754, "d": "img-7caf6b0502.webp"}, "h2i_bench": {"h": 49.4, "w": 58, "ax": 0.5, "iw": 348, "ih": 296, "d": "img-614b1f8374.webp"}, "h2i_timber": {"h": 49.0, "w": 50, "ax": 0.5, "iw": 300, "ih": 294, "d": "img-e3b281b1f8.webp"}, "h2o_pine": {"h": 112, "w": 82.5, "ax": 0.44, "iw": 495, "ih": 672, "d": "img-30eb07a561.webp"}, "h2o_casuarina": {"h": 122, "w": 70.1, "ax": 0.426, "iw": 421, "ih": 732, "d": "img-7352f564fc.webp"}, "h2o_pandanus": {"h": 51.7, "w": 52, "ax": 0.5, "iw": 312, "ih": 310, "d": "img-7c1bedcd45.webp"}, "h2o_rock": {"h": 35.3, "w": 52, "ax": 0.5, "iw": 312, "ih": 212, "d": "img-2956d7d5e6.webp"}, "h2o_sampan": {"h": 71.5, "w": 100, "ax": 0.5, "iw": 600, "ih": 429, "d": "img-5dbeb80ae0.webp"}, "h2o_boat": {"h": 102.8, "w": 128, "ax": 0.5, "iw": 768, "ih": 617, "d": "img-4799603235.webp"}, "h2o_rack": {"h": 59.5, "w": 62, "ax": 0.5, "iw": 372, "ih": 357, "d": "img-6ce3516179.webp"}, "h2o_netrack": {"h": 63.3, "w": 74, "ax": 0.5, "iw": 444, "ih": 380, "d": "img-b1752cc310.webp"}, "h2o_baskets": {"h": 45.3, "w": 46, "ax": 0.5, "iw": 276, "ih": 272, "d": "img-e5b2a93362.webp"}, "h2o_bollard": {"h": 40.2, "w": 34, "ax": 0.5, "iw": 204, "ih": 241, "d": "img-648a6f9930.webp"}, "h2o_anchor": {"h": 46.5, "w": 42, "ax": 0.5, "iw": 252, "ih": 279, "d": "img-bf8e64fea2.webp"}, "h2o_floats": {"h": 41.1, "w": 44, "ax": 0.5, "iw": 264, "ih": 246, "d": "img-c24b93bdd5.webp"}, "h2o_lamp": {"h": 64, "w": 33.1, "ax": 0.291, "iw": 199, "ih": 384, "d": "img-4c81461993.webp"}, "h2o_cart": {"h": 62.8, "w": 72, "ax": 0.5, "iw": 432, "ih": 377, "d": "img-9c8f868a04.webp"}, "h2o_sign": {"h": 60, "w": 35.7, "ax": 0.5, "iw": 214, "ih": 360, "d": "img-2c37092739.webp"}, "h2o_crates": {"h": 51.5, "w": 50, "ax": 0.5, "iw": 300, "ih": 309, "d": "img-693c5b2810.webp"}, "h2o_shells": {"h": 30.8, "w": 36, "ax": 0.5, "iw": 216, "ih": 185, "d": "img-c31be56dc7.webp"}, "h2o_gull": {"h": 30, "w": 30.9, "ax": 0.5, "iw": 185, "ih": 180, "d": "img-759f35f2ad.webp"}, "h2o_railing": {"h": 41.7, "w": 60, "ax": 0.5, "iw": 360, "ih": 250, "d": "img-6992487e50.webp"}, "h2o_fishing": {"h": 58, "w": 40.4, "ax": 0.5, "iw": 242, "ih": 348, "d": "img-6b038bc2ff.webp"}, "h2i_beacon": {"h": 68.7, "w": 42, "ax": 0.5, "iw": 252, "ih": 412, "d": "img-944f047c7c.webp"}, "h2i_drum": {"h": 54.6, "w": 38, "ax": 0.5, "iw": 228, "ih": 328, "d": "img-19834d79e1.webp"}, "h2i_bed": {"h": 54.2, "w": 62, "ax": 0.5, "iw": 372, "ih": 326, "d": "img-45a52ac2c0.webp"}, "h2i_table": {"h": 58.7, "w": 56, "ax": 0.5, "iw": 336, "ih": 352, "d": "img-b6a32fe46a.webp"}, "h2i_brazier": {"h": 55.7, "w": 38, "ax": 0.5, "iw": 228, "ih": 334, "d": "img-c324c32121.webp"}, "h2i_cabinet": {"h": 50.8, "w": 48, "ax": 0.5, "iw": 288, "ih": 305, "d": "img-a85d9c5b7f.webp"}, "h2i_cape": {"h": 60.6, "w": 46, "ax": 0.5, "iw": 276, "ih": 364, "d": "img-93f72b73ff.webp"}});
 // 這個檔案由 art/taskart.py 產生：第 51 版，任務小遊戲的插圖（4 張拼圖）
-const TASK_ATLAS = {"t1": {"d": "img-4785c64713.webp", "box": {"f_log": [37, 4, 165, 232], "f_axe": [273, 4, 174, 232], "f_split": [484, 11, 232, 217], "f_lantern": [771, 4, 138, 232], "f_bucket": [992, 4, 176, 232], "f_wheat": [1235, 4, 169, 232], "f_sickle": [37, 244, 165, 232], "f_sheaf": [276, 244, 168, 232], "f_can": [484, 253, 232, 214], "f_sprout": [724, 255, 232, 210], "f_fish": [964, 291, 232, 137], "f_float": [1268, 244, 104, 232], "f_egg": [25, 484, 189, 232], "f_basket": [260, 484, 200, 232], "f_hammer": [516, 484, 167, 232], "f_iron": [724, 511, 232, 177], "f_dough": [964, 506, 232, 187], "f_bread": [1204, 508, 232, 184], "f_pumpkin": [4, 734, 232, 211], "f_corn": [257, 724, 205, 232], "f_carrot": [517, 724, 166, 232], "f_jar": [746, 724, 187, 232]}}, "t2": {"d": "img-677c1679b2.webp", "box": {"h_ice": [4, 10, 232, 219], "h_tongs": [288, 4, 143, 232], "h_hook": [524, 4, 152, 232], "h_rope": [724, 31, 232, 177], "h_spool": [980, 4, 199, 232], "h_plank": [1204, 38, 232, 164], "h_nails": [4, 244, 232, 232], "h_netfish": [267, 244, 186, 232], "h_rackempty": [484, 246, 232, 227], "h_dried": [780, 244, 120, 232], "h_needle": [1002, 244, 156, 232], "h_scallop": [1204, 253, 232, 214], "h_conch": [32, 484, 176, 232], "h_star": [244, 484, 232, 231], "h_crab": [484, 498, 232, 203], "h_shrimp": [724, 486, 232, 228], "h_octopus": [964, 489, 232, 222], "h_brush": [1204, 506, 232, 187], "h_weight": [35, 724, 170, 232], "h_redfish": [244, 753, 232, 174]}}, "t3": {"d": "img-27e34bc46c.webp", "box": {"s_cup": [4, 8, 232, 224], "s_scissors": [268, 4, 184, 232], "s_incense": [555, 4, 90, 232], "s_ginseng": [752, 4, 176, 232], "s_goji": [964, 39, 232, 161], "s_lingzhi": [1204, 19, 232, 202], "s_chrys": [4, 264, 232, 191], "s_anise": [244, 249, 232, 221], "s_angelica": [484, 244, 232, 232], "s_steamer": [724, 244, 232, 232], "s_bun": [964, 264, 232, 192], "s_brush": [1236, 244, 168, 232], "s_inkstone": [4, 490, 232, 220], "s_leaves": [244, 506, 232, 188], "s_broom": [527, 484, 146, 232], "s_orange": [724, 487, 232, 226], "s_persimmon": [964, 497, 232, 205], "s_cat": [1228, 484, 183, 232], "s_driedfish": [4, 784, 232, 112], "s_peg": [259, 724, 201, 232]}}, "t4": {"d": "img-de2d81ad0b.webp", "box": {"m_hay": [4, 8, 232, 224], "m_rope": [248, 4, 223, 232], "m_fork": [531, 4, 137, 232], "m_horseshoe": [728, 4, 223, 232], "m_grave": [975, 4, 210, 232], "m_sheep": [1204, 11, 232, 217], "m_cabbage": [4, 253, 232, 214], "m_pot": [248, 244, 223, 232], "m_shears": [506, 244, 187, 232], "m_plate": [724, 266, 232, 187], "m_teapot": [964, 256, 232, 208], "m_cloth": [1204, 262, 232, 195], "m_bud": [29, 484, 181, 232], "m_bloom": [268, 484, 184, 232], "m_horse": [511, 484, 178, 232], "m_pie": [724, 505, 232, 189], "m_koi": [1019, 484, 122, 232], "m_apple": [1215, 484, 209, 232], "m_candle": [15, 724, 209, 232], "m_match": [271, 724, 177, 232], "m_knife": [484, 727, 232, 226], "m_whetstone": [724, 742, 232, 196]}}};
+const TASK_ATLAS = {"t1": {"d": "img-4785c64713.webp", "box": {"f_log": [37, 4, 165, 232], "f_axe": [273, 4, 174, 232], "f_split": [484, 11, 232, 217], "f_lantern": [771, 4, 138, 232], "f_bucket": [992, 4, 176, 232], "f_wheat": [1235, 4, 169, 232], "f_sickle": [37, 244, 165, 232], "f_sheaf": [276, 244, 168, 232], "f_can": [484, 253, 232, 214], "f_sprout": [724, 255, 232, 210], "f_fish": [964, 291, 232, 137], "f_float": [1268, 244, 104, 232], "f_egg": [25, 484, 189, 232], "f_basket": [260, 484, 200, 232], "f_hammer": [516, 484, 167, 232], "f_iron": [724, 511, 232, 177], "f_dough": [964, 506, 232, 187], "f_bread": [1204, 508, 232, 184], "f_pumpkin": [4, 734, 232, 211], "f_corn": [257, 724, 205, 232], "f_carrot": [517, 724, 166, 232], "f_jar": [746, 724, 187, 232]}}, "t2": {"d": "img-677c1679b2.webp", "box": {"h_ice": [4, 10, 232, 219], "h_tongs": [288, 4, 143, 232], "h_hook": [524, 4, 152, 232], "h_rope": [724, 31, 232, 177], "h_spool": [980, 4, 199, 232], "h_plank": [1204, 38, 232, 164], "h_nails": [4, 244, 232, 232], "h_netfish": [267, 244, 186, 232], "h_rackempty": [484, 246, 232, 227], "h_dried": [780, 244, 120, 232], "h_needle": [1002, 244, 156, 232], "h_scallop": [1204, 253, 232, 214], "h_conch": [32, 484, 176, 232], "h_star": [244, 484, 232, 231], "h_crab": [484, 498, 232, 203], "h_shrimp": [724, 486, 232, 228], "h_octopus": [964, 489, 232, 222], "h_brush": [1204, 506, 232, 187], "h_weight": [35, 724, 170, 232], "h_redfish": [244, 753, 232, 174]}}, "t3": {"d": "img-27e34bc46c.webp", "box": {"s_cup": [4, 8, 232, 224], "s_scissors": [268, 4, 184, 232], "s_incense": [555, 4, 90, 232], "s_ginseng": [752, 4, 176, 232], "s_goji": [964, 39, 232, 161], "s_lingzhi": [1204, 19, 232, 202], "s_chrys": [4, 264, 232, 191], "s_anise": [244, 249, 232, 221], "s_angelica": [484, 244, 232, 232], "s_steamer": [724, 244, 232, 232], "s_bun": [964, 264, 232, 192], "s_brush": [1236, 244, 168, 232], "s_inkstone": [4, 490, 232, 220], "s_leaves": [244, 506, 232, 188], "s_broom": [527, 484, 146, 232], "s_orange": [724, 487, 232, 226], "s_persimmon": [964, 497, 232, 205], "s_cat": [1228, 484, 183, 232], "s_driedfish": [4, 784, 232, 112], "s_peg": [259, 724, 201, 232]}}, "t4": {"d": "img-de2d81ad0b.webp", "box": {"m_hay": [4, 8, 232, 224], "m_rope": [248, 4, 223, 232], "m_fork": [531, 4, 137, 232], "m_horseshoe": [728, 4, 223, 232], "m_grave": [975, 4, 210, 232], "m_sheep": [1204, 11, 232, 217], "m_cabbage": [4, 253, 232, 214], "m_pot": [248, 244, 223, 232], "m_shears": [506, 244, 187, 232], "m_plate": [724, 266, 232, 187], "m_teapot": [964, 256, 232, 208], "m_cloth": [1204, 262, 232, 195], "m_bud": [29, 484, 181, 232], "m_bloom": [268, 484, 184, 232], "m_horse": [511, 484, 178, 232], "m_pie": [724, 505, 232, 189], "m_koi": [1019, 484, 122, 232], "m_apple": [1215, 484, 209, 232], "m_candle": [15, 724, 209, 232], "m_match": [271, 724, 177, 232], "m_knife": [484, 727, 232, 226], "m_whetstone": [724, 742, 232, 196]}}, "t5": {"d": "img-51e353e88a.webp", "box": {"t_card": [4, 32, 232, 176], "t_token": [244, 8, 232, 223], "t_ticket": [484, 39, 232, 161], "t_coin": [724, 4, 231, 232], "t_mic": [991, 4, 177, 232], "t_onigiri": [1204, 17, 232, 205], "t_can": [47, 244, 146, 232], "t_sandwich": [259, 244, 201, 232], "t_pudding": [485, 244, 230, 232], "t_noodles": [756, 244, 167, 232], "t_milk": [989, 244, 182, 232], "t_suitcase": [1244, 244, 151, 232], "t_backpack": [27, 484, 185, 232], "t_umbrella": [298, 484, 124, 232], "t_wrench": [522, 484, 155, 232], "t_gear": [731, 484, 218, 232], "t_bolt": [989, 484, 182, 232], "t_cloth": [1216, 484, 208, 232], "t_crushed": [37, 724, 165, 232], "t_cup": [288, 724, 143, 232], "t_paperball": [484, 725, 232, 230], "t_pigeon": [734, 724, 212, 232]}}};
+// 這個檔案由 art/street2art.py 產生：第 53 版，燈籠老街新畫風的家具和戶外小物件
+
+Object.assign(ART_PROPS, {"s2i_altar": {"h": 84.3, "w": 72, "ax": 0.5, "iw": 432, "ih": 506, "d": "img-3c4b4cd8e0.webp"}, "s2i_donate": {"h": 40.8, "w": 38, "ax": 0.5, "iw": 228, "ih": 245, "d": "img-9b88629fe8.webp"}, "s2i_teashelf": {"h": 64.7, "w": 46, "ax": 0.5, "iw": 276, "ih": 388, "d": "img-a894373876.webp"}, "s2i_teatable": {"h": 54.7, "w": 58, "ax": 0.5, "iw": 348, "ih": 328, "d": "img-a5481f7e1e.webp"}, "s2i_bolts": {"h": 56.3, "w": 44, "ax": 0.5, "iw": 264, "ih": 338, "d": "img-286a0b03ce.webp"}, "s2i_tailor": {"h": 55.4, "w": 64, "ax": 0.5, "iw": 384, "ih": 333, "d": "img-7d5107903b.webp"}, "s2i_medicine": {"h": 62.4, "w": 44, "ax": 0.5, "iw": 264, "ih": 375, "d": "img-528f9fec2c.webp"}, "s2i_mortar": {"h": 60.7, "w": 46, "ax": 0.5, "iw": 276, "ih": 364, "d": "img-a386ee24c1.webp"}, "s2i_steamer": {"h": 69.4, "w": 46, "ax": 0.5, "iw": 276, "ih": 416, "d": "img-e510658339.webp"}, "s2i_buns": {"h": 48.5, "w": 62, "ax": 0.5, "iw": 372, "ih": 291, "d": "img-f927fb4383.webp"}, "s2i_desk": {"h": 62.3, "w": 62, "ax": 0.5, "iw": 372, "ih": 374, "d": "img-ba1e0e217d.webp"}, "s2i_bookshelf": {"h": 64.6, "w": 46, "ax": 0.5, "iw": 276, "ih": 388, "d": "img-c7effb45fb.webp"}, "s2i_vat": {"h": 49.1, "w": 46, "ax": 0.5, "iw": 276, "ih": 295, "d": "img-0cddf1413c.webp"}, "s2i_dryrack": {"h": 73.1, "w": 70, "ax": 0.5, "iw": 420, "ih": 439, "d": "img-3cebdd4b9d.webp"}, "s2i_dyes": {"h": 48.4, "w": 46, "ax": 0.5, "iw": 276, "ih": 291, "d": "img-07d74abf8a.webp"}, "s2i_bed": {"h": 52.4, "w": 66, "ax": 0.5, "iw": 396, "ih": 315, "d": "img-086901bfa1.webp"}, "s2i_dining": {"h": 57.7, "w": 70, "ax": 0.5, "iw": 420, "ih": 346, "d": "img-e08ce31f52.webp"}, "s2i_wardrobe": {"h": 58.7, "w": 44, "ax": 0.5, "iw": 264, "ih": 352, "d": "img-3c83175f31.webp"}, "s2i_stove": {"h": 61.8, "w": 70, "ax": 0.5, "iw": 420, "ih": 371, "d": "img-8da5a01da7.webp"}, "s2i_rice": {"h": 49.6, "w": 42, "ax": 0.5, "iw": 252, "ih": 297, "d": "img-9c59241419.webp"}, "s2i_screen": {"h": 57.8, "w": 52, "ax": 0.5, "iw": 312, "ih": 347, "d": "img-cdc4cb95bc.webp"}, "s2i_chairs": {"h": 50.4, "w": 70, "ax": 0.5, "iw": 420, "ih": 302, "d": "img-b55437f3bf.webp"}, "s2o_banyan": {"h": 124, "w": 132.2, "ax": 0.518, "iw": 793, "ih": 744, "d": "img-946683303a.webp"}, "s2o_plum": {"h": 100, "w": 99.1, "ax": 0.476, "iw": 595, "ih": 600, "d": "img-b04622511c.webp"}, "s2o_bamboo": {"h": 112, "w": 89.2, "ax": 0.516, "iw": 535, "ih": 672, "d": "img-eb9358c2ee.webp"}, "s2o_potbush": {"h": 49.2, "w": 42, "ax": 0.5, "iw": 252, "ih": 295, "d": "img-435614d4b2.webp"}, "s2o_arch": {"h": 133.8, "w": 150, "ax": 0.5, "iw": 900, "ih": 803, "d": "img-5821f909f4.webp"}, "s2o_well": {"h": 82, "w": 66.6, "ax": 0.5, "iw": 400, "ih": 492, "d": "img-e4c259240f.webp"}, "s2o_stall": {"h": 73.7, "w": 78, "ax": 0.5, "iw": 468, "ih": 442, "d": "img-b60947afc4.webp"}, "s2o_snackcart": {"h": 77.0, "w": 78, "ax": 0.5, "iw": 468, "ih": 462, "d": "img-87a266e513.webp"}, "s2o_censer": {"h": 66.8, "w": 46, "ax": 0.5, "iw": 276, "ih": 401, "d": "img-32e64b1524.webp"}, "s2o_waterjar": {"h": 46.5, "w": 42, "ax": 0.5, "iw": 252, "ih": 279, "d": "img-1c2e08dc51.webp"}, "s2o_barrel": {"h": 45.8, "w": 36, "ax": 0.5, "iw": 216, "ih": 275, "d": "img-a47c53fefa.webp"}, "s2o_crate": {"h": 41.5, "w": 40, "ax": 0.5, "iw": 240, "ih": 249, "d": "img-2e5867a7e2.webp"}, "s2o_lamp": {"h": 66, "w": 36.4, "ax": 0.2, "iw": 218, "ih": 396, "d": "img-87bd1de884.webp"}, "s2o_lion": {"h": 60.3, "w": 42, "ax": 0.5, "iw": 252, "ih": 362, "d": "img-04ea692623.webp"}, "s2o_banner": {"h": 62, "w": 31.6, "ax": 0.5, "iw": 190, "ih": 372, "d": "img-a9f2dfd255.webp"}, "s2o_clothrack": {"h": 65.5, "w": 72, "ax": 0.5, "iw": 432, "ih": 393, "d": "img-9a559af3c1.webp"}, "s2o_cat": {"h": 30, "w": 26.9, "ax": 0.5, "iw": 162, "ih": 180, "d": "img-912f79f7c0.webp"}, "s2o_broom": {"h": 46, "w": 35.4, "ax": 0.5, "iw": 212, "ih": 276, "d": "img-0b0f0b04d8.webp"}, "s2o_bench": {"h": 32.8, "w": 62, "ax": 0.5, "iw": 372, "ih": 197, "d": "img-84db854ea2.webp"}, "s2o_flowerpot": {"h": 36.9, "w": 32, "ax": 0.5, "iw": 192, "ih": 221, "d": "img-54eb75a034.webp"}});
+// 這個檔案由 art/moor2art.py 產生：第 54 版，月影荒原新畫風的家具和戶外小物件
+
+Object.assign(ART_PROPS, {"m2i_chapel": {"h": 93.3, "w": 70, "ax": 0.5, "iw": 420, "ih": 560, "d": "img-c2426fe177.webp"}, "m2i_pew": {"h": 61.5, "w": 60, "ax": 0.5, "iw": 360, "ih": 369, "d": "img-57409ec1af.webp"}, "m2i_candles": {"h": 73.0, "w": 36, "ax": 0.5, "iw": 216, "ih": 438, "d": "img-edc75b6678.webp"}, "m2i_organ": {"h": 76.0, "w": 52, "ax": 0.5, "iw": 312, "ih": 456, "d": "img-180e0a28e8.webp"}, "m2i_millstone": {"h": 62.6, "w": 54, "ax": 0.5, "iw": 324, "ih": 376, "d": "img-99a2c30da9.webp"}, "m2i_sacks": {"h": 50.1, "w": 44, "ax": 0.5, "iw": 264, "ih": 301, "d": "img-b986aa521a.webp"}, "m2i_gear": {"h": 62.4, "w": 50, "ax": 0.5, "iw": 300, "ih": 375, "d": "img-2c7c22cc24.webp"}, "m2i_barrel": {"h": 46.4, "w": 36, "ax": 0.5, "iw": 216, "ih": 278, "d": "img-acef4c94b8.webp"}, "m2i_hay": {"h": 52.8, "w": 52, "ax": 0.5, "iw": 312, "ih": 317, "d": "img-538406ff9d.webp"}, "m2i_feeder": {"h": 47.0, "w": 64, "ax": 0.5, "iw": 384, "ih": 282, "d": "img-2cf40af4de.webp"}, "m2i_saddle": {"h": 50.0, "w": 50, "ax": 0.5, "iw": 300, "ih": 300, "d": "img-463bc04436.webp"}, "m2i_crate": {"h": 40.5, "w": 40, "ax": 0.5, "iw": 240, "ih": 243, "d": "img-80af9dbd28.webp"}, "m2i_forge": {"h": 69.7, "w": 56, "ax": 0.5, "iw": 336, "ih": 418, "d": "img-c48bb6a7df.webp"}, "m2i_anvil": {"h": 49.0, "w": 46, "ax": 0.5, "iw": 276, "ih": 294, "d": "img-cdf65b9c55.webp"}, "m2i_tools": {"h": 58.9, "w": 58, "ax": 0.5, "iw": 348, "ih": 354, "d": "img-7ddf073602.webp"}, "m2i_bed": {"h": 68.0, "w": 64, "ax": 0.5, "iw": 384, "ih": 408, "d": "img-a9cf126d4f.webp"}, "m2i_fireplace": {"h": 87.0, "w": 66, "ax": 0.5, "iw": 396, "ih": 522, "d": "img-133304e187.webp"}, "m2i_table": {"h": 68.1, "w": 62, "ax": 0.5, "iw": 372, "ih": 408, "d": "img-f72bfe6fb7.webp"}, "m2i_cupboard": {"h": 66.2, "w": 46, "ax": 0.5, "iw": 276, "ih": 397, "d": "img-50c69b3687.webp"}, "m2i_rocker": {"h": 56.5, "w": 44, "ax": 0.5, "iw": 264, "ih": 339, "d": "img-1515bd2b4b.webp"}, "m2i_firewood": {"h": 42.3, "w": 40, "ax": 0.5, "iw": 240, "ih": 254, "d": "img-b9fb4677ac.webp"}, "m2i_tub": {"h": 51.7, "w": 40, "ax": 0.5, "iw": 240, "ih": 310, "d": "img-440f624415.webp"}, "m2o_pine": {"h": 112, "w": 122.5, "ax": 0.451, "iw": 735, "ih": 672, "d": "img-35dc5e5f1d.webp"}, "m2o_dead": {"h": 104, "w": 99.7, "ax": 0.442, "iw": 598, "ih": 624, "d": "img-5757694723.webp"}, "m2o_birch": {"h": 118, "w": 94.8, "ax": 0.431, "iw": 569, "ih": 708, "d": "img-00c25fb876.webp"}, "m2o_heather": {"h": 40.7, "w": 52, "ax": 0.5, "iw": 312, "ih": 244, "d": "img-ab11251b90.webp"}, "m2o_rune": {"h": 84, "w": 73.4, "ax": 0.5, "iw": 440, "ih": 504, "d": "img-cd178a5181.webp"}, "m2o_well": {"h": 84, "w": 68.5, "ax": 0.5, "iw": 411, "ih": 504, "d": "img-608e4aad62.webp"}, "m2o_grave": {"h": 39.2, "w": 44, "ax": 0.5, "iw": 264, "ih": 235, "d": "img-77c71ecb35.webp"}, "m2o_cross": {"h": 64, "w": 50.9, "ax": 0.5, "iw": 305, "ih": 384, "d": "img-c31f5ebe41.webp"}, "m2o_boulder": {"h": 46.2, "w": 54, "ax": 0.5, "iw": 324, "ih": 277, "d": "img-4863d69366.webp"}, "m2o_peat": {"h": 36.8, "w": 48, "ax": 0.5, "iw": 288, "ih": 221, "d": "img-188c315af0.webp"}, "m2o_stump": {"h": 54.6, "w": 54, "ax": 0.5, "iw": 324, "ih": 327, "d": "img-54f713bcfe.webp"}, "m2o_trough": {"h": 40.4, "w": 58, "ax": 0.5, "iw": 348, "ih": 242, "d": "img-c0073a1c9a.webp"}, "m2o_lamp": {"h": 68, "w": 35.1, "ax": 0.256, "iw": 211, "ih": 408, "d": "img-9ffbebdd15.webp"}, "m2o_scarecrow": {"h": 70, "w": 54.9, "ax": 0.5, "iw": 329, "ih": 420, "d": "img-ded0d80e51.webp"}, "m2o_sign": {"h": 60, "w": 45.5, "ax": 0.5, "iw": 273, "ih": 360, "d": "img-0721cf470e.webp"}, "m2o_sheep": {"h": 40.4, "w": 44, "ax": 0.5, "iw": 264, "ih": 242, "d": "img-d1e5e655f6.webp"}, "m2o_gate": {"h": 51.3, "w": 64, "ax": 0.5, "iw": 384, "ih": 308, "d": "img-5ef7d77bf0.webp"}, "m2o_hayroll": {"h": 45.5, "w": 50, "ax": 0.5, "iw": 300, "ih": 273, "d": "img-fe99dd8e49.webp"}, "m2o_mushroom": {"h": 31.4, "w": 34, "ax": 0.5, "iw": 204, "ih": 189, "d": "img-f285896b17.webp"}, "m2o_crow": {"h": 36, "w": 31.1, "ax": 0.5, "iw": 187, "ih": 216, "d": "img-926cb3be4c.webp"}});
+// 這個檔案由 art/manor2art.py 產生：第 55 版，霧鐘莊園新畫風的家具和戶外小物件
+
+Object.assign(ART_PROPS, {"n2i_fourposter": {"h": 97.1, "w": 70, "ax": 0.5, "iw": 420, "ih": 582, "d": "img-c42ada6778.webp"}, "n2i_dining": {"h": 83.2, "w": 74, "ax": 0.5, "iw": 444, "ih": 499, "d": "img-041647ec48.webp"}, "n2i_sofa": {"h": 61.2, "w": 68, "ax": 0.5, "iw": 408, "ih": 367, "d": "img-4c3633e777.webp"}, "n2i_bookcase": {"h": 71.7, "w": 46, "ax": 0.5, "iw": 276, "ih": 430, "d": "img-ea8d1ba79a.webp"}, "n2i_desk": {"h": 79.3, "w": 68, "ax": 0.5, "iw": 408, "ih": 476, "d": "img-4c3cbef301.webp"}, "n2i_fireplace": {"h": 81.1, "w": 70, "ax": 0.5, "iw": 420, "ih": 487, "d": "img-3022f5d9fb.webp"}, "n2i_clock": {"h": 79.1, "w": 30, "ax": 0.5, "iw": 180, "ih": 475, "d": "img-70804bdcff.webp"}, "n2i_piano": {"h": 68.4, "w": 58, "ax": 0.5, "iw": 348, "ih": 410, "d": "img-38e2b3c7ab.webp"}, "n2i_silver": {"h": 69.8, "w": 48, "ax": 0.5, "iw": 288, "ih": 419, "d": "img-7133f6f5d2.webp"}, "n2i_wardrobe": {"h": 65.4, "w": 46, "ax": 0.5, "iw": 276, "ih": 392, "d": "img-b2a61d7dc5.webp"}, "n2i_range": {"h": 88.6, "w": 68, "ax": 0.5, "iw": 408, "ih": 532, "d": "img-6dc90f1c10.webp"}, "n2i_worktable": {"h": 68.4, "w": 68, "ax": 0.5, "iw": 408, "ih": 410, "d": "img-874e86c517.webp"}, "n2i_potrack": {"h": 54.8, "w": 56, "ax": 0.5, "iw": 336, "ih": 329, "d": "img-1ba7140437.webp"}, "n2i_barrel": {"h": 47.4, "w": 36, "ax": 0.5, "iw": 216, "ih": 284, "d": "img-71f3a0f2ed.webp"}, "n2i_plantstand": {"h": 63.3, "w": 46, "ax": 0.5, "iw": 276, "ih": 380, "d": "img-5f6cc4dfb2.webp"}, "n2i_potting": {"h": 84.4, "w": 70, "ax": 0.5, "iw": 420, "ih": 507, "d": "img-a7c6f38b6a.webp"}, "n2i_manger": {"h": 61.2, "w": 68, "ax": 0.5, "iw": 408, "ih": 367, "d": "img-e128412aaa.webp"}, "n2i_haybale": {"h": 39.0, "w": 50, "ax": 0.5, "iw": 300, "ih": 234, "d": "img-7a5a1708cb.webp"}, "n2i_saddle": {"h": 53.1, "w": 50, "ax": 0.5, "iw": 300, "ih": 319, "d": "img-ebf54084ed.webp"}, "n2i_altar": {"h": 86.6, "w": 70, "ax": 0.5, "iw": 420, "ih": 519, "d": "img-c83672a3e4.webp"}, "n2i_pew": {"h": 64.2, "w": 68, "ax": 0.5, "iw": 408, "ih": 385, "d": "img-e9118f6fad.webp"}, "n2i_candles": {"h": 76.2, "w": 36, "ax": 0.5, "iw": 216, "ih": 457, "d": "img-515f4e95a9.webp"}, "n2o_apple": {"h": 110, "w": 97.9, "ax": 0.519, "iw": 587, "ih": 660, "d": "img-e5ba4f7cdf.webp"}, "n2o_ball": {"h": 104, "w": 85.6, "ax": 0.502, "iw": 514, "ih": 624, "d": "img-f6c5794f71.webp"}, "n2o_cone": {"h": 96, "w": 61.1, "ax": 0.495, "iw": 366, "ih": 576, "d": "img-8d6b57ccd9.webp"}, "n2o_spiral": {"h": 100, "w": 58.0, "ax": 0.519, "iw": 348, "ih": 600, "d": "img-11c80b1860.webp"}, "n2o_hedge": {"h": 47.5, "w": 80, "ax": 0.5, "iw": 480, "ih": 285, "d": "img-d4dcb32400.webp"}, "n2o_roses": {"h": 51.3, "w": 60, "ax": 0.5, "iw": 360, "ih": 308, "d": "img-9d056ea8ee.webp"}, "n2o_fountain": {"h": 102.9, "w": 86, "ax": 0.5, "iw": 516, "ih": 618, "d": "img-75dd63673a.webp"}, "n2o_angel": {"h": 76, "w": 45.3, "ax": 0.5, "iw": 272, "ih": 456, "d": "img-23ce413181.webp"}, "n2o_gazebo": {"h": 126.8, "w": 92, "ax": 0.5, "iw": 552, "ih": 761, "d": "img-ba7426c678.webp"}, "n2o_bench": {"h": 51.8, "w": 60, "ax": 0.5, "iw": 360, "ih": 311, "d": "img-95e9f86184.webp"}, "n2o_lamp": {"h": 70, "w": 20.4, "ax": 0.492, "iw": 122, "ih": 420, "d": "img-4cd69415ba.webp"}, "n2o_urn": {"h": 52.4, "w": 44, "ax": 0.5, "iw": 264, "ih": 314, "d": "img-e7d498ab0a.webp"}, "n2o_sundial": {"h": 60.0, "w": 40, "ax": 0.5, "iw": 240, "ih": 360, "d": "img-3bc6e47270.webp"}, "n2o_birdbath": {"h": 57.4, "w": 46, "ax": 0.5, "iw": 276, "ih": 345, "d": "img-d7841d9c13.webp"}, "n2o_barrow": {"h": 67.2, "w": 70, "ax": 0.5, "iw": 420, "ih": 403, "d": "img-6230e335c2.webp"}, "n2o_can": {"h": 36.6, "w": 36, "ax": 0.5, "iw": 216, "ih": 220, "d": "img-47428d82b7.webp"}, "n2o_basket": {"h": 44.0, "w": 40, "ax": 0.5, "iw": 240, "ih": 264, "d": "img-46cd716f9b.webp"}, "n2o_picnic": {"h": 55.9, "w": 74, "ax": 0.5, "iw": 444, "ih": 335, "d": "img-ae7cae564c.webp"}, "n2o_railing": {"h": 45.5, "w": 64, "ax": 0.5, "iw": 384, "ih": 273, "d": "img-4dd276baf1.webp"}, "n2o_peacock": {"h": 46, "w": 41.2, "ax": 0.5, "iw": 247, "ih": 276, "d": "img-e9433cb6a6.webp"}});
+// 這個檔案由 art/metro2art.py 產生：第 56 版，捷運站的物件和列車
+
+Object.assign(ART_PROPS, {"t2i_ticket": {"h": 66, "w": 39.5, "ax": 0.5, "iw": 237, "ih": 396, "d": "img-36f99f5554.webp"}, "t2i_gate": {"h": 46, "w": 27.1, "ax": 0.5, "iw": 163, "ih": 276, "d": "img-9a8738aa1c.webp"}, "t2i_info": {"h": 85.2, "w": 70, "ax": 0.5, "iw": 420, "ih": 511, "d": "img-4935a83a17.webp"}, "t2i_routemap": {"h": 66, "w": 48.4, "ax": 0.5, "iw": 290, "ih": 396, "d": "img-8a851910dd.webp"}, "t2i_lockers": {"h": 74, "w": 58.9, "ax": 0.5, "iw": 353, "ih": 444, "d": "img-cc6b7dfe89.webp"}, "t2i_shelf": {"h": 68, "w": 48.4, "ax": 0.5, "iw": 290, "ih": 408, "d": "img-4996c4966a.webp"}, "t2i_fridge": {"h": 70, "w": 48.5, "ax": 0.5, "iw": 291, "ih": 420, "d": "img-25849fda99.webp"}, "t2i_checkout": {"h": 77.0, "w": 64, "ax": 0.5, "iw": 384, "ih": 462, "d": "img-bea1164de4.webp"}, "t2i_vending": {"h": 68, "w": 51.7, "ax": 0.5, "iw": 310, "ih": 408, "d": "img-1f930c78fd.webp"}, "t2i_seats": {"h": 48.7, "w": 72, "ax": 0.5, "iw": 432, "ih": 292, "d": "img-a1b57ed2a1.webp"}, "t2i_bins": {"h": 51.7, "w": 62, "ax": 0.5, "iw": 372, "ih": 310, "d": "img-807ac33e9c.webp"}, "t2i_plant": {"h": 54, "w": 43.1, "ax": 0.5, "iw": 258, "ih": 324, "d": "img-4de07e1b1c.webp"}, "t2i_topup": {"h": 62, "w": 37.2, "ax": 0.5, "iw": 223, "ih": 372, "d": "img-11693a961a.webp"}, "t2i_claw": {"h": 68, "w": 48.3, "ax": 0.5, "iw": 290, "ih": 408, "d": "img-ef698a5407.webp"}, "t2i_power": {"h": 60, "w": 48.9, "ax": 0.5, "iw": 294, "ih": 360, "d": "img-fef5ed9a13.webp"}, "t2i_extinguisher": {"h": 50, "w": 41.7, "ax": 0.5, "iw": 250, "ih": 300, "d": "img-941caf9865.webp"}, "t2i_cleancart": {"h": 58, "w": 40.2, "ax": 0.5, "iw": 241, "ih": 348, "d": "img-1a936265e5.webp"}, "t2i_wetsign": {"h": 38, "w": 30.4, "ax": 0.5, "iw": 183, "ih": 228, "d": "img-7b88b112fd.webp"}, "t2i_board": {"h": 66, "w": 52.9, "ax": 0.5, "iw": 317, "ih": 396, "d": "img-d2a28922ba.webp"}, "t2i_kiosk": {"h": 58, "w": 48.1, "ax": 0.5, "iw": 289, "ih": 348, "d": "img-3e2722d83f.webp"}, "t2i_photobooth": {"h": 72, "w": 58.5, "ax": 0.5, "iw": 351, "ih": 432, "d": "img-4d21c5836d.webp"}, "t2i_coffee": {"h": 77.1, "w": 64, "ax": 0.5, "iw": 384, "ih": 463, "d": "img-8647d3eff2.webp"}, "t2o_tree": {"h": 104, "w": 82.4, "ax": 0.517, "iw": 494, "ih": 624, "d": "img-56129d8c22.webp"}, "t2o_shrub": {"h": 37.5, "w": 42, "ax": 0.5, "iw": 252, "ih": 225, "d": "img-0f5c4ffd09.webp"}, "t2o_planter": {"h": 59.8, "w": 72, "ax": 0.5, "iw": 432, "ih": 359, "d": "img-5e08dc84d3.webp"}, "t2o_canopy": {"h": 96.3, "w": 92, "ax": 0.5, "iw": 552, "ih": 578, "d": "img-4a1166cd61.webp"}, "t2o_busstop": {"h": 72, "w": 26.0, "ax": 0.5, "iw": 156, "ih": 432, "d": "img-1653c503e6.webp"}, "t2o_bikes": {"h": 51.1, "w": 74, "ax": 0.5, "iw": 444, "ih": 307, "d": "img-fcd2a3dde8.webp"}, "t2o_lamp": {"h": 86, "w": 44.0, "ax": 0.208, "iw": 264, "ih": 516, "d": "img-8a9d6054a7.webp"}, "t2o_mailbox": {"h": 50, "w": 29.3, "ax": 0.5, "iw": 176, "ih": 300, "d": "img-d11a12803d.webp"}, "t2o_bench": {"h": 44.6, "w": 66, "ax": 0.5, "iw": 396, "ih": 268, "d": "img-1a44d97f44.webp"}, "t2o_hydrant": {"h": 36, "w": 27.4, "ax": 0.5, "iw": 164, "ih": 216, "d": "img-908a0338cc.webp"}, "t2o_cones": {"h": 39.1, "w": 46, "ax": 0.5, "iw": 276, "ih": 235, "d": "img-6fa60dbe9f.webp"}, "t2o_totem": {"h": 70, "w": 26.3, "ax": 0.5, "iw": 158, "ih": 420, "d": "img-ab4854267c.webp"}, "t2o_scooter": {"h": 52.3, "w": 50, "ax": 0.5, "iw": 300, "ih": 314, "d": "img-ac3b75bb3d.webp"}, "t2o_pbench": {"h": 46.1, "w": 76, "ax": 0.5, "iw": 456, "ih": 276, "d": "img-d85cf9d359.webp"}, "t2o_psign": {"h": 69.3, "w": 70, "ax": 0.5, "iw": 420, "ih": 416, "d": "img-89ed905680.webp"}, "t2o_signal": {"h": 62, "w": 19.5, "ax": 0.496, "iw": 117, "ih": 372, "d": "img-f8f95559fa.webp"}, "t2o_estop": {"h": 54, "w": 24.6, "ax": 0.5, "iw": 148, "ih": 324, "d": "img-0dbc5d5e1b.webp"}, "t2o_toolbox": {"h": 45.6, "w": 44, "ax": 0.5, "iw": 264, "ih": 274, "d": "img-dbfe2ac410.webp"}, "t2o_trolley": {"h": 52.8, "w": 52, "ax": 0.5, "iw": 312, "ih": 317, "d": "img-822644841e.webp"}, "t2o_pigeon": {"h": 22, "w": 20.8, "ax": 0.5, "iw": 125, "ih": 132, "d": "img-0d15e88c7d.webp"}, "t2t_head": {"h": 104, "w": 376.2, "ax": 0.5, "iw": 1505, "ih": 416, "d": "img-f1f3be3aad.webp"}, "t2t_mid": {"h": 104, "w": 371.3, "ax": 0.5, "iw": 1485, "ih": 416, "d": "img-9d2f66c391.webp"}});
 // ---------- AI 圖的載入與擺放（資料在 00d-art.js，由 art/assets.py 產生；這個檔案是手寫的）----------
 // 圖片解碼好之前，樹和建築先用程式畫的
 const ARTI = { trees: [], pines: [], bld: {}, props: {} };
@@ -1330,7 +1344,7 @@ const ROLE_SCENE_DEF = {"0": {"w": 1672, "h": 941, "d": "img-8c7e554875.webp"}, 
 const COMIC_DEF = {"ej": [{"w": 1672, "h": 941, "d": "img-799435197e.webp"}, {"w": 1672, "h": 941, "d": "img-8743da2e02.webp"}, {"w": 1672, "h": 941, "d": "img-5157534406.webp"}, {"w": 1672, "h": 941, "d": "img-b2dcd46d08.webp"}, {"w": 1672, "h": 941, "d": "img-27dfc46984.webp"}, {"w": 1672, "h": 941, "d": "img-b8a9c5932f.webp"}, {"w": 1672, "h": 941, "d": "img-c3c43d5cdd.webp"}], "none": [{"w": 1672, "h": 941, "d": "img-799435197e.webp"}, {"w": 1672, "h": 941, "d": "img-8743da2e02.webp"}, {"w": 1672, "h": 941, "d": "img-5157534406.webp"}, {"w": 1672, "h": 941, "d": "img-f951f0537c.webp"}], "boom": {"w": 1321, "h": 737, "d": "img-3c6b521bf7.webp"}};
 // 這個檔案由 art/audio.py 產生：聲音檔（audio/ 底下，打包時複製到 dist/）
 // f：檔名；d：長度（秒）；g：音樂播放時再乘上的音量；loop：可以循環
-const SND_FILES = {"m0": {"f": "snd-cd26099553.mp3", "d": 136.0, "g": 1.121, "loop": 1}, "m1": {"f": "snd-3ecc5ae8a0.mp3", "d": 87.9, "g": 1.492, "loop": 1}, "m2": {"f": "snd-b101ea4430.mp3", "d": 47.85, "g": 1.139, "loop": 1}, "m3": {"f": "snd-b3c2caee08.mp3", "d": 120.059, "g": 1.0, "loop": 1}, "m4": {"f": "snd-9f942a7362.mp3", "d": 187.0, "g": 1.851, "loop": 1}, "meet": {"f": "snd-c8f6db0bb4.mp3", "d": 100.35, "g": 1.0, "loop": 1}, "tense": {"f": "snd-3f87b61c0b.mp3", "d": 10.5, "g": 1.0, "loop": 0}, "h0": {"f": "snd-dfb126a389.mp3", "d": 185.678, "g": 1.309, "loop": 0}, "h1": {"f": "snd-ba2a481e09.mp3", "d": 158.224, "g": 1.0, "loop": 0}, "h2": {"f": "snd-d6b345b4bc.mp3", "d": 137.953, "g": 1.116, "loop": 0}, "h3": {"f": "snd-1cae790c30.mp3", "d": 93.701, "g": 1.321, "loop": 0}, "click": {"f": "snd-7073cd290a.mp3", "d": 0.091}, "ok": {"f": "snd-7d421678e3.mp3", "d": 0.29}, "done": {"f": "snd-7035523a9c.mp3", "d": 0.797}, "win": {"f": "snd-4e8e2fe376.mp3", "d": 0.797}, "lose": {"f": "snd-b07d5c8f49.mp3", "d": 1.739}, "report": {"f": "snd-3a4ee8b9e2.mp3", "d": 0.607}, "wrong": {"f": "snd-64fe54ec5a.mp3", "d": 1.324}, "bell": {"f": "snd-9811ba8b3b.mp3", "d": 1.326}, "hit0": {"f": "snd-d9ec04603c.mp3", "d": 0.544}, "hit1": {"f": "snd-a94f330098.mp3", "d": 0.464}, "hit2": {"f": "snd-e73ecbc2c5.mp3", "d": 0.414}, "hit3": {"f": "snd-49f5b1885c.mp3", "d": 0.416}, "thud": {"f": "snd-7d45089c54.mp3", "d": 0.569}, "slash": {"f": "snd-7b09fd3779.mp3", "d": 0.422}, "vote": {"f": "snd-c489725646.mp3", "d": 0.653}, "gong": {"f": "snd-468f4e1d4e.mp3", "d": 1.413}, "blow": {"f": "snd-61d7d39515.mp3", "d": 2.637}, "whoosh": {"f": "snd-f88369d099.mp3", "d": 1.053}, "roar": {"f": "snd-9295c3bdbd.mp3", "d": 0.927}, "growl": {"f": "snd-25dbd856e9.mp3", "d": 0.608}, "magic": {"f": "snd-b338b77971.mp3", "d": 0.578}, "altar": {"f": "snd-f6a8ab7390.mp3", "d": 0.479}, "fire": {"f": "snd-fbbabe7faa.mp3", "d": 0.889}, "gun": {"f": "snd-5860a8e2b1.mp3", "d": 1.139}, "empty": {"f": "snd-de1e3e0ba8.mp3", "d": 0.428}, "r_vill": {"f": "snd-22d64404c6.mp3", "d": 1.793}, "r_wolf": {"f": "snd-e85f845d0c.mp3", "d": 3.25}, "r_seer": {"f": "snd-aa425ed5bc.mp3", "d": 1.82}, "r_fool": {"f": "snd-6205bf9068.mp3", "d": 1.26}, "r_vigil": {"f": "snd-b1f9d151c9.mp3", "d": 2.67}, "r_hunt": {"f": "snd-c970c89799.mp3", "d": 2.35}};
+const SND_FILES = {"m0": {"f": "snd-cd26099553.mp3", "d": 136.0, "g": 1.121, "loop": 1}, "m1": {"f": "snd-3ecc5ae8a0.mp3", "d": 87.9, "g": 1.492, "loop": 1}, "m2": {"f": "snd-b101ea4430.mp3", "d": 47.85, "g": 1.139, "loop": 1}, "m3": {"f": "snd-b3c2caee08.mp3", "d": 120.059, "g": 1.0, "loop": 1}, "m4": {"f": "snd-9f942a7362.mp3", "d": 187.0, "g": 1.851, "loop": 1}, "m5": {"f": "snd-63df9b2e7d.mp3", "d": 259.85, "g": 1.0, "loop": 1}, "meet": {"f": "snd-c8f6db0bb4.mp3", "d": 100.35, "g": 1.0, "loop": 1}, "tense": {"f": "snd-3f87b61c0b.mp3", "d": 10.5, "g": 1.0, "loop": 0}, "h0": {"f": "snd-dfb126a389.mp3", "d": 185.678, "g": 1.309, "loop": 0}, "h1": {"f": "snd-ba2a481e09.mp3", "d": 158.224, "g": 1.0, "loop": 0}, "h2": {"f": "snd-d6b345b4bc.mp3", "d": 137.953, "g": 1.116, "loop": 0}, "h3": {"f": "snd-1cae790c30.mp3", "d": 93.701, "g": 1.321, "loop": 0}, "click": {"f": "snd-7073cd290a.mp3", "d": 0.091}, "ok": {"f": "snd-7d421678e3.mp3", "d": 0.29}, "done": {"f": "snd-7035523a9c.mp3", "d": 0.797}, "win": {"f": "snd-4e8e2fe376.mp3", "d": 0.797}, "lose": {"f": "snd-b07d5c8f49.mp3", "d": 1.739}, "report": {"f": "snd-3a4ee8b9e2.mp3", "d": 0.607}, "wrong": {"f": "snd-64fe54ec5a.mp3", "d": 1.324}, "bell": {"f": "snd-9811ba8b3b.mp3", "d": 1.326}, "hit0": {"f": "snd-d9ec04603c.mp3", "d": 0.544}, "hit1": {"f": "snd-a94f330098.mp3", "d": 0.464}, "hit2": {"f": "snd-e73ecbc2c5.mp3", "d": 0.414}, "hit3": {"f": "snd-49f5b1885c.mp3", "d": 0.416}, "thud": {"f": "snd-7d45089c54.mp3", "d": 0.569}, "slash": {"f": "snd-7b09fd3779.mp3", "d": 0.422}, "vote": {"f": "snd-c489725646.mp3", "d": 0.653}, "gong": {"f": "snd-468f4e1d4e.mp3", "d": 1.413}, "blow": {"f": "snd-61d7d39515.mp3", "d": 2.637}, "whoosh": {"f": "snd-f88369d099.mp3", "d": 1.053}, "roar": {"f": "snd-9295c3bdbd.mp3", "d": 0.927}, "growl": {"f": "snd-25dbd856e9.mp3", "d": 0.608}, "magic": {"f": "snd-b338b77971.mp3", "d": 0.578}, "altar": {"f": "snd-f6a8ab7390.mp3", "d": 0.479}, "fire": {"f": "snd-fbbabe7faa.mp3", "d": 0.889}, "gun": {"f": "snd-5860a8e2b1.mp3", "d": 1.139}, "empty": {"f": "snd-de1e3e0ba8.mp3", "d": 0.428}, "r_vill": {"f": "snd-22d64404c6.mp3", "d": 1.793}, "r_wolf": {"f": "snd-e85f845d0c.mp3", "d": 3.25}, "r_seer": {"f": "snd-aa425ed5bc.mp3", "d": 1.82}, "r_fool": {"f": "snd-6205bf9068.mp3", "d": 1.26}, "r_vigil": {"f": "snd-b1f9d151c9.mp3", "d": 2.67}, "r_hunt": {"f": "snd-c970c89799.mp3", "d": 2.35}, "trainWarn": {"f": "snd-cad189313f.mp3", "d": 3.354}, "trainPass": {"f": "snd-329071f328.mp3", "d": 4.45}};
 // 這個檔案由 art/prep_dog.py 產生：場景裡小白狗的動畫（第 42 版，使用者提供的圖）
 // rows：每個動作的每一格 [x, y, 寬, 高, 腳底中心 x, 腳底 y]（圖上的像素）；face：這個動作畫的時候臉朝哪邊（1 右、-1 左、0 正面）；tall：站著時大約多高（像素）
 const DOG_ART = {"d": "img-4cc8d91ee6.webp", "w": 2960, "h": 2112, "rows": {"idle": [[8, 8, 220, 206, 104.8, 192.0], [304, 8, 226, 212, 110.2, 198.0], [600, 8, 220, 212, 106.5, 198.0], [896, 8, 222, 212, 108.0, 198.0], [1192, 8, 218, 212, 103.2, 198.0], [1488, 8, 222, 212, 107.9, 198.0], [1784, 8, 216, 212, 102.3, 198.0], [2080, 8, 222, 212, 106.3, 198.0]], "runR": [[2376, 8, 182, 172, 90.3, 148.0], [2672, 8, 182, 172, 89.3, 148.0], [8, 272, 178, 180, 88.5, 156.0], [304, 272, 176, 180, 86.8, 156.0], [600, 272, 170, 180, 83.3, 156.0], [896, 272, 176, 180, 86.5, 156.0], [1192, 272, 178, 180, 86.9, 156.0], [1488, 272, 178, 180, 89.0, 154.0]], "runL": [[1784, 272, 178, 172, 87.4, 148.0], [2080, 272, 178, 172, 88.5, 148.0], [2376, 272, 182, 174, 89.6, 148.0], [2672, 272, 176, 178, 86.0, 154.0], [8, 536, 176, 182, 87.0, 156.0], [304, 536, 178, 180, 87.6, 156.0], [600, 536, 180, 182, 87.8, 156.0], [896, 536, 178, 180, 89.7, 156.0]], "dig": [[1192, 536, 228, 186, 118.9, 172.0], [1488, 536, 236, 196, 116.1, 182.0], [1784, 536, 276, 198, 119.8, 184.0], [2080, 536, 280, 206, 119.4, 192.0], [2376, 536, 274, 206, 123.8, 192.0], [2672, 536, 274, 206, 120.1, 192.0], [8, 800, 244, 206, 118.4, 192.0], [304, 800, 236, 206, 121.3, 192.0]], "carryR": [[600, 800, 190, 164, 91.7, 150.0], [896, 800, 182, 164, 86.2, 150.0], [1192, 800, 184, 164, 87.4, 150.0], [1488, 800, 180, 174, 87.2, 160.0], [1784, 800, 180, 176, 84.7, 162.0], [2080, 800, 180, 176, 83.9, 162.0], [2376, 800, 180, 176, 85.2, 162.0], [2672, 800, 180, 176, 86.4, 162.0]], "carryL": [[8, 1064, 180, 166, 91.4, 152.0], [304, 1064, 180, 166, 91.2, 152.0], [600, 1064, 180, 166, 91.7, 152.0], [896, 1064, 178, 166, 90.2, 152.0], [1192, 1064, 182, 176, 92.0, 162.0], [1488, 1064, 182, 174, 93.1, 160.0], [1784, 1064, 184, 176, 91.9, 162.0], [2080, 1064, 182, 176, 94.2, 162.0]], "bury": [[2376, 1064, 200, 178, 98.2, 164.0], [2672, 1064, 196, 178, 94.6, 164.0], [8, 1328, 194, 184, 95.3, 170.0], [304, 1328, 190, 180, 96.4, 166.0], [600, 1328, 194, 178, 98.7, 164.0], [896, 1328, 224, 186, 100.5, 172.0], [1192, 1328, 246, 186, 99.9, 172.0], [1488, 1328, 250, 186, 101.3, 172.0], [1784, 1328, 240, 186, 103.7, 172.0], [2080, 1328, 222, 186, 99.4, 172.0], [2376, 1328, 176, 186, 87.0, 172.0], [2672, 1328, 218, 186, 83.7, 172.0]], "belly": [[8, 1592, 190, 202, 90.3, 188.0], [304, 1592, 242, 202, 112.5, 188.0], [600, 1592, 250, 212, 119.9, 198.0], [896, 1592, 266, 212, 127.6, 198.0], [1192, 1592, 270, 210, 135.9, 196.0], [1488, 1592, 276, 206, 130.7, 192.0], [1784, 1592, 228, 212, 106.8, 198.0], [2080, 1592, 200, 212, 97.4, 198.0]], "dig_out": [[2376, 1592, 248, 232, 108.7, 218.0], [2672, 1592, 224, 220, 111.6, 206.0], [8, 1856, 238, 214, 109.3, 200.0], [304, 1856, 244, 220, 113.5, 206.0], [600, 1856, 230, 220, 112.0, 206.0], [896, 1856, 226, 230, 115.5, 216.0], [1192, 1856, 226, 234, 113.7, 220.0], [1488, 1856, 226, 234, 107.5, 220.0], [1784, 1856, 222, 234, 105.3, 220.0], [2080, 1856, 224, 234, 107.5, 220.0], [2376, 1856, 212, 232, 99.0, 218.0], [2672, 1856, 236, 248, 92.5, 234.0]]}, "fps": {"idle": 6, "runR": 12, "runL": 12, "dig": 10, "carryR": 12, "carryL": 12, "bury": 0, "belly": 8, "dig_out": 0}, "sc": {"idle": 1, "runR": 1.42, "runL": 1.42, "dig": 1.08, "carryR": 1.46, "carryL": 1.46, "bury": 1.3, "belly": 1.02, "dig_out": 1.12}, "face": {"idle": 0, "runR": 1, "runL": -1, "dig": 1, "carryR": 1, "carryL": -1, "bury": 1, "belly": 0, "dig_out": 1}, "tall": 198.0};
@@ -1364,8 +1378,8 @@ const setFlag = (s, i) => s.slice(0, i) + '1' + s.slice(i + 1);
 
 // ===== 地圖 =====
 // 三張地圖共用同樣大小的格子，差別在地形的排法。
-const T_GRASS = 0, T_PATH = 1, T_TREE = 2, T_WATER = 3, T_BLD = 4, T_FENCE = 5, T_PLANK = 6, T_SOIL = 7, T_STONE = 8, T_OBJ = 9, T_SAND = 10, T_COBBLE = 11, T_FLOOR = 12;
-const SOLID = [0, 0, 1, 1, 1, 1, 0, 0, 0, 1, 0, 0, 0];
+const T_GRASS = 0, T_PATH = 1, T_TREE = 2, T_WATER = 3, T_BLD = 4, T_FENCE = 5, T_PLANK = 6, T_SOIL = 7, T_STONE = 8, T_OBJ = 9, T_SAND = 10, T_COBBLE = 11, T_FLOOR = 12, T_VOID = 13;   // T_VOID（第 56 版）：捷運站地板以外的地方，走不進去、也看不過去
+const SOLID = [0, 0, 1, 1, 1, 1, 0, 0, 0, 1, 0, 0, 0, 1];
 const grid = new Uint8Array(MW * MH);
 const ground = new Uint8Array(MW * MH);   // 物件和房子底下原本的地面，畫地面時用
 const bmap = new Int8Array(MW * MH);      // 這一格屬於第幾棟房子（-1 = 不在房子裡）
@@ -1616,16 +1630,41 @@ function buildOldStreet() {
     hs(22, 25, 29, 30, [25, 30], [[26, 26, 26, 28]], 2, [22, 29]), hs(34, 25, 40, 30, [37, 30], [], 3), hs(54, 25, 59, 31, [56, 31], [], 4),
     hs(14, 35, 20, 41, [17, 41], [], 6, [14, 38]), hs(34, 35, 41, 41, [37, 41], [[38, 36, 38, 38]], 7, [41, 40])
   ];
+  // 第 53 版：整張換成新畫風——屋裡的家具、屋外的攤位和小東西都用新的素材
+  const H = (k, a, list, ex) => list.map(p => ob(k, p[0], p[1], Object.assign({ a }, ex || {}))), W2 = { w: 2 }, deco = { ns: true };
   OBJECTS = [
-    ...obs('altar', [[31, 4], [32, 4]]), ...obs('shelf', [[25, 4], [38, 4], [5, 4], [14, 4], [47, 4], [48, 4], [49, 4], [43, 15], [44, 15], [21, 15], [58, 15], [39, 26], [40, 36]]), ob('censer', 29, 13),
-    ob('table', 6, 4), ob('table', 10, 8), ob('table', 15, 4), ...obs('clothrack', [[19, 4], [20, 7]], { cs: ['#c8503c', '#e3b84c', '#6a8fc4'] }), ob('table', 43, 8),
-    ob('well', 56, 6), ...obs('bush', [[53, 9], [59, 9], [29, 40], [23, 40]]),
-    ...obs('steamer', [[7, 15], [8, 15]]), ob('oven', 7, 18), ob('table', 12, 16), ...obs('desk', [[48, 15], [49, 15]]),
-    ...obs('bed', [[17, 15], [53, 15], [23, 26], [35, 26], [55, 26], [15, 36], [35, 36]]), ...obs('table', [[20, 18], [57, 18], [28, 29], [38, 29], [58, 29], [19, 39], [40, 39]]),
-    ...obs('stall', [[6, 26], [9, 26], [12, 26], [15, 26], [18, 26]]), ...obs('stall', [[6, 30], [9, 30], [15, 30], [18, 30]], { c: '#3f7c8c' }), ob('barrel', 12, 30), ...obs('crate', [[20, 28], [5, 28], [3, 9], [51, 22], [41, 28]]), ...obs('barrel', [[15, 12], [51, 12], [21, 31], [42, 22]]),
-    ob('gate', 31, 24, { ns: true }),
-    ...obs('vat', [[44, 26], [44, 28]]), ob('vat', 45, 26, { c: '#b8463b' }), ...obs('clothrack', [[50, 26], [51, 26], [45, 36], [47, 37], [49, 36], [45, 39], [50, 39]]), ob('vat', 51, 35, { c: '#e3b84c' }), ob('vat', 51, 40),
-    ob('trough', 24, 38, { c: '#c9b05a' })
+    // 廟：神桌（兩格寬）、功德箱；兩邊的小間放屏風和太師椅。門口一對石獅子、廟埕上的大香爐
+    ...H('altar', 's2i_altar', [[31, 4]], W2), ...H('crate', 's2i_donate', [[30, 6]]), ...H('shelf', 's2i_screen', [[25, 4]]), ...H('table', 's2i_chairs', [[36, 4]], W2),
+    ...H('rock', 's2o_lion', [[29, 12], [34, 12]]), ...H('censer', 's2o_censer', [[28, 14]]),
+    // 茶行：茶罐櫃、茶桌、太師椅
+    ...H('shelf', 's2i_teashelf', [[5, 4], [10, 4]]), ...H('table', 's2i_teatable', [[6, 4]], W2), ...H('table', 's2i_chairs', [[9, 8]], W2),
+    // 布莊：布匹架、裁布桌、衣櫃
+    ...H('shelf', 's2i_bolts', [[14, 4], [19, 4], [20, 4]]), ...H('table', 's2i_tailor', [[15, 4]], W2), ...H('shelf', 's2i_wardrobe', [[18, 4]]),
+    // 藥鋪：藥櫃、搗藥桌
+    ...H('shelf', 's2i_medicine', [[43, 4], [47, 4], [48, 4]]), ...H('table', 's2i_mortar', [[49, 4], [43, 8]]),
+    // 包子舖：蒸籠灶、灶台、包子桌、米缸
+    ...H('steamer', 's2i_steamer', [[7, 15], [8, 15]]), ...H('stove', 's2i_stove', [[7, 18]], W2), ...H('table', 's2i_buns', [[11, 16]], W2), ...H('barrel', 's2i_rice', [[11, 15]]),
+    // 書齋：書架、書桌、屏風
+    ...H('shelf', 's2i_bookshelf', [[43, 15], [44, 15], [47, 15]]), ...H('desk', 's2i_desk', [[48, 15]], W2), ...H('shelf', 's2i_screen', [[49, 18]]), ...H('table', 's2i_chairs', [[43, 18]], W2),
+    // 染坊：染缸、染料桶、晾布竹架；院子裡曬著布
+    ...H('vat', 's2i_vat', [[44, 26], [45, 26]]), ...H('barrel', 's2i_dyes', [[44, 28], [49, 30]]), ...H('clothrack', 's2i_dryrack', [[50, 26]], W2),
+    ...H('clothrack', 's2o_clothrack', [[45, 36], [49, 36], [45, 39], [49, 39]], W2), ...H('barrel', 's2o_waterjar', [[51, 35]]), ...H('barrel', 's2i_dyes', [[51, 40]]),
+    // 七戶人家：床（兩格寬）、飯桌或茶桌、衣櫃、米缸
+    ...H('bed', 's2i_bed', [[17, 15], [53, 15], [23, 26], [35, 26], [55, 26], [15, 36], [35, 36]], W2),
+    ...H('table', 's2i_dining', [[20, 18], [53, 18], [38, 28]], W2), ...H('table', 's2i_teatable', [[27, 26], [18, 39]], W2),
+    ...H('shelf', 's2i_wardrobe', [[21, 15], [58, 15], [39, 26], [19, 36], [40, 36]]), ...H('barrel', 's2i_rice', [[58, 29], [40, 39]]), ...H('stove', 's2i_stove', [[57, 26]], W2), ...H('shelf', 's2i_screen', [[35, 39]]),
+    // 古井、盆栽
+    ...H('well', 's2o_well', [[56, 6]]), ...H('rock', 's2o_potbush', [[53, 9], [59, 9], [29, 40], [23, 40]]),
+    // 市集：兩排攤位和小吃攤車（都是兩格寬）
+    ...H('stall', 's2o_stall', [[6, 26], [12, 26], [18, 26], [9, 30], [15, 30]], W2), ...H('stall', 's2o_snackcart', [[9, 26], [15, 26], [6, 30], [18, 30]], W2),
+    ...H('barrel', 's2o_barrel', [[12, 30], [15, 12], [51, 12], [21, 31], [42, 22]]), ...H('crate', 's2o_crate', [[20, 28], [5, 28], [3, 9], [51, 22], [41, 28]]), ...H('barrel', 's2o_waterjar', [[3, 14], [40, 22]]),
+    // 牌樓（走得過去）、廟埕的石板凳
+    ...H('gate', 's2o_arch', [[31, 24]], { w: 2, ns: true }), ...H('rock', 's2o_bench', [[25, 19], [38, 19]]),
+    // 後院：水缸和貓
+    ...H('trough', 's2o_waterjar', [[24, 38]]), ...H('flower', 's2o_cat', [[25, 36], [28, 38], [27, 40]], deco),
+    // 只是裝飾、不擋路：店門口的招牌旗、住家門口的花盆、廟埕的掃帚
+    ...H('flower', 's2o_banner', [[9, 11], [19, 11], [48, 11], [12, 21], [48, 21], [49, 33]], deco),
+    ...H('flower', 's2o_flowerpot', [[18, 21], [54, 21], [24, 31], [36, 31], [57, 32], [16, 42], [36, 42]], deco), ...H('flower', 's2o_broom', [[27, 13]], deco)
   ];
   STATIONS = [
     stn('泡茶', '茶行', 6, 5, 'balance', '🍵', '按住加熱、放開降溫，讓水溫留在綠色區'),
@@ -1685,25 +1724,38 @@ function buildMoor() {
   tfill(44, 35, 44, 39, T_FENCE); tfill(29, 13, 29, 17, T_FENCE); tfill(52, 15, 55, 15, T_FENCE);
   // 第 38 版：房子換成荒原自己的圖，房子的深度照圖的比例變淺；房子後面空出來的地方種樹（不留死角）
   tfill(3, 3, 13, 4, T_TREE); tfill(26, 3, 37, 3, T_TREE); tfill(26, 3, 26, 9, T_TREE); tfill(37, 3, 37, 9, T_TREE); tfill(52, 3, 60, 5, T_TREE); tset(51, 7, T_TREE);
+  // 第 54 版：整張換成新畫風。房子掀開屋頂；牆的材質和顏色照荒原的樣子另外定（石牆、深色木板），不跟田園村同名的房子一樣
   BUILDINGS = [
-    bld('barn', '牧舍', 3, 5, 13, 10, [[8, 10], [9, 10], [13, 9]], [], { ak: 'moor_barn' }),
-    bld('shrine', '小教堂', 27, 4, 36, 10, [[31, 10], [32, 10]], [], { ak: 'moor_chapel' }),
-    bld('mill', '風車', 52, 6, 61, 10, [[56, 10], [57, 10], [52, 9]], [], { ak: 'moor_mill' }),
-    bld('smithy', '鐵匠鋪', 49, 34, 58, 39, [[53, 39], [54, 39], [49, 37]], [[55, 35, 55, 36]], { ak: 'moor_smithy' }),
-    bld('house', '守林人小屋', 4, 32, 12, 38, [[9, 38], [10, 38], [12, 36]], [], { ht: 3, ak: 'moor_cabin' })
+    bld('barn', '牧舍', 3, 5, 13, 10, [[8, 10], [9, 10], [13, 9]], [], { ko: { wl: 'plank', wc: '#7a5a40', cc: '#7a4a34', fl: 'earth' } }),
+    bld('shrine', '小教堂', 27, 4, 36, 10, [[31, 10], [32, 10]], [], { ko: { wl: 'stone', wc: '#a9a498', cc: '#6f7684', fl: 'stone' } }),
+    bld('mill', '風車', 52, 6, 61, 10, [[56, 10], [57, 10], [52, 9]], [], { ko: { wl: 'stone', wc: '#b4ab9a', cc: '#b08a4a', fl: 'wood' } }),
+    bld('smithy', '鐵匠鋪', 49, 34, 58, 39, [[53, 39], [54, 39], [49, 37]], [[55, 35, 55, 36]], { ko: { wl: 'stone', wc: '#8f8a82', cc: '#4b515c', fl: 'stone' } }),
+    bld('house', '守林人小屋', 4, 32, 12, 38, [[9, 38], [10, 38], [12, 36]], [], { ht: 3, ko: { wl: 'plank', wc: '#86694a', cc: '#5f7a4a', fl: 'wood' } })
   ];
-  // 屋外的東西都用荒原自己的圖（a）：石楠、巨石、墓碑、符文石、泥炭堆、樹樁、石槽、古井。屋裡的家具沿用程式畫的
-  const A = (k, list, a) => list.map((p, i) => ob(k, p[0], p[1], { a: Array.isArray(a) ? a[i % a.length] : a }));
+  const H = (k, a, list, ex) => list.map((p, i) => ob(k, p[0], p[1], Object.assign({ a: Array.isArray(a) ? a[i % a.length] : a }, ex || {}))), W2 = { w: 2 }, deco = { ns: true };
   OBJECTS = [
-    ...obs('crate', [[4, 6], [5, 6], [11, 6]]), ...obs('hay', [[12, 6], [4, 9]]), ...A('hay', [[4, 17], [5, 17], [13, 15]], 'moor_peat'), ...A('trough', [[10, 20]], 'moor_trough'), ...A('bush', [[6, 19]], 'moor_heath1'),
-    ...obs('altar', [[31, 5], [32, 5]]), ...obs('shelf', [[28, 5], [35, 5]]),
-    ...A('grave', [[42, 4], [44, 4], [46, 4], [48, 4], [43, 6], [45, 6], [49, 6], [42, 8], [48, 8]], ['moor_grave1', 'moor_grave2']),
-    ob('millstone', 60, 7), ...obs('sack', [[53, 7], [54, 7]]),
-    ob('forge', 57, 35), ob('anvil', 56, 37), ob('barrel', 50, 35), ...obs('crate', [[51, 35]]),
-    ob('table', 8, 35), ob('bed', 5, 34), ob('oven', 10, 34),
-    ...A('menhir', [[46, 16], [50, 15], [54, 17], [55, 20], [45, 20], [53, 21], [47, 24]], 'moor_rune'), ...A('rock', [[50, 19]], 'moor_boulder'),
-    ...A('well', [[43, 40]], 'moor_well'), ...A('stump', [[7, 26], [8, 31], [11, 29]], 'moor_stump'), ...A('logs', [[7, 29], [11, 31]], 'moor_peat'),
-    ...A('bush', [[24, 19], [38, 17], [38, 26], [25, 25], [30, 30], [40, 35], [56, 25], [14, 34]], ['moor_heath1', 'moor_heath2']), ...A('rock', [[21, 34], [34, 16], [58, 12], [3, 12], [20, 26], [45, 30]], 'moor_boulder')
+    // 牧舍：乾草堆、飼料槽（兩格寬）、馬鞍架、木箱、乾草捲
+    ...H('hay', 'm2i_hay', [[4, 6], [12, 6]]), ...H('trough', 'm2i_feeder', [[5, 6]], W2), ...H('shelf', 'm2i_saddle', [[11, 6]]), ...H('crate', 'm2i_crate', [[10, 6]]), ...H('hay', 'm2o_hayroll', [[4, 9]]),
+    // 小教堂：祭壇（兩格寬）、蠟燭台、小風琴、兩排長椅
+    ...H('altar', 'm2i_chapel', [[31, 5]], W2), ...H('lantern', 'm2i_candles', [[30, 5], [33, 5], [28, 5]]), ...H('shelf', 'm2i_organ', [[35, 5]]), ...H('table', 'm2i_pew', [[28, 7], [34, 7]], W2),
+    // 風車：石磨、木齒輪、麵粉袋、木桶
+    ...H('millstone', 'm2i_millstone', [[60, 7]]), ...H('shelf', 'm2i_gear', [[58, 7]]), ...H('sack', 'm2i_sacks', [[53, 7], [54, 7]]), ...H('barrel', 'm2i_barrel', [[55, 7]]),
+    // 鐵匠鋪：鍛鐵爐、鐵砧、工具架（兩格寬）、水桶、木桶、木箱
+    ...H('forge', 'm2i_forge', [[57, 35]]), ...H('anvil', 'm2i_anvil', [[56, 37]]), ...H('shelf', 'm2i_tools', [[51, 35]], W2), ...H('barrel', 'm2i_tub', [[50, 35]]), ...H('barrel', 'm2i_barrel', [[53, 35]]), ...H('crate', 'm2i_crate', [[50, 38]]),
+    // 守林人小屋：床、石壁爐（兩格寬）、餐桌、櫥櫃、搖椅、柴火籃
+    ...H('bed', 'm2i_bed', [[5, 33]], W2), ...H('stove', 'm2i_fireplace', [[8, 33]], W2), ...H('table', 'm2i_table', [[6, 36]], W2), ...H('shelf', 'm2i_cupboard', [[11, 33]]), ...H('table', 'm2i_rocker', [[5, 36]]), ...H('crate', 'm2i_firewood', [[10, 33]]),
+    // 羊圈：乾草捲、石水槽，幾隻羊（走得過去）
+    ...H('hay', 'm2o_hayroll', [[4, 17], [13, 15], [6, 13], [16, 26]]), ...H('trough', 'm2o_trough', [[10, 20]]), ...H('flower', 'm2o_sheep', [[6, 16], [11, 18], [7, 19], [12, 17], [5, 20]], deco),
+    // 墓園：墓碑和十字石碑；石圈：七塊符文立石
+    ...H('grave', ['m2o_grave', 'm2o_cross'], [[42, 4], [44, 4], [46, 4], [48, 4], [43, 6], [45, 6], [49, 6], [42, 8], [48, 8]]),
+    ...H('menhir', 'm2o_rune', [[46, 16], [50, 15], [54, 17], [55, 20], [45, 20], [53, 21], [47, 24]]), ...H('rock', 'm2o_boulder', [[50, 19]]),
+    // 古井、伐木場（樹樁和柴）、泥炭堆、菜園的稻草人、路牌
+    ...H('well', 'm2o_well', [[43, 40]]), ...H('stump', 'm2o_stump', [[7, 26], [8, 31], [11, 29]]), ...H('logs', 'm2i_firewood', [[7, 29]]), ...H('logs', 'm2o_peat', [[11, 31], [14, 22], [41, 34]]),
+    ...H('rock', 'm2o_scarecrow', [[34, 33]]), ...H('rock', 'm2o_sign', [[42, 11], [11, 25], [32, 42]]),
+    // 石楠花叢（走得過去）、大石頭
+    ...H('bush', 'm2o_heather', [[24, 19], [38, 17], [38, 26], [25, 25], [30, 30], [40, 35], [56, 25], [14, 34], [6, 22]]), ...H('rock', 'm2o_boulder', [[21, 34], [34, 16], [58, 12], [3, 12], [20, 26], [45, 30]]),
+    // 只是裝飾：蘑菇、烏鴉
+    ...H('flower', 'm2o_mushroom', [[13, 25], [24, 29], [45, 25], [35, 17], [52, 31], [8, 41], [38, 32]], deco), ...H('flower', 'm2o_crow', [[44, 5], [47, 7], [51, 18], [22, 35], [40, 8]], deco)
   ];
   STATIONS = [
     stn('劈柴', '伐木場', 8, 28, 'mash', '🪓', '連點 8 下把木頭劈開', 8),
@@ -1716,7 +1768,7 @@ function buildMoor() {
     stn('掃墓', '墓園', 45, 8, 'scatter', '🍂', '把墓碑前的落葉掃乾淨', 6),
     stn('趕羊', '羊圈', 9, 17, 'scatter', '🐑', '每隻羊都點一下，把牠們趕回圈裡', 5),
     stn('收菜', '菜園', 31, 35, 'scatter', '🥬', '把菜全部收起來', 6),
-    stn('煮湯', '守林人小屋', 7, 35, 'balance', '🍲', '按住加火、放開降溫，讓湯的火候留在綠色區'),
+    stn('煮湯', '守林人小屋', 8, 34, 'balance', '🍲', '按住加火、放開降溫，讓湯的火候留在綠色區'),
     stn('祈福', '石圈', 49, 21, 'seq', '🌙', '照 1 到 5 的順序點亮立石', 5)
   ];
   candleS = 2;   // 小教堂
@@ -1760,25 +1812,38 @@ function buildManor() {
   tfill(54, 2, 61, 10, T_TREE); tfill(61, 2, 61, 43, T_TREE); tfill(57, 21, 61, 24, T_TREE); tfill(2, 34, 7, 43, T_TREE); tfill(2, 25, 3, 33, T_TREE); tfill(20, 38, 22, 43, T_TREE); tfill(2, 3, 2, 22, T_TREE); tfill(3, 22, 3, 22, T_TREE); P(18, 35, 19, 42);
   // 第 38 版：房子換成莊園自己的圖，深度照圖的比例；溫室後面空出來的一排種樹
   tfill(43, 3, 52, 3, T_TREE);
+  // 第 55 版：整張換成新畫風。房子掀開屋頂；牆照莊園的樣子另外定（奶油色灰泥牆、溫室的白框、紅磚廚房、石造小教堂）
   BUILDINGS = [
-    bld('house', '莊園大宅', 23, 3, 38, 10, [[30, 10], [31, 10], [23, 8], [38, 8]], [[27, 4, 27, 7], [36, 4, 36, 7], [28, 7, 30, 7], [33, 7, 35, 7]], { ht: 2, ak: 'manor_house' }),
-    bld('herb', '溫室', 43, 4, 52, 9, [[47, 9], [48, 9], [52, 7]], [], { ak: 'manor_glass' }),
-    bld('barn', '馬廄', 50, 15, 59, 20, [[54, 20], [55, 20], [59, 18]], [], { ak: 'manor_stable' }),
-    bld('bakery', '廚房', 8, 27, 16, 32, [[9, 32], [10, 32], [16, 30]], [], { ak: 'manor_kitchen' }),
-    bld('temple', '小教堂', 9, 36, 16, 41, [[12, 41], [13, 41]], [], { ak: 'manor_chapel' })
+    bld('house', '莊園大宅', 23, 3, 38, 10, [[30, 10], [31, 10], [23, 8], [38, 8]], [[27, 4, 27, 7], [36, 4, 36, 7], [28, 7, 30, 7], [33, 7, 35, 7]], { ht: 2, ko: { wl: 'plaster', wc: '#e6dcc6', cc: '#5d5674', fl: 'wood' } }),
+    bld('herb', '溫室', 43, 4, 52, 9, [[47, 9], [48, 9], [52, 7]], [], { ko: { wl: 'plaster', wc: '#eef0e6', cc: '#6fa898', fl: 'stone' } }),
+    bld('barn', '馬廄', 50, 15, 59, 20, [[54, 20], [55, 20], [59, 18]], [], { ko: { wl: 'plank', wc: '#8a6a4a', cc: '#8a5236', fl: 'earth' } }),
+    bld('bakery', '廚房', 8, 27, 16, 32, [[9, 32], [10, 32], [16, 30]], [], { ko: { wl: 'stone', wc: '#b9866a', cc: '#a8523a', fl: 'stone' } }),
+    bld('temple', '小教堂', 9, 36, 16, 41, [[12, 41], [13, 41]], [], { ko: { wl: 'stone', wc: '#b3ad9f', cc: '#6f7684', fl: 'stone' } })
   ];
-  // 屋外的東西都用莊園自己的圖（a）：修剪成圓錐、螺旋的樹、灌木、玫瑰花圃、長椅、噴泉、天使像、涼亭
-  const A = (k, list, a, ex) => list.map((p, i) => ob(k, p[0], p[1], Object.assign({ a: Array.isArray(a) ? a[i % a.length] : a }, ex || {})));
+  const H = (k, a, list, ex) => list.map((p, i) => ob(k, p[0], p[1], Object.assign({ a: Array.isArray(a) ? a[i % a.length] : a }, ex || {}))), W2 = { w: 2 }, deco = { ns: true };
   OBJECTS = [
-    ...obs('table', [[25, 5], [33, 5]]), ...obs('shelf', [[24, 4], [37, 4], [30, 4]]), ...obs('bed', [[26, 9], [35, 9]]), ob('desk', 29, 5),
-    ...A('bush', [[44, 5], [45, 5], [50, 5], [51, 5]], ['manor_roses', 'manor_bush', 'manor_bush', 'manor_roses']),
-    ...A('bush', [[24, 13], [38, 13], [24, 18], [38, 18]], ['manor_cone', 'manor_cone', 'manor_spiral', 'manor_spiral']), ...A('bush', [[10, 4], [18, 20], [5, 20]], 'manor_bush'),
-    ...obs('hay', [[51, 16], [52, 16], [51, 19]]), ob('trough', 57, 17, { c: '#c9b05a' }),
-    ob('oven', 9, 28), ...obs('table', [[14, 29]]), ...obs('barrel', [[15, 28], [15, 31]]),
-    ...obs('altar', [[12, 37], [13, 37]]), ...obs('shelf', [[10, 37], [15, 37]]),
-    ...A('bush', [[36, 39]], 'manor_bush'), ...A('crate', [[44, 37], [58, 34]], 'manor_bench'), ...A('rock', [[42, 26], [19, 37], [3, 22]], 'manor_bush'),
-    ...A('statue', [[27, 23], [11, 12]], 'manor_angel'), ...A('well', [[27, 13]], 'manor_fountain', { w: 2 }), ...A('gazebo', [[33, 29]], 'manor_gazebo', { w: 2 }),
-    ...A('bush', [[30, 28], [33, 31], [28, 30]], 'manor_roses'), ...A('crate', [[22, 22]], 'manor_bench')
+    // 大宅——西邊餐室：銀器櫃、落地鐘、長餐桌；中間書房：書櫃、壁爐、鋼琴、書桌、沙發；東邊小間：衣櫃；南邊走廊兩頭各一張四柱大床、花架
+    ...H('shelf', 'n2i_silver', [[24, 4]]), ...H('shelf', 'n2i_clock', [[26, 4]]), ...H('table', 'n2i_dining', [[24, 6]], W2),
+    ...H('shelf', 'n2i_bookcase', [[28, 4], [29, 4]]), ...H('stove', 'n2i_fireplace', [[30, 4]], W2), ...H('shelf', 'n2i_piano', [[35, 4]]), ...H('desk', 'n2i_desk', [[28, 6]], W2), ...H('table', 'n2i_sofa', [[34, 6]], W2),
+    ...H('shelf', 'n2i_wardrobe', [[37, 4]]), ...H('bed', 'n2i_fourposter', [[24, 9], [36, 9]], W2), ...H('shelf', 'n2i_plantstand', [[28, 9], [33, 9]]),
+    // 溫室：盆栽桌（兩格寬）、花架、石花盆；兩個玫瑰花壇（走得過去）
+    ...H('table', 'n2i_potting', [[44, 5]], W2), ...H('shelf', 'n2i_plantstand', [[50, 5], [51, 5]]), ...H('rock', 'n2o_urn', [[49, 5]]), ...H('flower', 'n2o_roses', [[44, 8], [51, 8]], deco), ...H('flower', 'n2o_can', [[45, 7]], deco),
+    // 馬廄：馬槽（兩格寬）、乾草捆、馬鞍架、木桶
+    ...H('trough', 'n2i_manger', [[51, 16]], W2), ...H('hay', 'n2i_haybale', [[58, 16], [51, 19], [52, 19]]), ...H('shelf', 'n2i_saddle', [[55, 16]]), ...H('barrel', 'n2i_barrel', [[58, 19]]),
+    // 廚房：爐灶（兩格寬）、鍋具架、料理台（兩格寬）、木桶、蘋果籃
+    ...H('oven', 'n2i_range', [[9, 28]], W2), ...H('shelf', 'n2i_potrack', [[12, 28]]), ...H('table', 'n2i_worktable', [[13, 30]], W2), ...H('barrel', 'n2i_barrel', [[15, 28]]), ...H('crate', 'n2o_basket', [[14, 28]]),
+    // 小教堂：祭壇（兩格寬）、燭台、兩排長椅
+    ...H('altar', 'n2i_altar', [[12, 37]], W2), ...H('lantern', 'n2i_candles', [[10, 37], [15, 37]]), ...H('table', 'n2i_pew', [[10, 39], [14, 39]], W2),
+    // 前庭：噴水池（兩格寬）、日晷、四角修剪成造型的樹
+    ...H('well', 'n2o_fountain', [[27, 13]], W2), ...H('rock', 'n2o_sundial', [[34, 13]]), ...H('rock', ['n2o_cone', 'n2o_cone', 'n2o_spiral', 'n2o_spiral'], [[24, 13], [38, 13], [25, 17], [37, 17]]),
+    // 花園：天使雕像、鐵長椅、石花盆、鳥浴盆
+    ...H('statue', 'n2o_angel', [[27, 23], [11, 12]]), ...H('crate', 'n2o_bench', [[44, 37], [58, 34], [22, 22]]), ...H('rock', 'n2o_urn', [[42, 26], [19, 37], [3, 22], [10, 4], [18, 20], [5, 20]]), ...H('rock', 'n2o_birdbath', [[47, 16], [16, 25]]),
+    // 湖心島：涼亭（兩格寬）、玫瑰花壇（走得過去）；湖邊的野餐桌
+    ...H('gazebo', 'n2o_gazebo', [[33, 29]], W2), ...H('flower', 'n2o_roses', [[30, 28], [33, 31], [28, 30]], deco), ...H('table', 'n2o_picnic', [[25, 35]], W2),
+    // 果園的蘋果籃、菜園的手推車和澆水壺
+    ...H('crate', 'n2o_basket', [[48, 29], [55, 28]]), ...H('cart', 'n2o_barrow', [[31, 42]], W2), ...H('flower', 'n2o_can', [[27, 40], [34, 41]], deco),
+    // 只是裝飾：孔雀
+    ...H('flower', 'n2o_peacock', [[28, 22], [35, 21], [46, 12], [41, 17]], deco)
   ];
   STATIONS = [
     stn('修剪樹籬', '迷宮花園', 11, 11, 'mash', '✂️', '連點 8 下把樹籬剪整齊', 8),
@@ -1809,9 +1874,10 @@ function buildManor() {
 const MAPS = [
   { name: '田園村', desc: '四周是樹林的農村。鄉間大路繞一圈，倉庫的後門通到林間小路。', fence: 0, build: buildVillage, fruit: .16, cut: true, tart: 'village2', bell: 'v2o_bell', lamp: 'v2o_lamp' },
   { name: '潮聲漁港', desc: '彎彎曲曲的海岸，兩頭是松林岬角。三座碼頭和沙灘都是死路，落單很危險。', fence: 1, build: buildHarbor, pine: .6, tart: 'harbor2', cut: true, bell: 'v2o_bell', lamp: 'h2o_lamp' },
-  { name: '燈籠老街', desc: '巷弄交錯的老街，南邊一條水道只有三座橋。房子多、轉角多，進了屋外面就看不到你。', fence: 2, build: buildOldStreet, bloom: .5 },
-  { name: '月影荒原', desc: '大片空地和矮石牆，小溪把地圖切成兩半，只有三座橋。房子少，但大多有兩個門。', fence: 3, build: buildMoor, pine: .4, tart: 'moor' },
-  { name: '霧鐘莊園', desc: '大宅前的庭院、樹籬迷宮、湖心島和果園。路繞來繞去，大部分房子有兩個門。', fence: 4, build: buildManor, fruit: .5, tart: 'manor' }
+  { name: '燈籠老街', desc: '巷弄交錯的老街，南邊一條水道只有三座橋。房子多、轉角多，進了屋，只有從門口才看得到你。', fence: 2, build: buildOldStreet, bloom: .5, cut: true, tart: 'street2', bell: 'v2o_bell', lamp: 's2o_lamp' },
+  { name: '月影荒原', desc: '大片空地和矮石牆，小溪把地圖切成兩半，只有三座橋。房子少，但大多有兩個門。', fence: 3, build: buildMoor, pine: .4, tart: 'moor2', cut: true, bell: 'v2o_bell', lamp: 'm2o_lamp' },
+  { name: '霧鐘莊園', desc: '大宅前的庭院、樹籬迷宮、湖心島和果園。路繞來繞去，大部分房子有兩個門。', fence: 4, build: buildManor, fruit: .5, tart: 'manor2', cut: true, bell: 'v2o_bell', lamp: 'n2o_lamp' },
+  { name: '捷運站', desc: '三層樓的車站。走上軌道要小心列車，被撞到會暈 2 秒。', fence: 5, build: buildMetro, tart: 'metro2', cut: true, metro: true, bell: 'v2o_bell', lamp: 't2o_lamp', lg: [.84, .9] }
 ];
 
 function parseTasks(str) {
@@ -1860,7 +1926,7 @@ const LOBES = [[-13, 7, 13], [13, 8, 12.5], [0, 10, 14], [-16, -4, 12], [16, -3,
 function loadMap(i) {
   i = clamp(i | 0, 0, MAPS.length - 1); curMap = i;
   grid.fill(T_GRASS); bmap.fill(-1); dmap.fill(0); BUILDINGS = []; OBJECTS = []; STATIONS = []; AREAS = []; LAMPS = []; CHAINS = [];
-  CUT = !!MAPS[i].cut;
+  CUT = !!MAPS[i].cut; METRO = !!MAPS[i].metro; MT = null;
   MAPS[i].build();
   OBJECTS.unshift({ k: 'bell', x: BELL.x, y: BELL.y, a: MAPS[i].bell || null });
   placeLedger();
@@ -1886,6 +1952,7 @@ function loadMap(i) {
     for (const b of BUILDINGS) if (b.name) am.set(b.name, [(b.x0 + b.x1 + 1) / 2, (b.y0 + b.y1 + 1) / 2, 1]);
     for (const s of STATIONS) { if (BUILDINGS.some(b => b.name === s.area)) continue; const a = am.get(s.area); if (a && s.area !== PLAZA) { a[0] += s.x + .5; a[1] += s.y + .5; a[2]++; } else if (!a) am.set(s.area, [s.x + .5, s.y + .5, 1]); }
     AREAS = [...am].map(e => ({ n: e[0], x: e[1][0] / e[1][2], y: e[1][1] / e[1][2] })); }
+  if (METRO) for (const a of METRO_AREAS) AREAS.push({ n: a[0], x: a[1], y: a[2] });
   // 出生點：圍著鐘一圈
   SPAWNS.length = 0;
   for (let k = 0; k < MAX_PLAYERS; k++) {
@@ -1916,7 +1983,7 @@ function loadMap(i) {
   }
   for (const b of BUILDINGS) {
     b.X = b.x0 * TILE; b.Y = b.y0 * TILE; b.W = (b.x1 - b.x0 + 1) * TILE; b.H = (b.y1 - b.y0 + 1) * TILE;
-    const k = b.k = Object.assign({}, BK[b.kind] || BK.house, b.kind === 'house' && HT[b.ht] ? HT[b.ht] : {});
+    const k = b.k = Object.assign({}, BK[b.kind] || BK.house, b.kind === 'house' && HT[b.ht] ? HT[b.ht] : {}, b.ko || {});   // ko：這張地圖自己指定的牆面材質、顏色（第 54 版）
     b.wallH = k.wh || 48; b.wallY = b.Y + b.H - b.wallH; b.up = k.up || 22; b.ra = 1; b.cv = null; b.live = [];
     // 門洞（連在一起的門口算同一個）和實心的牆段。正門在下面那道牆；第 36 版起有些房子在左右牆多一個側門
     const dx = b.doors.filter(d => d[1] === b.y1).map(d => d[0]).sort((p, q) => p - q); b.dops = [];
@@ -1942,6 +2009,7 @@ function loadMap(i) {
     if (o.k === 'gate') { o.wx = (o.x + 1) * TILE; o.wy = (o.y + 1) * TILE - 6; }
     STATIC.push({ y: o.wy, k: 2, o, x0: o.wx - 70, x1: o.wx + 70, y0: o.wy - 120, y1: o.wy + 14 });
     if (o.k === 'bell') LIGHTS.push({ x: o.wx, y: o.wy - 30, r: 110 });
+    if (o.gl) LIGHTS.push({ x: o.wx, y: o.wy - 30, r: o.gl });   // 第 56 版：會發光的機器（售票機、販賣機、看板）
     if (o.k === 'boat') LIGHTS.push({ x: o.wx + 17, y: o.wy - 30, r: 62 });
     if (o.k === 'stall') LIGHTS.push({ x: o.wx, y: o.wy - 26, r: 58 });
     if (o.k === 'altar' || o.k === 'forge' || o.k === 'oven' || o.k === 'desk' || o.k === 'stove') LIGHTS.push({ x: o.wx, y: o.wy - 24, r: 60 });
@@ -2024,6 +2092,7 @@ function cutShrink(t, x, y, small) {
   let k = 1;
   for (let dy = 1; dy <= 3; dy++) for (let dx = -1; dx <= 1; dx++) if (tget(x + dx, y - dy) === T_BLD || dr(x + dx, y - dy)) k = Math.min(k, dy <= 2 ? .6 : .86);
   for (let dy = 0; dy <= 3; dy++) for (let dx = -2; dx <= 2; dx++) if (dr(x + dx, y - dy)) k = Math.min(k, .56);
+  for (let dy = 0; dy <= 2; dy++) for (const dx of [-2, -1, 1, 2]) if (tget(x + dx, y - dy) === T_BLD) k = Math.min(k, Math.abs(dx) === 1 ? .62 : .8);   // 第 54 版：房子左右兩邊的樹也種矮一點，樹冠才不會蓋住側牆
   if (k < 1) { t.s = Math.min(t.s, 1) * k; if (k < .7 && small) t.art = small; }
 }
 function treeArt(kind, t, x, y) {
@@ -2037,12 +2106,27 @@ function treeArt(kind, t, x, y) {
     const tr = (a, b) => tget(a, b) === T_TREE, nb = (tr(x - 1, y) ? 1 : 0) + (tr(x + 1, y) ? 1 : 0) + (tr(x, y - 1) ? 1 : 0) + (tr(x, y + 1) ? 1 : 0);
     t.art = nb <= 1 ? 'h2o_pine' : !tr(x, y + 1) && (x * 7 + y * 13) % 3 === 0 ? 'h2o_pine' : 'h2o_casuarina'; cutShrink(t, x, y); return;
   }   // 第 48 版：漁港新畫風的黑松和木麻黃
+  if (kind === 'street2') {   // 第 53 版：燈籠老街——竹林裡種竹子；單獨一棵的種老榕樹或梅花樹
+    const tr = (a, b) => tget(a, b) === T_TREE, nb = (tr(x - 1, y) ? 1 : 0) + (tr(x + 1, y) ? 1 : 0) + (tr(x, y - 1) ? 1 : 0) + (tr(x, y + 1) ? 1 : 0);
+    t.art = nb >= 1 ? 's2o_bamboo' : (x * 7 + y * 13) % 2 ? 's2o_plum' : 's2o_banyan';
+    if (nb >= 1 && y > 3) { if (!tr(x, y - 1)) t.s = Math.min(t.s, 1) * .6; else if (!tr(x, y - 2)) t.s = Math.min(t.s, 1) * .8; }   // 竹林朝北的那一排種矮一點，才不會蓋住林子前面的攤位
+    cutShrink(t, x, y, 's2o_plum'); return;
+  }
+  if (kind === 'moor2') {   // 第 54 版：月影荒原——樹林裡是彎松和白樺；零星的幾棵裡面有枯樹
+    const tr = (a, b) => tget(a, b) === T_TREE, nb = (tr(x - 1, y) ? 1 : 0) + (tr(x + 1, y) ? 1 : 0) + (tr(x, y - 1) ? 1 : 0) + (tr(x, y + 1) ? 1 : 0), h3 = (x * 7 + y * 13) % 3;
+    t.art = nb >= 2 ? (h3 === 0 ? 'm2o_birch' : 'm2o_pine') : ['m2o_dead', 'm2o_pine', 'm2o_birch'][h3]; cutShrink(t, x, y); return;
+  }
   if (kind === 'moor') { t.art = ['moor_pine1', 'moor_pine2', 'moor_pine1', 'moor_pine2', 'moor_dead'][(x * 7 + y * 13) % 5]; return; }
   if (kind === 'harbor') { t.art = ['harbor_pine1', 'harbor_pine2', 'harbor_pine1', 'harbor_pine2', 'harbor_casuarina'][(x * 7 + y * 13) % 5]; if (CUT) cutShrink(t, x, y); return; }   // 第 43 版：漁港的黑松兩種、木麻黃
-  if (kind !== 'manor') return;
+  if (kind !== 'manor' && kind !== 'manor2') return;
   const inMaze = (x, y) => x >= MAZE[0] && y >= MAZE[1] && x <= MAZE[2] && y <= MAZE[3];
   const tr = (x, y) => tget(x, y) === T_TREE;
   if (inMaze(x, y)) { const h = (dx, dy) => inMaze(x + dx, y + dy) && tr(x + dx, y + dy); t.hg = { w: h(-1, 0), e: h(1, 0), n: h(0, -1), s: h(0, 1) }; return; }
+  if (kind === 'manor2') {   // 第 55 版：果園全是蘋果樹；單獨一棵的是修剪成圓錐、螺旋的樹；樹林是圓球樹，夾幾棵圓錐和蘋果樹
+    if (x >= 46 && x <= 60 && y >= 26 && y <= 32) { t.art = 'n2o_apple'; t.s = Math.min(t.s, 1) * .8; return; }   // 果園的樹種矮一點，樹下的路才看得到
+    const nb2 = (tr(x - 1, y) ? 1 : 0) + (tr(x + 1, y) ? 1 : 0) + (tr(x, y - 1) ? 1 : 0) + (tr(x, y + 1) ? 1 : 0);
+    t.art = nb2 === 0 ? ((x + y) % 2 ? 'n2o_cone' : 'n2o_spiral') : ['n2o_ball', 'n2o_cone', 'n2o_ball', 'n2o_apple', 'n2o_ball'][(x * 7 + y * 13) % 5]; cutShrink(t, x, y); return;
+  }
   if (x >= 46 && x <= 60 && y >= 26 && y <= 32) { t.art = (x + y) % 2 ? 'manor_apple1' : 'manor_apple2'; return; }
   const nb = (tr(x - 1, y) ? 1 : 0) + (tr(x + 1, y) ? 1 : 0) + (tr(x, y - 1) ? 1 : 0) + (tr(x, y + 1) ? 1 : 0);
   t.art = nb === 0 ? ((x + y) % 2 ? 'manor_cone' : 'manor_spiral') : ['manor_ball', 'manor_apple1', 'manor_ball', 'manor_apple2'][(x * 7 + y * 13) % 4];
@@ -2102,7 +2186,7 @@ function slipDir(free, pref) {   // 往旁邊最多 12 個像素找得到路嗎�
 }
 // 視線：兩點之間隔著房子就看不到
 // 會擋住視線的東西：房子、樹、圍欄
-function blocksSight(t) { return t === T_BLD || t === T_TREE || t === T_FENCE; }
+function blocksSight(t) { return t === T_BLD || t === T_TREE || t === T_FENCE || t === T_VOID; }
 // 擋視線的方塊（世界座標）。up = 圖案往上凸出去多高（屋頂、樹冠）。
 // 人在屋外時，整棟房子算一塊；人在某棟屋子裡時，那一棟改用它的牆（才看得到屋內、看不到屋外）
 let OCC = [], OCC_BASE = [];
@@ -2125,7 +2209,7 @@ function mergeRects(test, up, x0, y0, x1, y1) {
 }
 function buildOccluders() {
   for (const k in occCache) delete occCache[k];
-  OCC_BASE = mergeRects(t => t === T_TREE || t === T_FENCE, t => t === T_TREE ? 26 : 0, 0, 0, MW - 1, MH - 1);
+  OCC_BASE = mergeRects(t => t === T_TREE || t === T_FENCE || t === T_VOID, t => t === T_TREE ? 26 : 0, 0, 0, MW - 1, MH - 1);
   for (const b of BUILDINGS) { b.occOut = { l: b.X, t: b.Y, r: b.X + b.W, b: b.Y + b.H, up: b.up }; b.occIn = mergeRects(t => t === T_BLD, () => 0, b.x0, b.y0, b.x1, b.y1); }
   OCC = occFor(-1);
 }
@@ -2143,6 +2227,7 @@ function canSee(ax, ay, bx, by) {
   if (d < 26) return true;
   const n = Math.ceil(d / 12);
   for (let i = 1; i < n; i++) if (blocksSight(tget(Math.floor((ax + dx * i / n) / TILE), Math.floor((ay + dy * i / n) / TILE)))) return false;
+  if (METRO && trainBlocks(ax, ay, bx, by)) return false;   // 第 56 版：列車開過去的時候擋住兩邊
   return true;
 }
 const DIRS8 = [[1, 0], [-1, 0], [0, 1], [0, -1], [1, 1], [1, -1], [-1, 1], [-1, -1]];
@@ -2159,6 +2244,7 @@ function findPath(sx, sy, tx, ty) {
       const dx = DIRS8[d][0], dy = DIRS8[d][1], nx = cx + dx, ny = cy + dy;
       if (SOLID[tget(nx, ny)]) continue;
       if (dx && dy && (SOLID[tget(cx + dx, cy)] || SOLID[tget(cx, cy + dy)])) continue;
+      if (METRO && dy) { const ec = MT[ny * MW + nx]; if ((ec === 101 && dy < 0) || (ec === 69 && dy > 0)) continue; }   // 第 56 版：電腦玩家不逆著電扶梯走（e 往下、E 往上）
       const n = ny * MW + nx; if (_prev[n] !== -1) continue;
       _prev[n] = c; q.push(n);
     }
@@ -2210,6 +2296,8 @@ function buildGround() {
   const g = groundCv.getContext('2d'); g.setTransform(GS, 0, 0, GS, 0, 0); g.globalAlpha = 1; g.globalCompositeOperation = 'source-over';
   const r = mulberry32(11 + curMap), T = TILE;
   const gget = (x, y) => (x < 0 || y < 0 || x >= MW || y >= MH) ? T_GRASS : ground[y * MW + x];
+  outdoor: {
+  if (METRO) { paintMetroGround(g, r); break outdoor; }   // 第 56 版：捷運站的地面另外畫（沒有草地）
   const each = (t, fn) => { for (let y = 0; y < MH; y++) for (let x = 0; x < MW; x++) if (ground[y * MW + x] === t) fn(x, y); };
   // 草地：底色加深淺不一的色塊
   g.fillStyle = '#2c5646'; g.fillRect(0, 0, WORLD_W, WORLD_H);
@@ -2368,6 +2456,7 @@ function buildGround() {
   }
   // 工作點的地面記號
   for (const s of STATIONS) { g.strokeStyle = 'rgba(20,14,6,.35)'; g.lineWidth = 4; g.beginPath(); g.ellipse(s.wx, s.wy, 17, 11, 0, 0, 6.2832); g.stroke(); g.strokeStyle = 'rgba(242,184,75,.5)'; g.lineWidth = 2; g.setLineDash([5, 5]); g.beginPath(); g.ellipse(s.wx, s.wy, 17, 11, 0, 0, 6.2832); g.stroke(); g.setLineDash([]); }
+  }
   if (!glowCv) {
     const gc = document.createElement('canvas'); gc.width = gc.height = 128; const gg = gc.getContext('2d');
     const gr = gg.createRadialGradient(64, 64, 2, 64, 64, 64);
@@ -2425,7 +2514,27 @@ function drawTree(g, t) {
 
 // 莊園迷宮的樹籬（第 38 版）：一格畫一段，左右有鄰居就接起來；南邊還有樹籬的只畫頂面（往南延伸），最南邊那格才畫正面
 // 圖（manor_hedge，放大後 652×276）上：頂面 y 12～100、正面 100～266；左端 x 20 起、右端到 632
+// 第 55 版：新畫風的樹籬（n2o_hedge）。做法一樣，只是圖不同：去背後 209×124，頂面 y 3～42、正面 42～120；左端 x 5 起、右端到 203
+function drawHedge2(g, t) {
+  const P = ARTI.props.n2o_hedge; if (!P || !P.ok) return false;
+  const im = P.im, kx = im.naturalWidth / 209, ky = im.naturalHeight / 124, D = (u, v, w, h, x, y, dw, dh) => g.drawImage(im, u * kx, v * ky, w * kx, h * ky, x, y, dw, dh);
+  const f = t.hg, X = t.tx * TILE, Y = t.ty * TILE, T0 = f.n ? 16 : 3, T1 = 42, F1 = 120;
+  const x0 = X - (f.w ? 1 : -2), x1 = X + TILE + (f.e ? 1 : -2), yT = Y - 16, yM = Y + 4, yB = Y + 42;
+  if (f.s) {   // 往南延伸的那幾格：只畫頂面，葉子轉 90 度鋪；左右沒接的那一邊描一條深色的邊
+    const u0 = 22 + (t.tx * 31 + t.ty * 57) % 90, L = Y + 28 - yT;
+    g.save(); g.translate((x0 + x1) / 2, yT + L / 2); g.rotate(Math.PI / 2); D(u0, 14, 86, 24, -L / 2, -(x1 - x0) / 2, L, x1 - x0); g.restore();
+    g.fillStyle = '#33241a'; if (!f.w) g.fillRect(x0, yT + (f.n ? 0 : 6), 2, L - (f.n ? 0 : 6)); if (!f.e) g.fillRect(x1 - 2, yT + (f.n ? 0 : 6), 2, L - (f.n ? 0 : 6));
+    if (!f.n) { const u = !f.w && !f.e ? 5 : f.w ? (f.e ? 62 : 122) : 5; D(u, 3, 80, 12, x0, yT, x1 - x0, 8); }
+    return true;
+  }
+  const seg = (u0, u1, a, b) => { D(u0, T0, u1 - u0, T1 - T0, a, yT, b - a, yM - yT); D(u0, T1, u1 - u0, F1 - T1, a, yM, b - a, yB - yM); };
+  g.fillStyle = 'rgba(6,14,16,.3)'; g.fillRect(x0 + 2, yB - 2, x1 - x0, 5);
+  if (!f.w && !f.e) { const m = (x0 + x1) / 2; seg(5, 46, x0, m); seg(162, 203, m, x1); }
+  else seg(f.w ? (f.e ? 62 : 122) : 5, f.w ? (f.e ? 144 : 203) : 86, x0, x1);
+  return true;
+}
 function drawHedge(g, t) {
+  if (CUT) return drawHedge2(g, t);
   const P = ARTI.props.manor_hedge; if (!P || !P.ok) return false;
   const f = t.hg, X = t.tx * TILE, Y = t.ty * TILE, T0 = f.n ? 40 : 12, T1 = 100, F1 = 266;
   const x0 = X - (f.w ? 1 : -2), x1 = X + TILE + (f.e ? 1 : -2), yT = Y - 16, yM = Y + 4, yB = Y + 42;
@@ -2446,7 +2555,7 @@ function drawHedge(g, t) {
 function drawFence(g, o) {
   const X = o.x * TILE, Y = o.y * TILE, st = o.st, ew = o.e || o.w, ns = o.n || o.s;
   // 第 38 版：3 荒原的乾砌石牆（不規則的石頭、長青苔）、4 莊園的紅磚牆（石頭壓頂）
-  const face = ['#8a6a48', '#8b8f96', '#cfc6b2', '#6c6e66', '#8c4a3a'][st], cap = ['#a78357', '#a9adb3', '#3d3f47', '#7f8576', '#bdb6a4'][st], ol = ['#3a2a1c', '#3a3d44', '#24252b', '#2a2c28', '#2a1612'][st];
+  const face = ['#8a6a48', '#8b8f96', '#cfc6b2', '#6c6e66', '#8c4a3a', '#9fc4cc'][st], cap = ['#a78357', '#a9adb3', '#3d3f47', '#7f8576', '#bdb6a4', '#d3d8de'][st], ol = ['#3a2a1c', '#3a3d44', '#24252b', '#2a2c28', '#2a1612', '#2a2f38'][st];   // 5：捷運站的玻璃欄杆（第 56 版）
   if (ns) {   // 南北向：看到的是牆頂
     const y0 = o.n ? Y - 12 : Y + 2, y1 = o.s ? Y + TILE - 12 : Y + 26;
     g.fillStyle = ol; g.fillRect(X + 11.5, y0 - 1.5, 17, y1 - y0 + 3);
@@ -2472,6 +2581,8 @@ function drawFence(g, o) {
       for (let j = 0; j < 4; j++) { const yy = top + 9 + j * 7; g.fillStyle = 'rgba(40,16,10,.45)'; g.fillRect(x0, yy + 6, x1 - x0, 1.1); for (let i = Math.ceil((x0 - (j % 2) * 6) / 12) * 12 + (j % 2) * 6; i < x1; i += 12) g.fillRect(i, yy, 1.1, 7); }
       g.fillStyle = 'rgba(255,200,170,.08)'; g.fillRect(x0, top + 11, x1 - x0, 2);
     }
+    else if (st === 5) { g.fillStyle = 'rgba(255,255,255,.28)'; for (let i = Math.ceil(x0 / 20) * 20; i < x1; i += 20) { g.beginPath(); g.moveTo(i + 4, top + 11); g.lineTo(i + 12, top + 11); g.lineTo(i + 4, bot - 4); g.lineTo(i - 4, bot - 4); g.closePath(); g.fill(); }
+      g.fillStyle = '#7d848e'; for (let i = Math.ceil(x0 / 20) * 20; i < x1; i += 20) g.fillRect(i - 1.2, top + 9, 2.4, bot - top - 9); g.fillRect(x0, bot - 4, x1 - x0, 4); }
     else { g.fillStyle = 'rgba(90,80,60,.28)'; g.fillRect(x0, bot - 7, x1 - x0, 7); }
     g.fillStyle = cap; g.fillRect(x0, top, x1 - x0, 9);
     if (st === 4) { g.fillStyle = 'rgba(0,0,0,.3)'; for (let i = Math.ceil(x0 / 20) * 20; i < x1; i += 20) g.fillRect(i, top, 1, 9); g.fillStyle = 'rgba(255,255,255,.22)'; g.fillRect(x0, top, x1 - x0, 2); }
@@ -2527,10 +2638,12 @@ function drawObject(g, o, t) {
   // 第 38 版：有自己的圖（a）就畫圖，底部中心對齊物件站的位置
   if (o.a) { const P = ARTI.props[o.a]; if (P && P.ok) {
     g.drawImage(P.im, x - P.w * P.ax, y + 4 - P.h, P.w, P.h);
+    if (o.a === 't2o_signal') drawSignalGlow(g, o, P, t);   // 第 56 版：號誌燈
     if (o.a === 'moor_rune') { g.fillStyle = 'rgba(120,190,255,' + (.16 + .12 * Math.sin(t / 900 + x)).toFixed(3) + ')'; circ(g, x, y - P.h * .48, 9); }   // 符文淡淡地發光
     return;
   } }
   switch (k) {
+    case 'pillar': drawPillar(g, x, y); return;   // 第 56 版：捷運站的柱子
     case 'ledger': {   // 第 49 版：生死簿——石座上的木頭書台，攤開一本紅皮的簿子
       g.save(); g.translate(x, y); g.scale(1.28, 1.28); g.translate(-x, -y);
       box(g, x - 13, y - 6, 26, 9, 2.5, '#8b8f98', '#33241a', 1.4);
@@ -2757,7 +2870,7 @@ function drawLamp(g, o) {
   const LP = MAPS[curMap] && MAPS[curMap].lamp ? ARTI.props[MAPS[curMap].lamp] : null;   // 第 47 版：這張地圖有自己的路燈圖
   if (LP && LP.ok) {
     g.drawImage(LP.im, o.wx - LP.w * LP.ax, o.wy + 3 - LP.h, LP.w, LP.h);
-    const lx = o.wx + LP.w * (.74 - LP.ax), ly = o.wy - LP.h * .5; g.fillStyle = 'rgba(255,196,110,' + (.2 + .06 * Math.sin(NOW / 600 + o.wx)).toFixed(3) + ')'; circ(g, lx, ly, 9);   // 燈籠的光
+    const lg = MAPS[curMap].lg || [.74, .5], lx = o.wx + LP.w * (lg[0] - LP.ax), ly = o.wy - LP.h * lg[1];   // lg：燈泡在圖上的位置（第 56 版，捷運站的路燈是高高的燈桿） g.fillStyle = 'rgba(255,196,110,' + (.2 + .06 * Math.sin(NOW / 600 + o.wx)).toFixed(3) + ')'; circ(g, lx, ly, 9);   // 燈籠的光
     for (let i = 0; i < 2; i++) { const k = NOW / 1000 * (1.7 + i * .6) + o.wx * .13 + i * 2.4, mx = lx + Math.cos(k) * (9 + i * 4) + Math.sin(k * 2.7) * 2, my = ly + Math.sin(k * 1.3) * 7 + Math.cos(k * 3.1) * 1.5; g.fillStyle = 'rgba(255,244,214,' + (.55 + .35 * Math.sin(k * 9)).toFixed(2) + ')'; ell(g, mx, my, 1.25, .8); }
     return;
   }
@@ -2972,13 +3085,13 @@ const BK = {
   boat: { lay: 'barrel', rf: 'tin', rc: '#7c8a94', wl: 'plank', wc: '#6e5a44', fl: 'earth', fa: 'arch', wh: 70, gh: 96, nowin: 1, xu: 14 },
   light: { cc: '#c2473a', lay: 'flat', rf: 'tar', rc: '#8b8e95', wl: 'plaster', wc: '#ece6d6', fl: 'stone', fa: 'tower', wh: 62, pw: 9, xu: 200 },
   hut: { cc: '#5f8a4a', lay: 'gable', rf: 'turf', rc: '#5f8a4a', wl: 'lap', wc: '#8f897e', fl: 'wood', fa: 'plain', wh: 54, rr: .32, xu: 30 },
-  tea: { lay: 'gable', rf: 'tile', rc: '#4c7758', wl: 'plank', wc: '#7a5a40', fl: 'wood', fa: 'two', wh: 102, rr: .4, xu: 24 },
-  cloth: { lay: 'flat', rf: 'tar', rc: '#6f6a78', wl: 'plaster', wc: '#d9c9ad', fl: 'wood', fa: 'jp', wh: 100, pw: 10, ped: 1, xu: 40 },
-  temple: { lay: 'tiers', rf: 'tile', rc: '#a23a30', wl: 'plaster', wc: '#e0cfa8', fl: 'stone', fa: 'hall', wh: 80, up: 44, xu: 52, curve: 1 },
-  herb: { lay: 'hip', rf: 'tile', rc: '#6a7450', wl: 'plank', wc: '#86694a', fl: 'wood', fa: 'arcade', wh: 86, ins: .2, xu: 22 },
-  bun: { lay: 'shed', rf: 'tile', rc: '#b06a3c', wl: 'plaster', wc: '#e8d8b6', fl: 'wood', fa: 'plain', wh: 62, rise: 40, xu: 40 },
-  study: { lay: 'hip', rf: 'tile', rc: '#4a5d78', wl: 'plaster', wc: '#d8cfba', fl: 'mat', fa: 'plain', wh: 58, ins: .5, rr: .5, round: 1, xu: 26 },
-  dye: { lay: 'sanhe', rf: 'tile', rc: '#3d6c8c', wl: 'plaster', wc: '#cbc1a8', fl: 'stone', fa: 'plain', wh: 58, wing: .22, xu: 26 },
+  tea: { cc: '#4f7a4a', lay: 'gable', rf: 'tile', rc: '#4c7758', wl: 'plank', wc: '#7a5a40', fl: 'wood', fa: 'two', wh: 102, rr: .4, xu: 24 },
+  cloth: { cc: '#3f6fa8', lay: 'flat', rf: 'tar', rc: '#6f6a78', wl: 'plaster', wc: '#d9c9ad', fl: 'wood', fa: 'jp', wh: 100, pw: 10, ped: 1, xu: 40 },
+  temple: { cc: '#b8382e', lay: 'tiers', rf: 'tile', rc: '#a23a30', wl: 'plaster', wc: '#e0cfa8', fl: 'stone', fa: 'hall', wh: 80, up: 44, xu: 52, curve: 1 },
+  herb: { cc: '#8a7a3a', lay: 'hip', rf: 'tile', rc: '#6a7450', wl: 'plank', wc: '#86694a', fl: 'wood', fa: 'arcade', wh: 86, ins: .2, xu: 22 },
+  bun: { cc: '#d98a3a', lay: 'shed', rf: 'tile', rc: '#b06a3c', wl: 'plaster', wc: '#e8d8b6', fl: 'wood', fa: 'plain', wh: 62, rise: 40, xu: 40 },
+  study: { cc: '#5a6f8a', lay: 'hip', rf: 'tile', rc: '#4a5d78', wl: 'plaster', wc: '#d8cfba', fl: 'mat', fa: 'plain', wh: 58, ins: .5, rr: .5, round: 1, xu: 26 },
+  dye: { cc: '#3a4f9a', lay: 'sanhe', rf: 'tile', rc: '#3d6c8c', wl: 'plaster', wc: '#cbc1a8', fl: 'stone', fa: 'plain', wh: 58, wing: .22, xu: 26 },
   house: { lay: 'gable', rf: 'tile', rc: '#5d5560', wl: 'plaster', wc: '#cfc3ad', fl: 'wood', fa: 'plain', wh: 56, xu: 20 }
 };
 // 老街九間民宅：每一間都不一樣（造型／材質／高度／顏色）
@@ -3709,6 +3822,258 @@ function mistPaint(m, mw, mh, k, cx, cy, now, alpha) {
   }
   m.globalAlpha = 1;
 }
+// ===== 第 56 版：捷運站 =====
+// 沒有房子的地圖：地面出口 → 大廳（非付費區、閘門、付費區）→ 月台。三層畫在同一張平面上，用樓梯和電扶梯接起來。
+// 特別的地方：
+// 1. 列車：每隔一段時間，兩條軌道各開過一輛（北軌道往東、南軌道往西）。來之前號誌燈會閃。
+//    軌道可以走；被列車撞到會彈回月台、暈 2 秒（不能動、不能按按鈕）。兩條軌道中間的安全島不會被撞。
+// 2. 電扶梯：站上去會自動被帶著走（西邊那座往下、東邊那座往上），逆向走會很慢。
+// 配置跟 art/design/metro_plan.py 的設計圖一樣（那邊有檢查每一格都走得到）。
+let MT = null, METRO = false;   // MT：捷運站每一格是什麼（字元碼）；METRO：現在這張地圖是不是捷運站
+const TRAIN_FIRST = 9, TRAIN_EVERY = 15, TRAIN_WARN = 3, TRAIN_V = 1000, TRAIN_STUN = 2, ESC_V = 90;
+const TRK = [{ y0: 36, y1: 37, dir: 1 }, { y0: 39, y1: 40, dir: -1 }];   // 兩條軌道（格子的列）和列車的方向
+const TRK_X0 = 3, TRK_X1 = 60;   // 月台這一段（兩頭是隧道）
+let trainT0 = -1, trainSeen = -1;   // 這一班列車的警示從什麼時候開始（performance.now()）；上一次看到的班次
+const mch = (x, y) => (!MT || x < 0 || y < 0 || x >= MW || y >= MH) ? ' ' : String.fromCharCode(MT[y * MW + x]);
+function isTrack(x, y) { return METRO && mch(x, y) === 't'; }
+function escDir(wx, wy) { if (!METRO) return 0; const c = mch(Math.floor(wx / TILE), Math.floor(wy / TILE)); return c === 'e' ? 1 : c === 'E' ? -1 : 0; }   // 電扶梯：1 往下（南）、-1 往上（北）
+function trainLen() { const a = ARTI.props.t2t_head, b = ARTI.props.t2t_mid; return (a ? a.w : 376) * 2 + (b ? b.w : 374) - 16; }   // 三節：車頭、中間、車尾
+function trainDur() { return (WORLD_W + trainLen()) / TRAIN_V; }
+// 0 沒有車、1 警示中、2 列車正在通過
+function trainState(now) { if (!METRO || trainT0 < 0) return 0; const t = (now - trainT0) / 1000; return t < TRAIN_WARN ? 1 : t < TRAIN_WARN + trainDur() ? 2 : 0; }
+// 第 k 條軌道上的列車現在佔住哪一段（世界座標 [左, 右]）；沒有車回傳 null
+function trainSpan(k, now) {
+  if (trainState(now) !== 2) return null;
+  const front = ((now - trainT0) / 1000 - TRAIN_WARN) * TRAIN_V, L = trainLen();
+  return TRK[k].dir > 0 ? [front - L, front] : [WORLD_W - front, WORLD_W - front + L];
+}
+// 這個位置現在會不會被撞？回傳軌道編號（-1 = 不會）
+function trainHitAt(wx, wy, now) {
+  if (trainState(now) !== 2) return -1;
+  const ty = Math.floor(wy / TILE);
+  for (let k = 0; k < TRK.length; k++) if (ty >= TRK[k].y0 && ty <= TRK[k].y1) { const s = trainSpan(k, now); if (s && wx > s[0] + 8 && wx < s[1] - 4) return k; }
+  return -1;
+}
+// 被撞：彈回最近的月台（北軌道 → 北月台，南軌道 → 南月台），順著列車的方向被帶出去一小段
+function trainKnock(p, k) {
+  const y = k === 0 ? 35 * TILE + 26 : 41 * TILE + 16, d = TRK[k].dir;
+  for (const dx of [46, 30, 14, 0, -20, -40, 70, -70]) { const x = clamp(p.x + dx * d, TRK_X0 * TILE + 14, (TRK_X1 + 1) * TILE - 14); if (boxFree(x, y)) { p.x = x; p.y = y; return; } }
+  p.y = y;
+}
+// 電腦玩家：列車快來的時候不要走上軌道
+function trainDanger(now) { if (!METRO || trainT0 < 0) return false; const t = (now - trainT0) / 1000; return t > .5 && t < TRAIN_WARN + trainDur() + .2; }
+// 列車擋住視線：兩個人在軌道的兩邊，中間剛好有車
+function trainBlocks(ax, ay, bx, by) {
+  if (!METRO || trainT0 < 0) return false;
+  const now = performance.now(); if (trainState(now) !== 2) return false;
+  for (let k = 0; k < TRK.length; k++) {
+    const s = trainSpan(k, now); if (!s) continue;
+    const top = TRK[k].y0 * TILE - 30, bot = (TRK[k].y1 + 1) * TILE - 8;   // 車身畫出來的範圍（比軌道高一點）
+    for (const yy of [top + 14, bot - 6]) { if ((ay - yy) * (by - yy) >= 0) continue; const x = ax + (bx - ax) * (yy - ay) / (by - ay); if (x > s[0] && x < s[1]) return true; }
+  }
+  return false;
+}
+
+// ---------- 地圖 ----------
+function buildMetro() {
+  PLAZA = '大廳'; BELL.x = 31; BELL.y = 15;
+  MT = new Uint8Array(MW * MH).fill(32); tfill(0, 0, MW - 1, MH - 1, T_VOID);
+  const TT = { s: T_STONE, '.': T_STONE, g: T_STONE, p: T_STONE, S: T_SOIL, '=': T_PLANK, e: T_PLANK, E: T_PLANK, t: T_PLANK, m: T_PLANK, '#': T_FENCE, u: T_VOID };
+  const F = (x0, y0, x1, y1, c) => { for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) { MT[y * MW + x] = c.charCodeAt(0); tset(x, y, TT[c]); } };
+  // 地面層：三個出口，一條人行道把它們連起來；出口之間是花圃（小狗在這裡埋骨頭）
+  F(5, 2, 58, 4, 's'); for (const x0 of [5, 27, 49]) F(x0, 5, x0 + 9, 7, 's');
+  for (const x0 of [16, 38]) F(x0, 5, x0 + 9, 6, 'S');
+  for (const p of [[6, 6], [13, 6], [28, 6], [35, 6], [50, 6], [57, 6]]) F(p[0], p[1], p[0], p[1], 'S');
+  for (const x0 of [9, 31, 53]) F(x0, 8, x0 + 1, 11, '=');                   // 往下到大廳的樓梯
+  // 大廳層：非付費區 → 閘門 → 付費區
+  F(4, 12, 59, 17, '.'); F(4, 18, 59, 18, '#'); F(4, 19, 59, 25, '.');
+  const GATES = [13, 29, 45];                                                  // 三組閘門，每組：機台、通道、機台、通道、機台
+  for (const x0 of GATES) { F(x0, 18, x0 + 4, 18, '.'); F(x0 + 1, 18, x0 + 1, 18, 'g'); F(x0 + 3, 18, x0 + 3, 18, 'g'); }
+  F(55, 21, 55, 24, '#');                                                      // 機房的隔牆
+  // 往下到月台：三座樓梯、兩座電扶梯（西邊往下、東邊往上）
+  F(10, 26, 11, 30, '='); F(14, 26, 15, 30, 'e'); F(31, 26, 32, 30, '='); F(48, 26, 49, 30, 'E'); F(52, 26, 53, 30, '=');
+  // 月台層：北月台、北軌道、安全島、南軌道、南月台
+  F(3, 31, 60, 35, 'p'); F(0, 36, 63, 40, 'u'); F(TRK_X0, 36, TRK_X1, 37, 't'); F(TRK_X0, 38, TRK_X1, 38, 'm'); F(TRK_X0, 39, TRK_X1, 40, 't'); F(3, 41, 60, 43, 'p');
+
+  const A = (a, list, ex) => { for (const p of list) OBJECTS.push(ob('prop', p[0], p[1], Object.assign({ a }, ex || {}))); };
+  const W2 = { w: 2 }, deco = { ns: true }, glow = { gl: 54 };
+  // 地面
+  A('t2o_tree', [[7, 2], [20, 2], [26, 2], [37, 2], [43, 2], [56, 2]]);
+  A('t2o_busstop', [[12, 2], [50, 2]]); A('t2o_bikes', [[14, 2], [46, 2]], W2); A('t2o_hydrant', [[17, 2]]); A('t2o_mailbox', [[23, 2]]);
+  A('t2o_bench', [[30, 2], [53, 2]], W2); A('t2o_scooter', [[40, 2]], W2); A('t2o_cones', [[57, 4]]);
+  A('t2o_totem', [[11, 7], [33, 7], [55, 7]]);
+  A('t2o_shrub', [[6, 6], [13, 6], [28, 6], [35, 6], [50, 6], [57, 6], [16, 5], [25, 5], [38, 5], [47, 5], [21, 6], [43, 6]], deco);
+  A('t2o_pigeon', [[33, 4], [36, 3], [30, 5]], deco);
+  // 大廳（非付費區）：便利商店、售票機、詢問處、置物櫃
+  A('t2i_fridge', [[4, 12]], glow); A('t2i_shelf', [[5, 12], [6, 12]]); A('t2i_coffee', [[7, 12]], W2); A('t2i_checkout', [[6, 15]], W2); A('t2i_vending', [[4, 15]], glow);
+  A('t2i_ticket', [[16, 12], [17, 12]], glow); A('t2i_topup', [[19, 12], [20, 12]], glow); A('t2i_routemap', [[22, 12], [42, 12]]); A('t2i_plant', [[25, 12], [57, 20], [6, 24], [43, 14]]);
+  A('t2i_board', [[40, 12], [34, 24]], glow); A('t2i_extinguisher', [[44, 12], [59, 21]]); A('t2i_photobooth', [[46, 12]]); A('t2i_claw', [[48, 12]], glow);
+  A('t2i_info', [[37, 14]], W2); A('t2i_kiosk', [[40, 14]], glow);
+  A('t2i_lockers', [[55, 12], [57, 12]], W2); A('t2i_vending', [[59, 14]], glow); A('t2i_bins', [[59, 16]]);
+  for (const x0 of GATES) A('t2i_gate', [[x0, 18], [x0 + 2, 18], [x0 + 4, 18]]);
+  // 付費區：座椅、垃圾桶、機房
+  A('t2i_seats', [[18, 21], [26, 23], [36, 23], [44, 21]], W2); A('t2i_bins', [[21, 19], [50, 19]], W2); A('t2i_wetsign', [[29, 22]]); A('t2i_cleancart', [[8, 22]]);
+  A('t2i_power', [[58, 25], [59, 25]]);
+  OBJECTS.push(...[[12, 15], [22, 15], [41, 16], [51, 15], [12, 22], [22, 22], [41, 22], [51, 22], [18, 33], [26, 33], [37, 33], [45, 33], [57, 34]].map(p => ob('pillar', p[0], p[1])));
+  // 月台
+  A('t2o_pbench', [[8, 32], [20, 32], [40, 32], [56, 32], [12, 43], [28, 43], [44, 43]], W2); A('t2o_psign', [[24, 31], [43, 31]], W2);
+  A('t2i_vending', [[4, 31], [36, 43]], glow); A('t2i_bins', [[6, 31]], W2); A('t2i_extinguisher', [[58, 31], [60, 43]]); A('t2o_estop', [[59, 31], [4, 43]]);
+  A('t2o_signal', [[3, 38], [60, 38]]); A('t2o_toolbox', [[35, 38]], deco); A('t2o_trolley', [[58, 43]], W2); A('t2o_pigeon', [[52, 42]], deco);
+
+  STATIONS = [
+    stn('加值', '售票機', 19, 13, 'scatter', '🪙', '把硬幣一枚一枚投進加值機', 5),
+    stn('驗票', '西閘門', 12, 17, 'seq', '🎫', '把票分好', 5),
+    stn('廣播', '詢問處', 38, 15, 'seq', '🎙️', '照順序按下廣播鈕', 5),
+    stn('補貨', '便利商店', 5, 13, 'scatter', '🍙', '把商品配成對', 6),
+    stn('整理寄物櫃', '置物櫃', 57, 13, 'seq', '🧳', '把行李放進對的櫃子', 5),
+    stn('修電扶梯', '西電扶梯', 16, 25, 'timing', '🔧', '指針進到綠色區再鎖，成功 3 次', 3),
+    stn('擦座椅', '北月台', 22, 32, 'hold', '🧽', '按住不放，把座椅擦乾淨'),
+    stn('檢查軌道', '軌道', 33, 38, 'mash', '🔩', '連點 8 下把螺栓鎖緊', 8),
+    stn('撿垃圾', '南月台', 40, 42, 'scatter', '🗑️', '把垃圾全部撿起來', 6),
+    stn('打開總開關', '機房', 58, 24, 'hold', '⚡', '按住不放，把電壓拉上來'),
+    stn('趕鴿子', '2 號出口', 34, 5, 'scatter', '🕊️', '把鴿子全部趕走', 5),
+    stn('澆花', '1 號出口', 17, 5, 'hold', '💧', '按住不放，把花圃澆透')
+  ];
+  candleS = 9;   // 燈被關掉以後，到機房把總開關打開
+  CHAINS = [
+    { name: '首班車準備', steps: [9, 2, 1] },
+    { name: '月台巡查', steps: [6, 7, 8] },
+    { name: '開店準備', steps: [3, 0] },
+    { name: '站外整理', steps: [11, 10] },
+    { name: '設備檢修', steps: [5, 9] },
+    { name: '失物招領', steps: [4, 2] }
+  ];
+  LAMPS = [[9.2, 3.4], [18.6, 3.4], [28.4, 3.4], [35.4, 3.4], [45.2, 3.4], [51.6, 3.4], [58.2, 3.6]];
+}
+const METRO_AREAS = [['付費區', 32, 22], ['3 號出口', 54, 5], ['東電扶梯', 49, 28], ['人行道', 32, 3]];
+
+// ---------- 地面 ----------
+function paintMetroGround(g, r) {
+  const T = TILE, room = (x, y) => { const c = mch(x, y); return c !== ' ' && c !== 'u'; };
+  const each = (set, fn) => { for (let y = 0; y < MH; y++) for (let x = 0; x < MW; x++) if (set.indexOf(mch(x, y)) >= 0) fn(x, y, x * T, y * T); };
+  g.fillStyle = '#06080c'; g.fillRect(0, 0, WORLD_W, WORLD_H);
+  // 馬路（人行道北邊）：柏油、分隔線
+  g.fillStyle = '#2b2f37'; g.fillRect(3 * T, 0, 58 * T, 2 * T); g.fillStyle = 'rgba(255,255,255,.05)'; for (let i = 0; i < 500; i++) g.fillRect(3 * T + r() * 58 * T, r() * 2 * T, 1.5, 1.5);
+  g.fillStyle = '#d8c46a'; for (let x = 3 * T + 10; x < 61 * T; x += 56) g.fillRect(x, 22, 30, 4);
+  g.fillStyle = '#5c6068'; g.fillRect(3 * T, 2 * T - 8, 58 * T, 8); g.fillStyle = '#8d9199'; g.fillRect(3 * T, 2 * T - 8, 58 * T, 3);   // 路緣石
+  { const sh = g.createLinearGradient(0, 0, 3 * T, 0); sh.addColorStop(0, '#06080c'); sh.addColorStop(1, 'rgba(6,8,12,0)'); g.fillStyle = sh; g.fillRect(3 * T, 0, 3 * T, 2 * T);
+    const s2 = g.createLinearGradient(58 * T, 0, 61 * T, 0); s2.addColorStop(0, 'rgba(6,8,12,0)'); s2.addColorStop(1, '#06080c'); g.fillStyle = s2; g.fillRect(58 * T, 0, 3 * T, 2 * T); }
+  // 牆：每一塊地板北邊靠著的那道牆（白磁磚、一條藍綠色的腰線），畫在地板外面
+  for (let y = 9; y < MH; y++) for (let x = 0; x < MW; x++) {
+    if (!room(x, y) || room(x, y - 1)) continue; const c = mch(x, y); if ('=eE'.indexOf(c) >= 0) continue;
+    const X = x * T, Y = y * T, H = 34, plat = c === 'p';
+    g.fillStyle = '#20252d'; g.fillRect(X, Y - H - 5, T, 5); g.fillStyle = plat ? '#c9cdd2' : '#dcd8cc'; g.fillRect(X, Y - H, T, H);
+    g.fillStyle = 'rgba(40,50,60,.16)'; g.fillRect(X, Y - H, 1, H); g.fillRect(X + 20, Y - H, 1, H); g.fillRect(X, Y - H + 11, T, 1); g.fillRect(X, Y - 9, T, 1);
+    g.fillStyle = '#2f8f93'; g.fillRect(X, Y - H + 14, T, 7); g.fillStyle = 'rgba(255,255,255,.25)'; g.fillRect(X, Y - H + 14, T, 1.5);
+    g.fillStyle = '#e88a3a'; g.fillRect(X, Y - H + 22.5, T, 2);
+    const sh = g.createLinearGradient(0, Y - 8, 0, Y); sh.addColorStop(0, 'rgba(10,14,20,0)'); sh.addColorStop(1, 'rgba(10,14,20,.4)'); g.fillStyle = sh; g.fillRect(X, Y - 8, T, 8);
+  }
+  // 地板
+  each('s', (x, y, X, Y) => { g.fillStyle = (x + y) % 2 ? '#8a8e96' : '#848890'; g.fillRect(X, Y, T, T); g.strokeStyle = 'rgba(40,44,52,.35)'; g.lineWidth = 1; g.strokeRect(X + .5, Y + .5, T - 1, T - 1); g.beginPath(); g.moveTo(X + 20, Y); g.lineTo(X + 20, Y + T); g.moveTo(X, Y + 20); g.lineTo(X + T, Y + 20); g.stroke(); });
+  each('.g#', (x, y, X, Y) => {
+    g.fillStyle = '#c4bfb0'; g.fillRect(X, Y, T, T); g.fillStyle = 'rgba(255,255,255,.1)'; g.fillRect(X + 1, Y + 1, T - 2, 2); g.strokeStyle = 'rgba(70,64,50,.28)'; g.lineWidth = 1; g.strokeRect(X + .5, Y + .5, T - 1, T - 1);
+    if ((x + y) % 4 === 0) { g.fillStyle = 'rgba(47,143,147,.22)'; poly(g, [X + 20, Y + 14, X + 26, Y + 20, X + 20, Y + 26, X + 14, Y + 20]); g.fill(); }
+    for (let i = 0; i < 3; i++) { g.fillStyle = i % 2 ? 'rgba(255,255,255,.12)' : 'rgba(60,50,40,.12)'; g.fillRect(X + r() * 38, Y + r() * 38, 1.6, 1.6); }
+  });
+  each('g', (x, y, X, Y) => { g.fillStyle = 'rgba(60,170,90,.2)'; g.fillRect(X + 5, Y, T - 10, T); g.fillStyle = '#3aa35a'; poly(g, [X + 20, Y + 8, X + 29, Y + 20, X + 23, Y + 20, X + 23, Y + 32, X + 17, Y + 32, X + 17, Y + 20, X + 11, Y + 20]); g.fill(); });
+  each('p', (x, y, X, Y) => {
+    g.fillStyle = (x + y) % 2 ? '#a7abb3' : '#a1a5ad'; g.fillRect(X, Y, T, T); g.strokeStyle = 'rgba(50,54,62,.28)'; g.lineWidth = 1; g.strokeRect(X + .5, Y + .5, T - 1, T - 1);
+    const dn = mch(x, y + 1) === 't', up = mch(x, y - 1) === 't';
+    if (dn || up) { const yy = dn ? Y + T - 15 : Y + 3; g.fillStyle = '#e2b93b'; g.fillRect(X, yy, T, 12); g.fillStyle = 'rgba(120,84,10,.5)'; for (let i = 4; i < T; i += 8) { circ(g, X + i, yy + 3.5, 1.5); circ(g, X + i, yy + 8.5, 1.5); }
+      g.fillStyle = '#f4f4f0'; g.fillRect(X, dn ? Y + T - 3 : Y, T, 3); }
+  });
+  each('S', (x, y, X, Y) => {
+    g.fillStyle = '#8d9199'; g.fillRect(X, Y, T, T); const n = mch(x, y - 1) === 'S', s = mch(x, y + 1) === 'S', w = mch(x - 1, y) === 'S', e = mch(x + 1, y) === 'S';
+    g.fillStyle = '#5b4630'; g.fillRect(X + (w ? 0 : 4), Y + (n ? 0 : 4), T - (w ? 0 : 4) - (e ? 0 : 4), T - (n ? 0 : 4) - (s ? 0 : 4));
+    for (let i = 0; i < 5; i++) { g.fillStyle = ['#4a8a54', '#5fa064', '#3f7a4a'][i % 3]; ell(g, X + 6 + r() * 28, Y + 6 + r() * 28, 3 + r() * 3, 2 + r() * 2); }
+    if (r() < .6) { const fx = X + 8 + r() * 24, fy = Y + 8 + r() * 24; g.fillStyle = ['#f08aa8', '#f2c24e', '#f4f0e6', '#e8713c'][Math.floor(r() * 4)]; for (let a = 0; a < 5; a++) circ(g, fx + Math.cos(a * 1.257) * 2.6, fy + Math.sin(a * 1.257) * 2.6, 1.7); g.fillStyle = '#f6e27a'; circ(g, fx, fy, 1.3); }
+  });
+  // 樓梯：一階一階，兩邊是扶手
+  each('=', (x, y, X, Y) => {
+    g.fillStyle = '#7e8188'; g.fillRect(X, Y, T, T); for (let i = 0; i < 4; i++) { g.fillStyle = '#b3b6bc'; g.fillRect(X, Y + i * 10, T, 6); g.fillStyle = '#54575e'; g.fillRect(X, Y + i * 10 + 6, T, 1.5); g.fillStyle = '#e2b93b'; g.fillRect(X, Y + i * 10, T, 1.2); }
+    if (!room(x - 1, y)) { g.fillStyle = '#3a4048'; g.fillRect(X - 5, Y, 5, T); g.fillStyle = '#c7ccd2'; g.fillRect(X, Y, 3.5, T); }
+    if (!room(x + 1, y)) { g.fillStyle = '#3a4048'; g.fillRect(X + T, Y, 5, T); g.fillStyle = '#c7ccd2'; g.fillRect(X + T - 3.5, Y, 3.5, T); }
+  });
+  // 電扶梯：底座（會動的梯級每一格畫面另外畫）
+  each('eE', (x, y, X, Y) => {
+    g.fillStyle = '#2b3038'; g.fillRect(X, Y, T, T);
+    if (!room(x - 1, y)) { g.fillStyle = '#20242b'; g.fillRect(X - 6, Y, 6, T); g.fillStyle = '#2f8f93'; g.fillRect(X, Y, 5, T); g.fillStyle = 'rgba(255,255,255,.3)'; g.fillRect(X, Y, 1.5, T); }
+    if (!room(x + 1, y)) { g.fillStyle = '#20242b'; g.fillRect(X + T, Y, 6, T); g.fillStyle = '#2f8f93'; g.fillRect(X + T - 5, Y, 5, T); g.fillStyle = 'rgba(255,255,255,.3)'; g.fillRect(X + T - 5, Y, 1.5, T); }
+  });
+  // 軌道：碎石、枕木、兩條鐵軌；兩頭伸進隧道裡
+  for (const tr of TRK) {
+    const Y0 = tr.y0 * T, Hh = (tr.y1 - tr.y0 + 1) * T;
+    g.fillStyle = '#34312e'; g.fillRect(0, Y0, WORLD_W, Hh);
+    for (let i = 0; i < 2600; i++) { g.fillStyle = ['rgba(120,112,100,.5)', 'rgba(20,18,16,.5)', 'rgba(90,84,76,.5)'][i % 3]; g.fillRect(r() * WORLD_W, Y0 + r() * Hh, 2, 2); }
+    for (let x = 6; x < WORLD_W; x += 20) { g.fillStyle = '#5a4a3a'; g.fillRect(x, Y0 + 10, 8, Hh - 20); g.fillStyle = 'rgba(255,255,255,.08)'; g.fillRect(x, Y0 + 10, 2, Hh - 20); }
+    for (const ry of [Y0 + 20, Y0 + Hh - 24]) { g.fillStyle = '#1e2026'; g.fillRect(0, ry + 3, WORLD_W, 2.5); g.fillStyle = '#a9afb8'; g.fillRect(0, ry, WORLD_W, 3.5); g.fillStyle = 'rgba(255,255,255,.4)'; g.fillRect(0, ry, WORLD_W, 1); }
+  }
+  each('m', (x, y, X, Y) => { g.fillStyle = '#7d7f84'; g.fillRect(X, Y, T, T); g.fillStyle = '#e2b93b'; g.fillRect(X, Y, T, 3); g.fillRect(X, Y + T - 3, T, 3); g.fillStyle = '#23262c'; for (let i = (x % 2) * 10; i < T; i += 20) { g.fillRect(X + i, Y, 10, 3); g.fillRect(X + i, Y + T - 3, 10, 3); } g.strokeStyle = 'rgba(40,44,52,.3)'; g.lineWidth = 1; g.strokeRect(X + .5, Y + 3.5, T - 1, T - 7); });
+  // 隧道口：兩頭越來越暗，洞口有一圈拱
+  for (const side of [0, 1]) {
+    const x0 = side ? (TRK_X1 + 1) * T : 0, w = side ? WORLD_W - x0 : TRK_X0 * T, y0 = 36 * T, h = 5 * T;
+    const sh = g.createLinearGradient(side ? x0 : x0 + w, 0, side ? x0 + w : x0, 0); sh.addColorStop(0, 'rgba(4,5,8,.55)'); sh.addColorStop(.75, '#040508'); g.fillStyle = sh; g.fillRect(x0, y0, w, h);
+    g.fillStyle = '#4a4f58'; g.fillRect(side ? x0 : x0 + w - 8, y0 - 6, 8, h + 12); g.fillStyle = '#e2b93b'; for (let yy = y0 - 6; yy < y0 + h + 6; yy += 16) g.fillRect(side ? x0 : x0 + w - 8, yy, 8, 8);
+  }
+  // 地板的邊：南邊一道深色的收邊，東西兩邊是牆頂
+  for (let y = 0; y < MH; y++) for (let x = 0; x < MW; x++) {
+    if (!room(x, y)) continue; const X = x * T, Y = y * T, c = mch(x, y); if ('=eEtm'.indexOf(c) >= 0) continue;
+    if (!room(x, y + 1) && mch(x, y + 1) !== 'u') { g.fillStyle = '#1b1f26'; g.fillRect(X, Y + T, T, 7); g.fillStyle = '#4a4f58'; g.fillRect(X, Y + T, T, 2.5); }
+    if (y >= 9 && !room(x - 1, y)) { g.fillStyle = '#3a4048'; g.fillRect(X - 6, Y - 34, 6, T + 34); g.fillStyle = '#6a707a'; g.fillRect(X - 6, Y - 34, 2, T + 34); }
+    if (y >= 9 && !room(x + 1, y)) { g.fillStyle = '#3a4048'; g.fillRect(X + T, Y - 34, 6, T + 34); g.fillStyle = '#6a707a'; g.fillRect(X + T + 4, Y - 34, 2, T + 34); }
+  }
+  // 很細的顆粒，讓大片地板不會太平
+  for (let i = 0; i < 16000; i++) { g.fillStyle = i % 2 ? 'rgba(255,248,226,.04)' : 'rgba(4,8,20,.06)'; g.fillRect(r() * WORLD_W, r() * WORLD_H, .8 + r() * 1.4, .8 + r() * 1.4); }
+  for (const s of SEWERS) drawSewer(g, s.wx, s.wy, false);
+  for (const s of STATIONS) { g.strokeStyle = 'rgba(20,14,6,.35)'; g.lineWidth = 4; g.beginPath(); g.ellipse(s.wx, s.wy, 17, 11, 0, 0, 6.2832); g.stroke(); g.strokeStyle = 'rgba(242,184,75,.6)'; g.lineWidth = 2; g.setLineDash([5, 5]); g.beginPath(); g.ellipse(s.wx, s.wy, 17, 11, 0, 0, 6.2832); g.stroke(); g.setLineDash([]); }
+}
+// 電扶梯會動的梯級（每一格畫面畫一次；只畫看得到的）
+function drawEscalators(g, now, y0, y1) {
+  if (!METRO) return; const T = TILE;
+  for (const e of [[14, 26, 1], [48, 26, -1]]) {
+    const X = e[0] * T + 5, W = 2 * T - 10, Y0 = e[1] * T, Y1 = Y0 + 5 * T; if (Y1 < y0 || Y0 > y1) continue;
+    const off = ((now / 1000 * ESC_V * e[2]) % 12 + 12) % 12;
+    g.save(); g.beginPath(); g.rect(X, Y0, W, Y1 - Y0); g.clip();
+    for (let yy = Y0 - 12 + off; yy < Y1; yy += 12) { g.fillStyle = '#6d737d'; g.fillRect(X, yy, W, 8); g.fillStyle = '#e2b93b'; g.fillRect(X, yy + (e[2] > 0 ? 7 : 0), W, 1.3); g.fillStyle = 'rgba(255,255,255,.12)'; g.fillRect(X, yy + 1, W, 1.5); }
+    g.restore();
+    // 方向箭頭
+    const cx = X + W / 2, a = .5 + .3 * Math.sin(now / 260); g.fillStyle = 'rgba(120,230,150,' + a.toFixed(2) + ')';
+    for (const k of [1, 3]) { const cy = Y0 + k * T + 12; if (e[2] > 0) poly(g, [cx - 9, cy - 5, cx + 9, cy - 5, cx, cy + 7]); else poly(g, [cx - 9, cy + 5, cx + 9, cy + 5, cx, cy - 7]); g.fill(); }
+  }
+}
+function drawPillar(g, x, y) {
+  g.fillStyle = 'rgba(6,12,16,.3)'; ell(g, x + 2, y + 2, 17, 6);
+  box(g, x - 13, y - 62, 26, 64, 3, '#d6d2c6', '#2a2f38', 1.6); g.fillStyle = 'rgba(0,0,0,.14)'; g.fillRect(x + 5, y - 61, 7, 62); g.fillStyle = 'rgba(255,255,255,.3)'; g.fillRect(x - 11, y - 61, 3, 62);
+  g.fillStyle = '#2f8f93'; g.fillRect(x - 12.2, y - 34, 24.4, 7); g.fillStyle = '#e88a3a'; g.fillRect(x - 12.2, y - 26, 24.4, 2);
+  box(g, x - 15, y - 5, 30, 7, 2, '#8a8f98', '#2a2f38', 1.4); box(g, x - 15, y - 66, 30, 6, 2, '#8a8f98', '#2a2f38', 1.4);
+}
+// 號誌燈：平常亮綠燈；列車要來、正在通過時紅燈一閃一閃
+function drawSignalGlow(g, o, P, now) {
+  const st = trainState(now), cx = o.wx + P.w * (.5 - P.ax), top = o.wy + 4 - P.h;
+  g.globalCompositeOperation = 'lighter';
+  if (st) { if (Math.sin(now / 110) > -.2) { const gr = g.createRadialGradient(cx, top + P.h * .16, 1, cx, top + P.h * .16, 22); gr.addColorStop(0, 'rgba(255,70,50,.95)'); gr.addColorStop(1, 'rgba(255,70,50,0)'); g.fillStyle = gr; g.fillRect(cx - 22, top + P.h * .16 - 22, 44, 44); } }
+  else { const gr = g.createRadialGradient(cx, top + P.h * .34, 1, cx, top + P.h * .34, 13); gr.addColorStop(0, 'rgba(90,255,130,.55)'); gr.addColorStop(1, 'rgba(90,255,130,0)'); g.fillStyle = gr; g.fillRect(cx - 13, top + P.h * .34 - 13, 26, 26); }
+  g.globalCompositeOperation = 'source-over';
+}
+// 列車：三節（車頭、中間、車尾）。圖是朝右的，往西開的那一輛整個左右翻過來。
+function drawTrain(g, k, now) {
+  const s = trainSpan(k, now); if (!s) return;
+  const A = ARTI.props.t2t_head, B = ARTI.props.t2t_mid, tr = TRK[k], base = (tr.y1 + 1) * TILE - 8, L = trainLen();
+  g.save(); g.beginPath(); g.rect(TRK_X0 * TILE - 14, tr.y0 * TILE - 80, (TRK_X1 - TRK_X0 + 1) * TILE + 28, 4 * TILE + 80); g.clip();
+  g.fillStyle = 'rgba(4,6,10,.4)'; g.fillRect(s[0] + 6, base - 6, L - 12, 12);
+  if (tr.dir > 0) g.translate(s[1], base); else { g.translate(s[0], base); g.scale(-1, 1); }   // 原點放在車頭最前面的地面上，車身往 -x 排
+  if (A && A.ok && B && B.ok) {
+    g.drawImage(A.im, -A.w, -A.h, A.w, A.h); g.drawImage(B.im, -A.w - B.w + 8, -B.h, B.w, B.h);
+    g.save(); g.translate(-A.w - B.w + 16, 0); g.scale(-1, 1); g.drawImage(A.im, 0, -A.h, A.w, A.h); g.restore();
+    const gl = g.createRadialGradient(-6, -30, 2, 30, -30, 70); gl.addColorStop(0, 'rgba(255,236,170,.5)'); gl.addColorStop(1, 'rgba(255,236,170,0)'); g.globalCompositeOperation = 'lighter'; g.fillStyle = gl; g.fillRect(-40, -100, 140, 140); g.globalCompositeOperation = 'source-over';
+  } else { box(g, -L, -96, L, 90, 10, '#e8e2d2', '#2a2f38', 2); g.fillStyle = '#2f6f8f'; g.fillRect(-L, -44, L, 10); }
+  g.restore();
+}
+// 被撞暈：頭上轉圈的星星
+function drawStun(g, x, y, now) {
+  for (let i = 0; i < 3; i++) { const a = now / 180 + i * 2.094, sx = x + Math.cos(a) * 13, sy = y - 4 + Math.sin(a) * 4.5, s = 4.2 + .8 * Math.sin(a * 2);
+    g.fillStyle = '#ffd94a'; g.strokeStyle = '#7a5a10'; g.lineWidth = 1; g.beginPath(); for (let j = 0; j < 10; j++) { const rr2 = j % 2 ? s * .45 : s, b = j * .6283 - 1.5708; g[j ? 'lineTo' : 'moveTo'](sx + Math.cos(b) * rr2, sy + Math.sin(b) * rr2); } g.closePath(); g.fill(); g.stroke(); }
+}
 // ===== 連線層：Firebase Realtime Database =====
 // rooms/{代碼}/h  房主維護的遊戲狀態（存在就代表房間開著）
 // rooms/{代碼}/b  電腦玩家的基本資料，bp 是它們的位置
@@ -3768,7 +4133,7 @@ const Net = {
     this.val = null; this.roomRef = null; this.meRef = null;
   }
 };
-function mePresence() { return { n: ME.n, c: ME.c, x: Math.round(ME.x), y: Math.round(ME.y), f: ME.f, m: ME.m, td: ME.td, k: ME.k, r: ME.r, bl: ME.bl, fx: ME.fx, ap: ME.ap, ax: ME.ax, as: ME.as, ins: ME.ins, ex: ME.ex, pt: ME.pt, hu: ME.hu, v: ME.v, ch: ME.ch, sw: ME.sw }; }
+function mePresence() { return { n: ME.n, c: ME.c, x: Math.round(ME.x), y: Math.round(ME.y), f: ME.f, m: ME.m, td: ME.td, k: ME.k, r: ME.r, bl: ME.bl, fx: ME.fx, ap: ME.ap, ax: ME.ax, as: ME.as, ins: ME.ins, ex: ME.ex, pt: ME.pt, hu: ME.hu, v: ME.v, ch: ME.ch, sw: ME.sw, zz: ME.zz ? 1 : 0 }; }
 
 // ===== 共用狀態 =====
 const ME = { id: '', n: '', c: 0, x: 0, y: 0, f: 1, m: 0, td: [0, 0], k: null, r: null, bl: null, fx: null, ap: null, ax: null, as: null, ins: null, ex: null, pt: null, hu: null, v: null, ch: [], sw: null };
@@ -3776,7 +4141,7 @@ let code = '', inRoom = false, isHost = false, practice = false;
 let H = null, hs = null, BOTS = [], hostDirty = false;   // 房主才有
 let G = null;                                            // 目前看到的遊戲狀態（房主時 G === H）
 const players = new Map();                               // 其他人與電腦玩家
-const my = { idx: -1, wolf: false, dead: false, role: 0, tasks: [], cd: 0, bcd: 0, em: false, bellCd: 0 };   // role：0 一般、2 檢驗官、3 白癡、4 義警
+const my = { idx: -1, wolf: false, dead: false, role: 0, tasks: [], cd: 0, bcd: 0, em: false, bellCd: 0, stun: 0 };   // role：0 一般、2 檢驗官、3 白癡、4 義警
 const seen = { gn: -1, ph: -1, dead: false, lo: 0, it: -1, su: 0 };
 let hostSeenAt = 0;
 
@@ -3830,6 +4195,7 @@ function hostStart() {
   hs.tl = H.ta.map(parseTasks); hs.tlGn = H.gn;
   let tot = 0; for (let i = 0; i < n; i++) if (!wolves.has(i)) tot += hs.tl[i].length;
   H.bd = []; H.mt = null; H.rs = null; H.hu = null; H.win = 0; H.why = 0; H.pg = [0, tot]; H.ph = 1; H.rem = 11;   // 開場動畫：先「你是」再揭曉身分，總共約 10 秒
+  hs.trT = null; H.tr = 0; for (const b of BOTS) { b.stun = 0; b.reGo = null; }
   hs.lastSw = {}; hs.lastK = {}; hs.lastR = {}; hs.lastB = {}; hs.lastF = {}; hs.lastS = {}; hs.em = {}; hs.mv = {}; hs.bellAt = 0; hs.hunt = false; hs.huAt = 0; hs.huWolf = false; hs.meetNo = 0; hs.absent = {}; hs.acc = 0; hs.fixer = null; H.lo = 0; hs.lastA = {}; hs.alCd = performance.now() + 20000; H.al = { a: [], on: 0, rem: 0, lk: 1 };
   for (const [id, p] of players) { if (p.bot) continue; hs.lastK[id] = Array.isArray(p.k) ? p.k[0] : undefined; hs.lastR[id] = Array.isArray(p.r) ? p.r[0] : undefined; hs.lastB[id] = Array.isArray(p.bl) ? p.bl[0] : undefined; hs.lastHu = hs.lastHu || {}; hs.lastHu[id] = Array.isArray(p.hu) ? p.hu[0] : undefined; hs.lastS[id] = [p.ins, p.ex, p.pt].map(v => Array.isArray(v) ? v[0] : undefined); hs.lastF[id] = Array.isArray(p.fx) ? p.fx[0] : undefined; hs.lastA[id] = [p.ap, p.ax, p.as].map(v => Array.isArray(v) ? v[0] : undefined); }
   for (const b of BOTS) {
@@ -4165,7 +4531,7 @@ function hostIntents() {
   }
 }
 // 只把有變動的部分送出去，省流量
-const H_KEYS = ['gn', 'ph', 'st', 'ro', 'wf', 'sp', 'su', 'it', 'dd', 'lf', 'ta', 'ga', 'lo', 'al', 'bd', 'mt', 'rs', 'hu', 'pg', 'win', 'why', 'rem'];
+const H_KEYS = ['gn', 'ph', 'st', 'ro', 'wf', 'sp', 'su', 'it', 'dd', 'lf', 'ta', 'ga', 'lo', 'al', 'bd', 'mt', 'rs', 'hu', 'pg', 'win', 'why', 'rem', 'tr'];
 let pubTick = 0;
 function hostPublish() {
   if (!Net.on || !H) return;
@@ -4179,7 +4545,7 @@ function hostPublish() {
   if (bm !== Net.lastB) { Net.lastB = bm; patch.b = JSON.parse(bm); n++; }
   if (H.ph !== 2 || pubTick % 2 === 0) {
     const dg = hs.dog && H.ph === 2 ? [[Math.round(hs.dog.x), Math.round(hs.dog.y), hs.dog.f, hs.dog.st].concat(...hs.dog.bones)] : [];   // 小狗的位置、狀態、埋骨頭的地方，跟在電腦玩家後面一起送
-    const bp = JSON.stringify(BOTS.map(b => [Math.round(b.x), Math.round(b.y), b.f, b.m]).concat(dg));
+    const bp = JSON.stringify(BOTS.map(b => b.stun > 0 ? [Math.round(b.x), Math.round(b.y), b.f, 0, 1] : [Math.round(b.x), Math.round(b.y), b.f, b.m]).concat(dg));   // 第五個數字：被列車撞暈
     if (bp !== Net.lastBp) { Net.lastBp = bp; patch.bp = JSON.parse(bp); n++; }
   }
   if (n) Net.setRoom(patch);
@@ -4192,6 +4558,7 @@ function hostTick(dt) {
   if (ph === 1) { if (sec) { H.rem--; hostDirty = true; } if (H.rem <= 0) { H.ph = 2; hs.bellAt = now + BELL_CD_START * 1000; hostDirty = true; } }
   else if (ph === 2) {
     hostIntents();
+    if (METRO) { hs.trT = (hs.trT == null ? TRAIN_EVERY - TRAIN_FIRST : hs.trT) + dt; if (hs.trT >= TRAIN_EVERY) { hs.trT = 0; H.tr = (H.tr | 0) + 1; hostDirty = true; } }   // 第 56 版：捷運站每隔一段時間來一班車（開會的時候不算時間）
     if (H.ph === 2) botsPlay(dt, now);
     if (sec) hostLeaves();
     if (sec && H.ph === 2) hostAltarTick();
@@ -4228,6 +4595,7 @@ function hostTick(dt) {
 function botStep(b, dt, speed) {
   if (!b.path || b.pi >= b.path.length) return true;
   const last = b.pi === b.path.length - 1, tp = b.path[b.pi];
+  if (METRO && isTrack(tp[0], tp[1]) && !isTrack(Math.floor(b.x / TILE), Math.floor(b.y / TILE)) && trainDanger(performance.now())) { b.m = 0; return false; }   // 第 56 版：列車快來了，先在月台等
   const gx = tp[0] * TILE + 20 + (last ? b.jx : 0), gy = tp[1] * TILE + 22 + (last ? b.jy : 0);
   const dx = gx - b.x, dy = gy - b.y, d = Math.hypot(dx, dy), step = speed * dt;
   if (d <= step) { b.x = gx; b.y = gy; b.pi++; }
@@ -4251,7 +4619,13 @@ function botsPlay(dt, now) {
   }
   for (const b of BOTS) {
     const idx = H.ro.indexOf(b.id); if (idx < 0) continue;
+    if (METRO && aliveIdx(idx)) {   // 第 56 版：電腦玩家也會被列車撞暈；暈完繼續往原本要去的地方走
+      if (b.stun > 0) { b.stun -= dt; b.m = 0; if (b.stun <= 0 && b.reGo) { botGoTile(b, b.reGo[0], b.reGo[1]); b.reGo = null; } continue; }
+      const tk = trainHitAt(b.x, b.y, now);
+      if (tk >= 0) { b.reGo = b.path && b.path.length ? b.path[b.path.length - 1] : null; trainKnock(b, tk); b.stun = TRAIN_STUN; b.m = 0; b.path = null; continue; }
+    }
     botThink(b, idx, dt, now);
+    if (METRO && aliveIdx(idx)) { const ed = escDir(b.x, b.y); if (ed) b.y += ed * ESC_V * dt; }
     if (H.ph !== 2) return;
   }
 }
@@ -4434,6 +4808,7 @@ function upsert(pr, bot, now) {
   { const was = p.sw || null, cur = Array.isArray(pr.sw) ? pr.sw : null;   // 第 50 版：鑽進去、爬出來的那一刻，那個口的蓋子掀開一下
     if (cur && !was) sewerLid[cur[2] | 0] = performance.now(); else if (!cur && was) sewerLid[was[2] | 0] = performance.now();
     p.sw = cur; }
+  p.zz = pr.zz ? 1 : 0;   // 第 56 版：被列車撞暈
   return p;
 }
 const arr = x => Array.isArray(x) ? x : EMPTY;
@@ -4449,7 +4824,7 @@ function normG(h) {
     mt: mt && typeof mt === 'object' ? { no: mt.no | 0, by: mt.by | 0, body: mt.body == null ? -1 : mt.body | 0 } : null,
     rs: rs && typeof rs === 'object' ? { ej: rs.ej == null ? -1 : rs.ej | 0, tie: rs.tie | 0, sk: rs.sk | 0, vt: arr(rs.vt) } : null,
     hu: h.hu && typeof h.hu === 'object' ? { by: h.hu.by | 0, t: h.hu.t == null ? -2 : h.hu.t | 0 } : null,   // 獵人開槍：by 獵人、t 打中誰（-2 還在想、-1 不開槍）
-    pg: Array.isArray(h.pg) ? h.pg : [0, 0], win: h.win | 0, why: h.why | 0, rem: h.rem | 0
+    pg: Array.isArray(h.pg) ? h.pg : [0, 0], win: h.win | 0, why: h.why | 0, rem: h.rem | 0, tr: h.tr | 0   // tr（第 56 版）：捷運站的列車開到第幾班
   };
 }
 function mergeBots(b, bp) {
@@ -4458,7 +4833,7 @@ function mergeBots(b, bp) {
   for (let i = 0; i < b.length; i++) {
     const meta = b[i]; if (!meta || !isBotId(meta.id)) continue;
     const pos = Array.isArray(bp) && Array.isArray(bp[i]) ? bp[i] : null;
-    out.push({ id: meta.id, n: meta.n, c: meta.c, td: meta.td, v: meta.v, ch: meta.ch, x: pos ? pos[0] : SPAWNS[i % SPAWNS.length].x, y: pos ? pos[1] : SPAWNS[i % SPAWNS.length].y, f: pos ? pos[2] : 1, m: pos ? pos[3] : 0 });
+    out.push({ id: meta.id, n: meta.n, c: meta.c, td: meta.td, v: meta.v, ch: meta.ch, x: pos ? pos[0] : SPAWNS[i % SPAWNS.length].x, y: pos ? pos[1] : SPAWNS[i % SPAWNS.length].y, f: pos ? pos[2] : 1, m: pos ? pos[3] : 0, zz: pos && pos[4] ? 1 : 0 });
   }
   return out;
 }
@@ -4594,7 +4969,8 @@ function onStateChange() {
 }
 
 function updateMe(dt) {
-  const canMove = inRoom && G && G.ph === 2 && my.idx >= 0 && !taskState && !sewerIn && !document.body.classList.contains('map-open') && !document.body.classList.contains('menu-open');
+  if (my.stun > 0) { my.stun -= dt; if (my.stun <= 0 || !G || G.ph !== 2 || my.dead) stunEnd(); }
+  const canMove = inRoom && G && G.ph === 2 && my.idx >= 0 && !taskState && !sewerIn && !(my.stun > 0) && !document.body.classList.contains('map-open') && !document.body.classList.contains('menu-open');
   let vx = 0, vy = 0;
   if (canMove) {
     vx = input.x; vy = input.y; const k = input.keys;
@@ -4609,11 +4985,33 @@ function updateMe(dt) {
     if (Math.abs(vx) > .15) ME.f = vx > 0 ? 1 : -1;
     ME.m = 1;
   } else ME.m = 0;
+  if (METRO && G && G.ph === 2 && my.idx >= 0 && !my.dead && !sewerIn && !(my.stun > 0)) { const ed = escDir(ME.x, ME.y); if (ed) moveCollide(ME, 0, ed * ESC_V * dt); }   // 第 56 版：電扶梯帶著走
   mePhase += dt * (ME.m ? 13 : 2.2);
   if (my.cd > 0 && G && G.ph === 2 && !sewerIn) my.cd = Math.max(0, my.cd - dt);   // 躲在下水道裡的時候，襲擊的冷卻不會倒數（不能躲著等冷卻）
   if (my.bcd > 0 && G && G.ph === 2 && !G.lo) my.bcd = Math.max(0, my.bcd - dt);
   if (my.bellCd > 0 && G && G.ph === 2) my.bellCd = Math.max(0, my.bellCd - dt);
 }
+// 第 56 版：捷運站的列車。房主每隔一段時間把班次加一，每台裝置看到班次變了就各自開始倒數（先警示 3 秒，再讓列車開過去）。
+function stunEnd() { my.stun = 0; if (ME.zz) { ME.zz = 0; if (Net.on) Net.set({ zz: 0 }); } document.body.classList.remove('stunned'); }
+function trainTick(now) {
+  if (!METRO || !inRoom || !G || G.ph !== 2) { trainT0 = -1; if (G) trainSeen = G.tr | 0; return; }
+  const n = G.tr | 0;
+  if (n !== trainSeen) { if (n > trainSeen && trainSeen >= 0) { trainT0 = now; trainWarned = false; trainRumble = false; } trainSeen = n; }
+  const st = trainState(now); if (!st) { if (trainT0 >= 0 && (now - trainT0) / 1000 > TRAIN_WARN) trainT0 = -1; return; }
+  const near = my.idx >= 0 && ME.y > 30 * TILE;   // 人在月台這一層才聽得到、看得到提示
+  if (st === 1 && !trainWarned) { trainWarned = true; if (near) { sfx('trainWarn'); if (!my.dead) toast('列車要來了，離開軌道！', 2200); } }
+  if (st === 2 && !trainRumble) { trainRumble = true; if (near) sfx('trainPass'); }
+  if (st === 2 && my.idx >= 0 && !my.dead && !sewerIn && !(my.stun > 0)) {
+    const k = trainHitAt(ME.x, ME.y, now);
+    if (k >= 0) {
+      trainKnock(ME, k); ME.m = 0; my.stun = TRAIN_STUN; ME.zz = 1; sentSig = ''; document.body.classList.add('stunned');
+      if (taskState && typeof closeTask === 'function') closeTask();
+      if (Net.on) Net.set({ zz: 1, x: Math.round(ME.x), y: Math.round(ME.y), m: 0 });
+      sfx('hit2'); sfx('thud'); toast('被列車撞到了！暈 ' + TRAIN_STUN + ' 秒', 1800); try { if (navigator.vibrate) navigator.vibrate(120); } catch (e) { }
+    }
+  }
+}
+let trainWarned = false, trainRumble = false;
 function sendPos(now) {
   if (!Net.on || now - lastSend < 100) return;
   const sig = Math.round(ME.x) + ',' + Math.round(ME.y) + ',' + ME.f + ',' + ME.m;
@@ -4699,9 +5097,9 @@ function altarSetTick(now) {
   if (now - altarSet.t0 >= ALTAR_SET * 1000) { altarSet.on = false; const why = altarWhyNot(); if (why) toast(why, 2200); else sendAltar('p'); }
 }
 function doAltarStart() { if (!(G && G.ph === 2 && my.wolf && !my.dead)) return; if (G.al.on) return; if (!G.al.a.length) { toast('先放至少一座祭壇。', 2000); return; } if (G.lo) { toast('燈亮了之後才能啟動祭壇。', 2200); return; } sendAltar('x'); }
-function doBlow() { if (!canBlow()) return; my.bcd = G.st.bl; sendBlow(); }
+function doBlow() { if (!canBlow() || my.stun > 0) return; my.bcd = G.st.bl; sendBlow(); }
 function doUse() {
-  const u = ctxA.use; if (!u) return;
+  const u = ctxA.use; if (!u || my.stun > 0) return;   // 被撞暈的時候什麼都不能按
   if (u.k === 'task') openTask(u.ti);
   else if (u.k === 'candle') openCandle();
   else if (u.k === 'altar') openAltar(u.i);
@@ -4740,14 +5138,14 @@ function sewerTick(now) {
   if (!(G && G.ph === 2 && my.wolf && !my.dead && my.idx >= 0)) { sewerExit(true); return; }   // 開會了、遊戲結束了：直接算離開（位置交給開會的站位）
   const s = SEWERS[sewerIn.at]; ME.x = s.wx; ME.y = s.wy + 3; ME.m = 0;
 }
-function doReport() { if (ctxA.body && G) sendReport(G.ro[ctxA.body[0]]); }
+function doReport() { if (my.stun > 0) return; if (ctxA.body && G) sendReport(G.ro[ctxA.body[0]]); }
 // 檢驗官的檢驗、義警的處決
 function doSpecial() {
-  const p = ctxA.sp; if (!p || !G || G.su) return;
+  const p = ctxA.sp; if (!p || !G || G.su || my.stun > 0) return;
   if (my.role === 2) { if (isHost) hostInspect(ME.id, p.id); else { ME.ins = [Date.now(), p.id]; Net.set({ ins: ME.ins }); } }
   else if (my.role === 4) { if (isHost) hostExecute(ME.id, p.id); else { ME.ex = [Date.now(), p.id]; Net.set({ ex: ME.ex }); } }
 }
-function doKill() { const p = ctxA.kill; if (!p || !G) return; my.cd = G.st.kc; sendKill(p.id); }
+function doKill() { const p = ctxA.kill; if (!p || !G || my.stun > 0) return; my.cd = G.st.kc; sendKill(p.id); }
 
 // ===== 進出房間 =====
 function genCode() { let s = ''; for (let i = 0; i < 4; i++) s += 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'[Math.floor(Math.random() * 32)]; return s; }
@@ -4882,6 +5280,7 @@ function render(now) {
   g.setTransform(z, 0, 0, z, -cx * z, -cy * z);
   const sx = Math.max(0, cx), sy = Math.max(0, cy), ex = Math.min(WORLD_W, cx + vw), ey = Math.min(WORLD_H, cy + vh);
   if (groundCv && ex > sx && ey > sy) g.drawImage(groundCv, sx * GS, sy * GS, (ex - sx) * GS, (ey - sy) * GS, sx, sy, ex - sx, ey - sy);
+  if (METRO) drawEscalators(g, now, sy, ey);   // 第 56 版：電扶梯會動的梯級
   // 水面的波光會動
   { g.strokeStyle = '#d9f4f6'; g.lineWidth = 1.4; g.lineCap = 'round';
     for (let ty = Math.max(0, Math.floor(sy / TILE)); ty <= Math.min(MH - 1, Math.floor(ey / TILE)); ty++) for (let tx = Math.max(0, Math.floor(sx / TILE)); tx <= Math.min(MW - 1, Math.floor(ex / TILE)); tx++) {
@@ -4935,12 +5334,13 @@ function render(now) {
     for (let i = 0; i < G.ro.length; i++) {
       const id = G.ro[i], dead = G.dd[i] === '1' || G.lf[i] === '1';
       if (G.lf[i] === '1') continue;
-      if (id === ME.id) { if (sewerIn) continue; dyn.push({ y: ME.y, k: 4, x: ME.x, c: ME.c, f: ME.f, m: ME.m, ph: mePhase, ghost: dead, n: ME.n, me: true, wolf: my.wolf, id: 'me' }); continue; }
+      if (id === ME.id) { if (sewerIn) continue; dyn.push({ y: ME.y, k: 4, x: ME.x, c: ME.c, f: ME.f, m: ME.m, ph: mePhase, ghost: dead, n: ME.n, me: true, wolf: my.wolf, id: 'me', zz: my.stun > 0 }); continue; }
       const p = players.get(id); if (!p || inSewer(p)) continue;
       if (dead && !ghostView) continue;
       if (!ghostView && (dist(ME.x, ME.y, p.rx, p.ry) > vis || !canSee(ME.x, ME.y, p.rx, p.ry))) continue;
-      dyn.push({ y: p.ry, k: 4, x: p.rx, c: p.c, f: p.f, m: p.m, ph: p.phase, ghost: dead, n: p.n, wolf: my.wolf && G.wf[i] === '1', id });
+      dyn.push({ y: p.ry, k: 4, x: p.rx, c: p.c, f: p.f, m: p.m, ph: p.phase, ghost: dead, n: p.n, wolf: my.wolf && G.wf[i] === '1', id, zz: p.zz && !dead });
     }
+    if (METRO && trainState(now) === 2) for (let k = 0; k < TRK.length; k++) dyn.push({ y: (TRK[k].y1 + 1) * TILE - 8, k: 8, tk: k });   // 第 56 版：列車
   } else if (inRoom) {
     dyn.push({ y: ME.y, k: 4, x: ME.x, c: ME.c, f: ME.f, m: 0, ph: mePhase, n: ME.n, me: true, id: 'me' });
     for (const p of players.values()) dyn.push({ y: p.ry, k: 4, x: p.rx, c: p.c, f: p.f, m: 0, ph: p.phase, n: p.n, id: p.id });
@@ -4955,8 +5355,10 @@ function render(now) {
     if (d.k === 5) { drawFallen(g, d.x, d.y, COLORS[d.c][1], d.t0 != null ? (now - d.t0) / 1000 : null); return; }
     if (d.k === 6) { drawDog(g, d.x, d.y, DOG.f, DOG.st, now, DOG.t0); return; }
     if (d.k === 7) { drawDogMound(g, d.x, d.by); return; }
+    if (d.k === 8) { drawTrain(g, d.tk, now); return; }
     drawVillager(g, d.x, d.y, COLORS[d.c][1], { f: d.f, phase: d.ph, moving: d.m, ghost: d.ghost, id: d.id });
     if (d.n) drawName(g, d.x, d.y - charTop(d.c) - (d.ghost ? 9 : 0), d.n, d.wolf ? '#f08a7e' : d.me ? '#f2b84b' : '#ece5d3');
+    if (d.zz) drawStun(g, d.x, d.y - charTop(d.c) - 14, now);
   };
   for (let i = 0; i < STATIC.length; i++) {
     const s = STATIC[i];
@@ -5125,7 +5527,7 @@ function frame(now) {
     }
     if (inRoom && G && G.st && (G.st.map | 0) !== curMap) { applyMap(G.st.map | 0); derive(); }
     onStateChange();
-    if (inRoom) { updateMe(dt); altarSetTick(now); sewerTick(now); sendPos(now); computeCtx(); } else ambientTick(dt);
+    if (inRoom) { updateMe(dt); altarSetTick(now); sewerTick(now); trainTick(now); sendPos(now); computeCtx(); } else ambientTick(dt);
     for (const p of players.values()) {
       const dx = p.x - p.rx, dy = p.y - p.ry;
       if (Math.abs(dx) + Math.abs(dy) > 260 || p.sw) { p.rx = p.x; p.ry = p.y; } else { const k = Math.min(1, dt * 13); p.rx += dx * k; p.ry += dy * k; }
@@ -6295,7 +6697,7 @@ const TG = {
     const W = S.W, GY = S.GY, n = (c.n || 5) + (S.heavy ? 2 : 0), penX = W - 96, sz = 52, top = GY - 78, bot = GY + 16, an = []; let inN = 0;
     for (let i = 0; i < n; i++) an.push({ x: rnd(40, penX - 80), y: rnd(top, bot), vx: 0, vy: 0, in: false, t: rnd(0, 6) });
     return { frame() {
-      const g = S.g, p = S.p; tBg(S, 'grass', true);
+      const g = S.g, p = S.p; tBg(S, c.bg || 'grass', true);
       g.strokeStyle = '#8a6a44'; g.lineWidth = 5; g.lineCap = 'round'; for (const yy of [top - 26, top - 12]) { g.beginPath(); g.moveTo(penX, yy); g.lineTo(W - 8, yy); g.stroke(); } for (let x = penX; x <= W - 8; x += 22) { g.beginPath(); g.moveTo(x, top - 34); g.lineTo(x, top - 4); g.stroke(); }
       g.beginPath(); g.moveTo(penX, top - 30); g.lineTo(penX, top + 14); g.moveTo(penX, bot - 22); g.lineTo(penX, S.H); g.stroke();
       g.fillStyle = 'rgba(255,230,150,.1)'; g.fillRect(penX, top - 4, W - penX, S.H);
@@ -6373,7 +6775,19 @@ const TASK_SKIN = {
   '澆菜': { m: 'pour', can: 'f_can', a: 'f_sprout', b: 'm_cabbage', n: 4, tip: '按著水壺，移到每一株上面澆到滿' },
   '拔蘿蔔': { m: 'hit', pull: 1, target: 'f_carrot', items: 3, chip: '#6b5236', bg: 'soil', tip: '一下一下把蘿蔔拔出來' },
   '點蠟燭': { m: 'memory', item: 'm_candle', n: 5, bg: 'wood', flame: [-.12, .98] },
-  '磨刀': { m: 'rub', kind: 'strokes', obj: 'm_whetstone', tool: 'm_knife', oh: 70, tip: '按著刀在磨刀石上來回磨' }
+  '磨刀': { m: 'rub', kind: 'strokes', obj: 'm_whetstone', tool: 'm_knife', oh: 70, tip: '按著刀在磨刀石上來回磨' },
+  // 捷運站（第 56 版）；「澆花」跟莊園共用
+  '加值': { m: 'drag', mode: 'into', item: 't_coin', n: 5, target: 't2i_topup', isz: 34, th: 112, bg: 'stone', tip: '把硬幣一枚一枚拖進加值機' },
+  '驗票': { m: 'drag', mode: 'sort', items: ['t_card', 't_token', 't_ticket'], n: 6, isz: 42, bg: 'stone', tip: '把票拖進畫著同樣東西的箱子' },
+  '廣播': { m: 'memory', item: 't_mic', n: 5, bg: 'stone', glow: 'rgba(120,255,150,.6)' },
+  '補貨': { m: 'pairs', icons: ['t_onigiri', 't_can', 't_sandwich', 't_pudding', 't_noodles', 't_milk'], tip: '翻開箱子，把一樣的商品配成對' },
+  '整理寄物櫃': { m: 'drag', mode: 'sort', items: ['t_suitcase', 't_backpack', 't_umbrella'], n: 6, isz: 46, bg: 'stone', tip: '把行李拖進畫著同樣東西的櫃子' },
+  '修電扶梯': { m: 'timing', tool: 't_wrench', target: 't_gear', item: 't_bolt', spark: '#ffe08a', tip: '指針進到綠色區再鎖' },
+  '擦座椅': { m: 'rub', obj: 't2o_pbench', tool: 't_cloth', kind: 'mud', bg: 'stone', tip: '按著抹布來回擦，把座椅擦乾淨' },
+  '檢查軌道': { m: 'hit', tool: 't_wrench', target: 't_bolt', out: 't_bolt', items: 3, chip: '#c9ced6', bg: 'stone', tip: '用扳手一下一下把螺栓鎖緊' },
+  '撿垃圾': { m: 'drag', mode: 'into', items: ['t_crushed', 't_cup', 't_paperball'], n: 6, target: 't2i_bins', isz: 38, th: 100, bg: 'stone', tip: '把垃圾一個一個拖進垃圾桶' },
+  '打開總開關': { m: 'balance', obj: 't2i_power', label: '電壓', oh: 118, tip: '按住加壓、放開降壓，讓電壓留在綠色區' },
+  '趕鴿子': { m: 'herd', animal: 't_pigeon', n: 5, bg: 'stone', tip: '按著畫面把鴿子全部趕進右邊的圍欄裡' },
 };
 // ===== 介面 =====
 let toastTimer = 0;
@@ -7306,7 +7720,7 @@ function main() {
   requestAnimationFrame(frame);
   window.__lw = { Snd, SND_FILES, get OUTSIDE() { return OUTSIDE; }, get OBJECTS() { return OBJECTS; }, TREES, ART_BLD, ART_PROPS, artGeom, BELL, COMIC, hostHunt, sendHunt, get EJ() { return { EJ_PANEL, EJ_STAND, EJ_VERD, EJ_BLACK, EJ_BOOM, EJ_BOARD, EJ_LEN, NONE_OUT, NONE_BOARD, NONE_LEN }; }, homeBg, sceneArt, SPR_ANI, killFx, startKillAnim, aniOf, drawCharFallen, ARTI, STATIC, drawTree, drawBuilding, get WORLD_W() { return WORLD_W; }, get WORLD_H() { return WORLD_H; }, VFX, fxBlood, fxTaskDone, fxSpark, fxDust, camShake, fxFlash, cardArt, cardW, openCard, closeCard, get cardOpen() { return cardOpen; }, SPR, NCHAR, turnChar, sprFlip, drawChar, drawCharFit, drawCharFallen, COLORS, get BUILDINGS() { return BUILDINGS; }, drawBuilding, BK, loadMap, buildGround,
     get G() { return G; }, get H() { return H; }, ME, my, players, get BOTS() { return BOTS; }, Net, get STATIONS() { return STATIONS; }, SPAWNS, grid, MAPS, loadMap, applyMap, canSee, paintMiniMap, tget, boxFree, get curMap() { return curMap; },
-    findPath, TASK_SKIN, TG, TASK_SPR, tSprite, get CUT() { return CUT; }, get SEWERS() { return SEWERS; }, get LEDGER() { return LEDGER; }, sewerEnter, sewerGo, sewerExit, get sewerIn() { return sewerIn; }, openLedger, inSewer, hostSewer, computeCtx, solidAt, boxFree, moveCollide, input, updateMe, get LAMPS() { return LAMPS; }, get SUB() { return SUB; }, startPractice, createRoom, joinRoom, invite, inviteLink, intro, startIntro, hostStart, hostKill, hostReport, hostTick, setBotCount, castVote, sendChat, finishTask, openTask, leaveRoom, uiMode, parseTasks, dealTasks, taskCur, taskMarks, get CHAINS() { return CHAINS; }, get taskState() { return taskState; }, get hs() { return hs; }, get BUILDINGS() { return BUILDINGS; }, get OCC() { return OCC; }, BUILD, get view() { return view; }, get CANDLE() { return CANDLE; }, hostBlow, hostRelight, doBlow, canBlow, killRangeOf, guideMarks, openCandle, killFx, startKillAnim, COLORS, hostResolve, hostInspect, hostExecute, hostFool, hostPet, showSlash, DOG, DOG_ART, dogPettable, bldAt, occFor, get STATIC() { return STATIC; }, art: { drawObject, drawChar, drawCharFallen, drawFallen, avatarCanvas, drawVillager, wolfShape, wolfEyes, lantern, drawTree, drawDog, circ, ell }, openAltar, finishAltar, hostAltarPlace, hostAltarStart, hostAltarSolve, doAltarPlace, doAltarStart, altarWhyNot,
+    findPath, TASK_SKIN, TG, TASK_SPR, tSprite, get CUT() { return CUT; }, get METRO() { return METRO; }, get MT() { return MT; }, mch, TRK, trainState, trainSpan, trainHitAt, trainLen, trainDur, escDir, get trainT0() { return trainT0; }, set trainT0(v) { trainT0 = v; }, get stun() { return my.stun; }, TRAIN_EVERY, TRAIN_WARN, TRAIN_STUN, get SEWERS() { return SEWERS; }, get LEDGER() { return LEDGER; }, sewerEnter, sewerGo, sewerExit, get sewerIn() { return sewerIn; }, openLedger, inSewer, hostSewer, computeCtx, solidAt, boxFree, moveCollide, input, updateMe, get LAMPS() { return LAMPS; }, get SUB() { return SUB; }, startPractice, createRoom, joinRoom, invite, inviteLink, intro, startIntro, hostStart, hostKill, hostReport, hostTick, setBotCount, castVote, sendChat, finishTask, openTask, leaveRoom, uiMode, parseTasks, dealTasks, taskCur, taskMarks, get CHAINS() { return CHAINS; }, get taskState() { return taskState; }, get hs() { return hs; }, get BUILDINGS() { return BUILDINGS; }, get OCC() { return OCC; }, BUILD, get view() { return view; }, get CANDLE() { return CANDLE; }, hostBlow, hostRelight, doBlow, canBlow, killRangeOf, guideMarks, openCandle, killFx, startKillAnim, COLORS, hostResolve, hostInspect, hostExecute, hostFool, hostPet, showSlash, DOG, DOG_ART, dogPettable, bldAt, occFor, get STATIC() { return STATIC; }, art: { drawObject, drawChar, drawCharFallen, drawFallen, avatarCanvas, drawVillager, wolfShape, wolfEyes, lantern, drawTree, drawDog, circ, ell }, openAltar, finishAltar, hostAltarPlace, hostAltarStart, hostAltarSolve, doAltarPlace, doAltarStart, altarWhyNot,
     get ctx() { return ctxA; }, get inRoom() { return inRoom; }, get isHost() { return isHost; }, get code() { return code; }
   };
 }
