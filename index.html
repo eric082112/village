@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>月光光心慌慌</title>
 <meta name="description" content="和朋友連線玩的狼人村：做完村裡的工作，找出混在裡面的狼人。">
-<meta name="lw-build" content="60">
+<meta name="lw-build" content="61">
 <meta name="theme-color" content="#0b151d">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -725,6 +725,10 @@ body.stunned .joy,body.stunned .acts{opacity:.3;pointer-events:none}
 .tg-cv{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none;border-radius:12px;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}
 .tg-tip{position:absolute;left:8px;right:8px;top:7px;text-align:center;font-size:13.5px;line-height:1.25;color:#f2e6c8;text-shadow:0 1px 3px rgba(0,0,0,.85),0 0 6px rgba(0,0,0,.6);pointer-events:none}
 body.task-open #task .panel{max-width:500px}
+/* 第 61 版：雙面人掉了一命的記號（裂開的面具） */
+.card canvas.tfm{width:18px;height:20px;margin-left:-2px}
+.card.tf{border-color:#b0507a}
+.ledger-cell canvas.tfm{position:absolute;top:-5px;right:-3px;width:20px;height:22px;z-index:2;filter:drop-shadow(0 1px 2px rgba(0,0,0,.6))}
 [hidden]{display:none !important}
 </style>
 </head>
@@ -1233,6 +1237,7 @@ const ROLE_CARD_DEF = {
   3: { n: '白癡', w: 1041, h: 1511, d: 'img-36e286cf80.webp' },
   4: { n: '義警', w: 1050, h: 1498, d: 'img-f9764e43bc.webp' },
   5: { n: '獵人', w: 1050, h: 1498, d: 'img-82e761ba5a.webp' },
+  6: { n: '雙面人', w: 1024, h: 1536, d: 'img-6d20abfdac.webp' },
 };
 // 這個檔案由 art/assets.py 產生：使用者用 AI 生成的地圖圖片
 
@@ -1343,12 +1348,12 @@ function artCanvas(b) {
   return b.artCv = c;
 }
 // 這個檔案由 art/scenes.py 產生：開場揭曉身分時的橫式職業卡（使用者提供）
-const ROLE_SCENE_DEF = {"0": {"w": 1672, "h": 941, "d": "img-8c7e554875.webp"}, "1": {"w": 1672, "h": 941, "d": "img-fd9850f922.webp"}, "2": {"w": 1672, "h": 941, "d": "img-4f8ae1f6e9.webp"}, "3": {"w": 1672, "h": 941, "d": "img-65c3d5b3a6.webp"}, "4": {"w": 1672, "h": 941, "d": "img-2fbd53f1bd.webp"}, "5": {"w": 1672, "h": 941, "d": "img-7f7fc667c6.webp"}};
+const ROLE_SCENE_DEF = {"0": {"w": 1672, "h": 941, "d": "img-8c7e554875.webp"}, "1": {"w": 1672, "h": 941, "d": "img-fd9850f922.webp"}, "2": {"w": 1672, "h": 941, "d": "img-4f8ae1f6e9.webp"}, "3": {"w": 1672, "h": 941, "d": "img-65c3d5b3a6.webp"}, "4": {"w": 1672, "h": 941, "d": "img-2fbd53f1bd.webp"}, "5": {"w": 1672, "h": 941, "d": "img-7f7fc667c6.webp"}, "6": {"w": 1672, "h": 941, "d": "img-e6768585c3.webp"}};
 // 這個檔案由 art/comic.py 產生：投票放逐的漫畫（使用者提供）
 const COMIC_DEF = {"ej": [{"w": 1672, "h": 941, "d": "img-799435197e.webp"}, {"w": 1672, "h": 941, "d": "img-8743da2e02.webp"}, {"w": 1672, "h": 941, "d": "img-5157534406.webp"}, {"w": 1672, "h": 941, "d": "img-b2dcd46d08.webp"}, {"w": 1672, "h": 941, "d": "img-27dfc46984.webp"}, {"w": 1672, "h": 941, "d": "img-b8a9c5932f.webp"}, {"w": 1672, "h": 941, "d": "img-c3c43d5cdd.webp"}], "none": [{"w": 1672, "h": 941, "d": "img-799435197e.webp"}, {"w": 1672, "h": 941, "d": "img-8743da2e02.webp"}, {"w": 1672, "h": 941, "d": "img-5157534406.webp"}, {"w": 1672, "h": 941, "d": "img-f951f0537c.webp"}], "ev": [{"w": 1672, "h": 941, "d": "img-d30540d56c.webp"}, {"w": 1672, "h": 941, "d": "img-d1836bab35.webp"}, {"w": 1672, "h": 941, "d": "img-8eb5262257.webp"}, {"w": 1671, "h": 941, "d": "img-c56b7db8f8.webp"}, {"w": 1672, "h": 941, "d": "img-296f0ff687.webp"}], "ew": [{"w": 1672, "h": 941, "d": "img-af3d02c2e1.webp"}, {"w": 1672, "h": 941, "d": "img-d1ad177b50.webp"}, {"w": 1672, "h": 941, "d": "img-9f985c59e0.webp"}, {"w": 1671, "h": 941, "d": "img-cda0faaa44.webp"}, {"w": 1672, "h": 941, "d": "img-f8bdeff711.webp"}], "ef": [{"w": 1672, "h": 941, "d": "img-941a269b54.webp"}, {"w": 1671, "h": 941, "d": "img-5f34fe878b.webp"}, {"w": 1672, "h": 941, "d": "img-df408ecc9a.webp"}, {"w": 1672, "h": 941, "d": "img-03e7698b00.webp"}, {"w": 1672, "h": 941, "d": "img-0588c16bda.webp"}], "boom": {"w": 1321, "h": 737, "d": "img-3c6b521bf7.webp"}};
 // 這個檔案由 art/audio.py 產生：聲音檔（audio/ 底下，打包時複製到 dist/）
 // f：檔名；d：長度（秒）；g：音樂播放時再乘上的音量；loop：可以循環
-const SND_FILES = {"m0": {"f": "snd-cd26099553.mp3", "d": 136.0, "g": 1.121, "loop": 1}, "m1": {"f": "snd-3ecc5ae8a0.mp3", "d": 87.9, "g": 1.492, "loop": 1}, "m2": {"f": "snd-b101ea4430.mp3", "d": 47.85, "g": 1.139, "loop": 1}, "m3": {"f": "snd-b3c2caee08.mp3", "d": 120.059, "g": 1.0, "loop": 1}, "m4": {"f": "snd-9f942a7362.mp3", "d": 187.0, "g": 1.851, "loop": 1}, "m5": {"f": "snd-63df9b2e7d.mp3", "d": 259.85, "g": 1.0, "loop": 1}, "meet": {"f": "snd-c8f6db0bb4.mp3", "d": 100.35, "g": 1.0, "loop": 1}, "tense": {"f": "snd-3f87b61c0b.mp3", "d": 10.5, "g": 1.0, "loop": 0}, "h0": {"f": "snd-dfb126a389.mp3", "d": 185.678, "g": 1.309, "loop": 0}, "h1": {"f": "snd-ba2a481e09.mp3", "d": 158.224, "g": 1.0, "loop": 0}, "h2": {"f": "snd-d6b345b4bc.mp3", "d": 137.953, "g": 1.116, "loop": 0}, "h3": {"f": "snd-1cae790c30.mp3", "d": 93.701, "g": 1.321, "loop": 0}, "click": {"f": "snd-7073cd290a.mp3", "d": 0.091}, "ok": {"f": "snd-7d421678e3.mp3", "d": 0.29}, "done": {"f": "snd-7035523a9c.mp3", "d": 0.797}, "win": {"f": "snd-4e8e2fe376.mp3", "d": 0.797}, "lose": {"f": "snd-b07d5c8f49.mp3", "d": 1.739}, "report": {"f": "snd-3a4ee8b9e2.mp3", "d": 0.607}, "wrong": {"f": "snd-64fe54ec5a.mp3", "d": 1.324}, "bell": {"f": "snd-9811ba8b3b.mp3", "d": 1.326}, "hit0": {"f": "snd-d9ec04603c.mp3", "d": 0.544}, "hit1": {"f": "snd-a94f330098.mp3", "d": 0.464}, "hit2": {"f": "snd-e73ecbc2c5.mp3", "d": 0.414}, "hit3": {"f": "snd-49f5b1885c.mp3", "d": 0.416}, "thud": {"f": "snd-7d45089c54.mp3", "d": 0.569}, "slash": {"f": "snd-7b09fd3779.mp3", "d": 0.422}, "vote": {"f": "snd-c489725646.mp3", "d": 0.653}, "gong": {"f": "snd-468f4e1d4e.mp3", "d": 1.413}, "blow": {"f": "snd-61d7d39515.mp3", "d": 2.637}, "whoosh": {"f": "snd-f88369d099.mp3", "d": 1.053}, "roar": {"f": "snd-9295c3bdbd.mp3", "d": 0.927}, "growl": {"f": "snd-25dbd856e9.mp3", "d": 0.608}, "magic": {"f": "snd-b338b77971.mp3", "d": 0.578}, "altar": {"f": "snd-f6a8ab7390.mp3", "d": 0.479}, "fire": {"f": "snd-fbbabe7faa.mp3", "d": 0.889}, "gun": {"f": "snd-5860a8e2b1.mp3", "d": 1.139}, "empty": {"f": "snd-de1e3e0ba8.mp3", "d": 0.428}, "door": {"f": "snd-db5793ec17.mp3", "d": 0.414}, "glassbreak": {"f": "snd-04f1d024f6.mp3", "d": 0.814}, "creak": {"f": "snd-8d89e2bf33.mp3", "d": 0.807}, "gasp": {"f": "snd-237404ba4f.mp3", "d": 1.52}, "r_vill": {"f": "snd-22d64404c6.mp3", "d": 1.793}, "r_wolf": {"f": "snd-e85f845d0c.mp3", "d": 3.25}, "r_seer": {"f": "snd-aa425ed5bc.mp3", "d": 1.82}, "r_fool": {"f": "snd-6205bf9068.mp3", "d": 1.26}, "r_vigil": {"f": "snd-b1f9d151c9.mp3", "d": 2.67}, "r_hunt": {"f": "snd-c970c89799.mp3", "d": 2.35}, "trainWarn": {"f": "snd-cad189313f.mp3", "d": 3.354}, "jingle": {"f": "snd-a98438f95d.mp3", "d": 0.62}, "dawn": {"f": "snd-4f9d3e8fd9.mp3", "d": 3.728}, "crackle": {"f": "snd-7a2259621f.mp3", "d": 5.594}, "cowbell": {"f": "snd-b24bb5950c.mp3", "d": 4.828}, "herd": {"f": "snd-6c94074369.mp3", "d": 4.378}, "moo": {"f": "snd-ae5d3f769b.mp3", "d": 2.5}, "tide": {"f": "snd-c34b821870.mp3", "d": 6.044}, "fuse": {"f": "snd-f3a2df572c.mp3", "d": 2.479}, "fogcome": {"f": "snd-600db9371d.mp3", "d": 4.65}, "toll": {"f": "snd-f5e754ca43.mp3", "d": 4.883}, "hedge": {"f": "snd-7b7cd9d25d.mp3", "d": 1.84}, "trainPass": {"f": "snd-329071f328.mp3", "d": 4.45}};
+const SND_FILES = {"m0": {"f": "snd-cd26099553.mp3", "d": 136.0, "g": 1.121, "loop": 1}, "m1": {"f": "snd-3ecc5ae8a0.mp3", "d": 87.9, "g": 1.492, "loop": 1}, "m2": {"f": "snd-b101ea4430.mp3", "d": 47.85, "g": 1.139, "loop": 1}, "m3": {"f": "snd-b3c2caee08.mp3", "d": 120.059, "g": 1.0, "loop": 1}, "m4": {"f": "snd-9f942a7362.mp3", "d": 187.0, "g": 1.851, "loop": 1}, "m5": {"f": "snd-63df9b2e7d.mp3", "d": 259.85, "g": 1.0, "loop": 1}, "meet": {"f": "snd-c8f6db0bb4.mp3", "d": 100.35, "g": 1.0, "loop": 1}, "tense": {"f": "snd-3f87b61c0b.mp3", "d": 10.5, "g": 1.0, "loop": 0}, "h0": {"f": "snd-dfb126a389.mp3", "d": 185.678, "g": 1.309, "loop": 0}, "h1": {"f": "snd-ba2a481e09.mp3", "d": 158.224, "g": 1.0, "loop": 0}, "h2": {"f": "snd-d6b345b4bc.mp3", "d": 137.953, "g": 1.116, "loop": 0}, "h3": {"f": "snd-1cae790c30.mp3", "d": 93.701, "g": 1.321, "loop": 0}, "click": {"f": "snd-7073cd290a.mp3", "d": 0.091}, "ok": {"f": "snd-7d421678e3.mp3", "d": 0.29}, "done": {"f": "snd-7035523a9c.mp3", "d": 0.797}, "win": {"f": "snd-4e8e2fe376.mp3", "d": 0.797}, "lose": {"f": "snd-b07d5c8f49.mp3", "d": 1.739}, "report": {"f": "snd-3a4ee8b9e2.mp3", "d": 0.607}, "wrong": {"f": "snd-64fe54ec5a.mp3", "d": 1.324}, "bell": {"f": "snd-9811ba8b3b.mp3", "d": 1.326}, "hit0": {"f": "snd-d9ec04603c.mp3", "d": 0.544}, "hit1": {"f": "snd-a94f330098.mp3", "d": 0.464}, "hit2": {"f": "snd-e73ecbc2c5.mp3", "d": 0.414}, "hit3": {"f": "snd-49f5b1885c.mp3", "d": 0.416}, "thud": {"f": "snd-7d45089c54.mp3", "d": 0.569}, "slash": {"f": "snd-7b09fd3779.mp3", "d": 0.422}, "vote": {"f": "snd-c489725646.mp3", "d": 0.653}, "gong": {"f": "snd-468f4e1d4e.mp3", "d": 1.413}, "blow": {"f": "snd-61d7d39515.mp3", "d": 2.637}, "whoosh": {"f": "snd-f88369d099.mp3", "d": 1.053}, "roar": {"f": "snd-9295c3bdbd.mp3", "d": 0.927}, "growl": {"f": "snd-25dbd856e9.mp3", "d": 0.608}, "magic": {"f": "snd-b338b77971.mp3", "d": 0.578}, "altar": {"f": "snd-f6a8ab7390.mp3", "d": 0.479}, "fire": {"f": "snd-fbbabe7faa.mp3", "d": 0.889}, "gun": {"f": "snd-5860a8e2b1.mp3", "d": 1.139}, "empty": {"f": "snd-de1e3e0ba8.mp3", "d": 0.428}, "door": {"f": "snd-db5793ec17.mp3", "d": 0.414}, "glassbreak": {"f": "snd-04f1d024f6.mp3", "d": 0.814}, "creak": {"f": "snd-8d89e2bf33.mp3", "d": 0.807}, "gasp": {"f": "snd-237404ba4f.mp3", "d": 1.52}, "r_vill": {"f": "snd-22d64404c6.mp3", "d": 1.793}, "r_wolf": {"f": "snd-e85f845d0c.mp3", "d": 3.25}, "r_seer": {"f": "snd-aa425ed5bc.mp3", "d": 1.82}, "r_fool": {"f": "snd-6205bf9068.mp3", "d": 1.26}, "r_vigil": {"f": "snd-b1f9d151c9.mp3", "d": 2.67}, "r_hunt": {"f": "snd-c970c89799.mp3", "d": 2.35}, "r_twin": {"f": "snd-327c4573a3.mp3", "d": 3.2}, "trainWarn": {"f": "snd-cad189313f.mp3", "d": 3.354}, "jingle": {"f": "snd-a98438f95d.mp3", "d": 0.62}, "dawn": {"f": "snd-4f9d3e8fd9.mp3", "d": 3.728}, "crackle": {"f": "snd-7a2259621f.mp3", "d": 5.594}, "cowbell": {"f": "snd-b24bb5950c.mp3", "d": 4.828}, "herd": {"f": "snd-6c94074369.mp3", "d": 4.378}, "moo": {"f": "snd-ae5d3f769b.mp3", "d": 2.5}, "tide": {"f": "snd-c34b821870.mp3", "d": 6.044}, "fuse": {"f": "snd-f3a2df572c.mp3", "d": 2.479}, "fogcome": {"f": "snd-600db9371d.mp3", "d": 4.65}, "toll": {"f": "snd-f5e754ca43.mp3", "d": 4.883}, "hedge": {"f": "snd-7b7cd9d25d.mp3", "d": 1.84}, "trainPass": {"f": "snd-329071f328.mp3", "d": 4.45}};
 // 這個檔案由 art/prep_dog.py 產生：場景裡小白狗的動畫（第 42 版，使用者提供的圖）
 // rows：每個動作的每一格 [x, y, 寬, 高, 腳底中心 x, 腳底 y]（圖上的像素）；face：這個動作畫的時候臉朝哪邊（1 右、-1 左、0 正面）；tall：站著時大約多高（像素）
 const DOG_ART = {"d": "img-4cc8d91ee6.webp", "w": 2960, "h": 2112, "rows": {"idle": [[8, 8, 220, 206, 104.8, 192.0], [304, 8, 226, 212, 110.2, 198.0], [600, 8, 220, 212, 106.5, 198.0], [896, 8, 222, 212, 108.0, 198.0], [1192, 8, 218, 212, 103.2, 198.0], [1488, 8, 222, 212, 107.9, 198.0], [1784, 8, 216, 212, 102.3, 198.0], [2080, 8, 222, 212, 106.3, 198.0]], "runR": [[2376, 8, 182, 172, 90.3, 148.0], [2672, 8, 182, 172, 89.3, 148.0], [8, 272, 178, 180, 88.5, 156.0], [304, 272, 176, 180, 86.8, 156.0], [600, 272, 170, 180, 83.3, 156.0], [896, 272, 176, 180, 86.5, 156.0], [1192, 272, 178, 180, 86.9, 156.0], [1488, 272, 178, 180, 89.0, 154.0]], "runL": [[1784, 272, 178, 172, 87.4, 148.0], [2080, 272, 178, 172, 88.5, 148.0], [2376, 272, 182, 174, 89.6, 148.0], [2672, 272, 176, 178, 86.0, 154.0], [8, 536, 176, 182, 87.0, 156.0], [304, 536, 178, 180, 87.6, 156.0], [600, 536, 180, 182, 87.8, 156.0], [896, 536, 178, 180, 89.7, 156.0]], "dig": [[1192, 536, 228, 186, 118.9, 172.0], [1488, 536, 236, 196, 116.1, 182.0], [1784, 536, 276, 198, 119.8, 184.0], [2080, 536, 280, 206, 119.4, 192.0], [2376, 536, 274, 206, 123.8, 192.0], [2672, 536, 274, 206, 120.1, 192.0], [8, 800, 244, 206, 118.4, 192.0], [304, 800, 236, 206, 121.3, 192.0]], "carryR": [[600, 800, 190, 164, 91.7, 150.0], [896, 800, 182, 164, 86.2, 150.0], [1192, 800, 184, 164, 87.4, 150.0], [1488, 800, 180, 174, 87.2, 160.0], [1784, 800, 180, 176, 84.7, 162.0], [2080, 800, 180, 176, 83.9, 162.0], [2376, 800, 180, 176, 85.2, 162.0], [2672, 800, 180, 176, 86.4, 162.0]], "carryL": [[8, 1064, 180, 166, 91.4, 152.0], [304, 1064, 180, 166, 91.2, 152.0], [600, 1064, 180, 166, 91.7, 152.0], [896, 1064, 178, 166, 90.2, 152.0], [1192, 1064, 182, 176, 92.0, 162.0], [1488, 1064, 182, 174, 93.1, 160.0], [1784, 1064, 184, 176, 91.9, 162.0], [2080, 1064, 182, 176, 94.2, 162.0]], "bury": [[2376, 1064, 200, 178, 98.2, 164.0], [2672, 1064, 196, 178, 94.6, 164.0], [8, 1328, 194, 184, 95.3, 170.0], [304, 1328, 190, 180, 96.4, 166.0], [600, 1328, 194, 178, 98.7, 164.0], [896, 1328, 224, 186, 100.5, 172.0], [1192, 1328, 246, 186, 99.9, 172.0], [1488, 1328, 250, 186, 101.3, 172.0], [1784, 1328, 240, 186, 103.7, 172.0], [2080, 1328, 222, 186, 99.4, 172.0], [2376, 1328, 176, 186, 87.0, 172.0], [2672, 1328, 218, 186, 83.7, 172.0]], "belly": [[8, 1592, 190, 202, 90.3, 188.0], [304, 1592, 242, 202, 112.5, 188.0], [600, 1592, 250, 212, 119.9, 198.0], [896, 1592, 266, 212, 127.6, 198.0], [1192, 1592, 270, 210, 135.9, 196.0], [1488, 1592, 276, 206, 130.7, 192.0], [1784, 1592, 228, 212, 106.8, 198.0], [2080, 1592, 200, 212, 97.4, 198.0]], "dig_out": [[2376, 1592, 248, 232, 108.7, 218.0], [2672, 1592, 224, 220, 111.6, 206.0], [8, 1856, 238, 214, 109.3, 200.0], [304, 1856, 244, 220, 113.5, 206.0], [600, 1856, 230, 220, 112.0, 206.0], [896, 1856, 226, 230, 115.5, 216.0], [1192, 1856, 226, 234, 113.7, 220.0], [1488, 1856, 226, 234, 107.5, 220.0], [1784, 1856, 222, 234, 105.3, 220.0], [2080, 1856, 224, 234, 107.5, 220.0], [2376, 1856, 212, 232, 99.0, 218.0], [2672, 1856, 236, 248, 92.5, 234.0]]}, "fps": {"idle": 6, "runR": 12, "runL": 12, "dig": 10, "carryR": 12, "carryL": 12, "bury": 0, "belly": 8, "dig_out": 0}, "sc": {"idle": 1, "runR": 1.42, "runL": 1.42, "dig": 1.08, "carryR": 1.46, "carryL": 1.46, "bury": 1.3, "belly": 1.02, "dig_out": 1.12}, "face": {"idle": 0, "runR": 1, "runL": -1, "dig": 1, "carryR": 1, "carryL": -1, "bury": 1, "belly": 0, "dig_out": 1}, "tall": 198.0};
@@ -4305,6 +4310,57 @@ function evDrawScreen(g, now, W, H) {
   }
   g.restore();
 }
+// ===== 第 61 版：雙面人（玩法 5，身分 6）=====
+// 規則在 03-host.js（hostKill、hostReport）；「只有狼人看到他死了」的判斷在 04-client.js（tfFake、vGone、vBodies）。這裡是畫面上的東西。
+// 裂開的面具：雙面人掉了一命之後，所有人都看得到這個記號（地圖上在他的名字上面，開會、生死簿在他的頭像旁邊）
+function drawCrackMask(g, x, y, s, now) {
+  const bob = now != null ? Math.sin(now / 420) * 1.2 : 0;
+  g.save(); g.translate(x, y + bob); g.scale(s, s); g.lineJoin = 'round'; g.lineCap = 'round';
+  // 臉：上寬下尖的面具
+  g.beginPath(); g.moveTo(0, -8.5); g.bezierCurveTo(6.6, -8.5, 7.6, -3, 6.6, 1.5); g.bezierCurveTo(5.6, 6, 2.6, 8.5, 0, 8.5); g.bezierCurveTo(-2.6, 8.5, -5.6, 6, -6.6, 1.5); g.bezierCurveTo(-7.6, -3, -6.6, -8.5, 0, -8.5); g.closePath();
+  g.fillStyle = 'rgba(12,8,18,.55)'; g.save(); g.translate(.8, 1.2); g.fill(); g.restore();
+  g.fillStyle = '#ece2d2'; g.fill(); g.strokeStyle = '#2a1c2e'; g.lineWidth = 1.3; g.stroke();
+  // 閉著的眼睛（往下彎）、往下撇的嘴
+  g.strokeStyle = '#2a1c2e'; g.lineWidth = 1.2;
+  g.beginPath(); g.arc(-2.9, -2.6, 1.9, .25, Math.PI - .25); g.stroke();
+  g.beginPath(); g.arc(2.9, -2.6, 1.9, .25, Math.PI - .25); g.stroke();
+  g.beginPath(); g.arc(0, 5.6, 2.3, Math.PI + .5, -.5); g.stroke();
+  // 一滴眼淚
+  g.fillStyle = '#6fb6e6'; g.beginPath(); g.moveTo(-3.1, -.4); g.quadraticCurveTo(-4.5, 1.9, -3.1, 2.7); g.quadraticCurveTo(-1.7, 1.9, -3.1, -.4); g.fill();
+  // 裂痕：從頭頂劈下來
+  g.strokeStyle = '#b0271f'; g.lineWidth = 1.5; g.beginPath(); g.moveTo(1.2, -8.6); g.lineTo(-.4, -5.2); g.lineTo(1.6, -2.4); g.lineTo(.2, .8); g.lineTo(1.4, 3); g.stroke();
+  g.restore();
+}
+// 給介面用的小圖示（開會的頭像卡、生死簿）
+function crackMaskIcon() {
+  const c = document.createElement('canvas'); c.width = 54; c.height = 60; c.className = 'tfm';
+  drawCrackMask(c.getContext('2d'), 27, 30, 3, null); c.setAttribute('aria-label', '掉了一命'); return c;
+}
+// 狼人的箭頭：雙面人揭曉之後，一直指著他現在的位置（隔著牆、在霧裡也指得到）。離得很近時改成浮在他頭上的小箭頭
+function tfArrowDraw(g, now, cx, cy) {
+  if (!(G && G.ph === 2 && my.wolf && !my.dead && tfMarked(G.sp))) return;
+  const p = players.get(G.ro[G.sp]); if (!p) return;
+  const col = '#ff5a4a', beat = .5 + .5 * Math.sin(now / 200);
+  g.setTransform(view.dpr, 0, 0, view.dpr, 0, 0);
+  const mxp = (ME.x - cx) * view.z, myp = (ME.y - 22 - cy) * view.z, Rx = Math.min(view.w * .2, 170), Ry = Math.min(view.h * .3, 120);   // 圈小一點，才不會跑到右邊的按鈕底下
+  const dx = (p.rx - ME.x) * view.z, dy = (p.ry - ME.y) * view.z, an = Math.atan2(dy, dx), ex = Math.cos(an) * Rx, ey = Math.sin(an) * Ry;
+  g.save();
+  if (Math.hypot(dx, dy) < Math.hypot(ex, ey) + 34) {   // 就在旁邊：箭頭浮在他頭上往下指
+    const tx = (p.rx - cx) * view.z, ty = (p.ry - charTop(p.c) - 40 - cy) * view.z + beat * 5;
+    g.translate(tx, ty); g.rotate(Math.PI / 2);
+  } else { const k = 1 + beat * .04; g.translate(mxp + ex * k, myp + ey * k); g.rotate(an); }
+  g.fillStyle = 'rgba(30,8,8,.8)'; circ(g, 0, 0, 16);
+  g.strokeStyle = col; g.lineWidth = 2; g.beginPath(); g.arc(0, 0, 16, 0, 6.2832); g.stroke();
+  g.fillStyle = col; g.beginPath(); g.moveTo(12, 0); g.lineTo(-5, -9); g.lineTo(-1.5, 0); g.lineTo(-5, 9); g.closePath(); g.fill();
+  g.restore();
+}
+// 狀態變了（每台裝置各自看）：揭曉、第二刀
+function tfOnChange() {
+  const s = G.st.gm === 5 ? G.tf.s : 0, was = seen.tf | 0; if (s === was) return; seen.tf = s;
+  if (my.idx < 0) return;
+  // 第二刀：動手的那隻狼人，襲擊和吹燈馬上可以再用
+  if (s === 3 && was === 2 && my.wolf && !my.dead && G.tf.k === my.idx && G.ph === 2) { my.cd = 0; my.bcd = 0; sfx('glassbreak', { vol: .5 }); toast('雙面人倒下了，襲擊和吹燈都可以馬上再用。', 2600); }
+}
 // ===== 連線層：Firebase Realtime Database =====
 // rooms/{代碼}/h  房主維護的遊戲狀態（存在就代表房間開著）
 // rooms/{代碼}/b  電腦玩家的基本資料，bp 是它們的位置
@@ -4378,6 +4434,9 @@ let hostSeenAt = 0;
 
 const isBotId = id => typeof id === 'string' && id.length < 5;
 const aliveIdx = i => H.dd[i] === '0' && H.lf[i] === '0';
+// 第 61 版　雙面人（玩法 5）：有兩條命。H.tf.s：0 兩條命都在、1 被刀了一次但還沒揭曉（只有狼人的畫面上他倒下了）、2 開過會揭曉了（剩一條命，狼人有箭頭指著他）、3 第二次被刀，真的死了
+// 狼人眼中「這個人已經不在了」：真的出局，或是還沒揭曉的雙面人
+const tfHidden = i => H.st.gm === 5 && i === H.sp && H.tf.s === 1;
 // 第 50 版：這個人正躲在下水道裡（看不到、碰不到）。可以一直待著，爬出來才會再出現
 function inSewer(p) { return !!(p && (p === ME ? sewerIn : p.sw)); }
 function botById(id) { for (const b of BOTS) if (b.id === id) return b; return null; }
@@ -4387,7 +4446,7 @@ function nameOfId(id) { const p = pubOf(id); return p ? p.n : '某人'; }
 
 // ===== 房主：遊戲規則 =====
 function hostCreate() {
-  H = { gn: 0, ph: 0, st: { w: 1, gm: 0, ir: 1, fn: 3, xr: 1, hs: 15, sp: 100, tl: 2, ts: 3, ga: 8, kc: 40, kr: 1, bl: 45, an: 3, at: 40, mt: 90, map: Math.max(0, curMap) }, sp: -1, su: 0, it: -1, ro: [], wf: '', dd: '', lf: '', ta: [], ga: [], lo: 0, al: { a: [], on: 0, rem: 0, lk: 1 }, bd: [], mt: null, rs: null, pg: [0, 0], win: 0, why: 0, rem: 0 };
+  H = { gn: 0, ph: 0, st: { w: 1, gm: 0, ir: 1, fn: 3, xr: 1, hs: 15, sp: 100, tl: 2, ts: 3, ga: 8, kc: 40, kr: 1, bl: 45, an: 3, at: 40, mt: 90, map: Math.max(0, curMap) }, sp: -1, su: 0, it: -1, tf: { s: 0, x: 0, y: 0, k: -1 }, ro: [], wf: '', dd: '', lf: '', ta: [], ga: [], lo: 0, al: { a: [], on: 0, rem: 0, lk: 1 }, bd: [], mt: null, rs: null, pg: [0, 0], win: 0, why: 0, rem: 0 };
   hs = { lastSw: {}, lastK: {}, lastR: {}, lastB: {}, lastF: {}, lastA: {}, em: {}, meetNo: 0, acc: 0, absent: {}, alCd: 0 };
   BOTS = []; G = H; hostDirty = true;
 }
@@ -4418,7 +4477,7 @@ function hostStart() {
   H.wf = ids.map((_, i) => wolves.has(i) ? '1' : '0').join('');
   H.dd = '0'.repeat(n); H.lf = '0'.repeat(n);
   // 特殊玩法：從村民裡挑一位當檢驗官／白癡／義警
-  H.sp = -1; H.su = 0; H.it = -1; hs.foolOut = false; hs.dog = null; hs.spAt = performance.now() + 30000 + Math.random() * 30000;
+  H.sp = -1; H.su = 0; H.it = -1; H.tf = { s: 0, x: 0, y: 0, k: -1 }; hs.foolOut = false; hs.dog = null; hs.spAt = performance.now() + 30000 + Math.random() * 30000;
   if (H.st.gm > 0) { const vs = order.slice(w); H.sp = vs[Math.floor(Math.random() * vs.length)]; }
   H.ta = dealTasks(n, H.st.tl, H.st.ts);   // 每個人各自一組；狼人拿到的是假清單
   H.ga = ids.map(() => 0); hs.gacc = {};   // 鬼魂自動完成的步驟
@@ -4444,6 +4503,14 @@ function hostKill(kid, vid) {
   if (H.wf[ki] !== '1' || !aliveIdx(ki) || !aliveIdx(vi) || H.wf[vi] === '1') return false;
   const kp = posOf(kid), vp = posOf(vid); if (!kp || !vp) return false;
   if (dist(kp.x, kp.y, vp.x, vp.y) > killRangeOf(H.st) * 2.6) return false;
+  if (H.st.gm === 5 && vi === H.sp) {   // 雙面人
+    if (H.tf.s === 1) return false;   // 狼人以為他已經死了，不能再刀
+    if (H.tf.s === 0) {   // 第一刀：其實沒死。只有狼人的畫面上他倒下；他自己和其他村民什麼都看不到，所以也沒有目擊者
+      H.tf = { s: 1, x: Math.round(vp.x), y: Math.round(vp.y), k: ki }; hostDirty = true; return true;
+    }
+    H.tf = { s: 3, x: 0, y: 0, k: ki };   // 第二刀：真的死。動手的狼人，襲擊和吹燈的冷卻馬上歸零
+    const kb = botById(kid); if (kb) kb.tfHit = 1;
+  }
   H.dd = setFlag(H.dd, vi); H.bd.push([vi, Math.round(vp.x), Math.round(vp.y)]);
   for (const b of BOTS) {
     const bi = H.ro.indexOf(b.id);
@@ -4516,10 +4583,14 @@ function hostLightsOn() {
 function hostReport(rid, bid) {
   const ri = H.ro.indexOf(rid);
   if (H.ph !== 2 || ri < 0 || !aliveIdx(ri) || H.al.on) return false;   // 祭壇啟動時不能開會
-  let bi = -1;
-  if (bid) { bi = H.ro.indexOf(bid); if (bi < 0 || !H.bd.some(b => b[0] === bi)) return false; }
+  let bi = -1, fk = 0;
+  if (bid) { bi = H.ro.indexOf(bid); if (bi < 0) return false;
+    if (tfHidden(bi) && H.wf[ri] === '1') fk = 1;   // 狼人舉報了那具只有狼人看得到的「屍體」
+    else if (!H.bd.some(b => b[0] === bi)) return false; }
   else { if (hs.em[rid] || performance.now() < (hs.bellAt || 0)) return false; hs.em[rid] = 1; }   // 敲鐘：一人一次，冷卻中不行
-  hs.meetNo++; H.mt = { no: hs.meetNo, by: ri, body: bi }; H.rem = H.st.mt; H.ph = 3; H.rs = null;
+  const rv = H.st.gm === 5 && H.tf.s === 1 ? 1 : 0;   // 雙面人在這場會議揭曉：大家都看到他掉了一命
+  if (rv) H.tf = { s: 2, x: 0, y: 0, k: H.tf.k };
+  hs.meetNo++; H.mt = { no: hs.meetNo, by: ri, body: bi, fk, tf: rv }; H.rem = H.st.mt; H.ph = 3; H.rs = null;
   hostLightsOn();   // 開會時燈自動恢復
   botsMeetInit(); H.bd = []; hostDirty = true; return true;
 }
@@ -4762,7 +4833,7 @@ function hostIntents() {
   }
 }
 // 只把有變動的部分送出去，省流量
-const H_KEYS = ['gn', 'ph', 'st', 'ro', 'wf', 'sp', 'su', 'it', 'dd', 'lf', 'ta', 'ga', 'lo', 'al', 'bd', 'mt', 'rs', 'hu', 'pg', 'win', 'why', 'rem', 'tr'];
+const H_KEYS = ['gn', 'ph', 'st', 'ro', 'wf', 'sp', 'su', 'it', 'tf', 'dd', 'lf', 'ta', 'ga', 'lo', 'al', 'bd', 'mt', 'rs', 'hu', 'pg', 'win', 'why', 'rem', 'tr'];
 let pubTick = 0;
 function hostPublish() {
   if (!Net.on || !H) return;
@@ -4914,23 +4985,24 @@ function botThink(b, idx, dt, now) {
       if (b.cd <= 0) {
         let vic = -1, best = killRangeOf(H.st) - 6;
         for (let i = 0; i < H.ro.length; i++) {
-          if (i === idx || !aliveIdx(i) || H.wf[i] === '1') continue;
+          if (i === idx || !aliveIdx(i) || H.wf[i] === '1' || tfHidden(i)) continue;   // 還沒揭曉的雙面人：狼人以為他死了
           const p = posOf(H.ro[i]); if (!p) continue;
           const d = dist(b.x, b.y, p.x, p.y); if (d < best && canSee(b.x, b.y, p.x, p.y)) { best = d; vic = i; }
         }
         if (vic >= 0) {
           let wit = 0;
           for (let i = 0; i < H.ro.length; i++) {
-            if (i === idx || i === vic || !aliveIdx(i) || H.wf[i] === '1') continue;
+            if (i === idx || i === vic || !aliveIdx(i) || H.wf[i] === '1' || tfHidden(i)) continue;   // 狼人看不到還沒揭曉的雙面人，不會把他算成目擊者
             const p = posOf(H.ro[i]); if (p && dist(b.x, b.y, p.x, p.y) < (H.lo ? 105 : 230) * evVision(false) && canSee(p.x, p.y, b.x, b.y)) wit++;
           }
-          if (wit === 0 && hostKill(b.id, H.ro[vic])) { b.cd = H.st.kc + rnd(0, 5); b.path = null; b.wait = 0; b.goalJ = -1; return; }
+          if (wit === 0 && hostKill(b.id, H.ro[vic])) { b.cd = H.st.kc + rnd(0, 5); b.path = null; b.wait = 0; b.goalJ = -1; if (b.tfHit) { b.tfHit = 0; b.cd = rnd(1.5, 4); b.bcd = Math.min(b.bcd, rnd(2, 6)); } return; }   // 刀到剩一條命的雙面人：冷卻馬上歸零
         }
         if (now > b.stalkAt) {
           b.stalkAt = now + 2600;
-          const c = []; for (let i = 0; i < H.ro.length; i++) if (i !== idx && aliveIdx(i) && H.wf[i] !== '1') c.push(i);
+          const c = []; for (let i = 0; i < H.ro.length; i++) if (i !== idx && aliveIdx(i) && H.wf[i] !== '1' && !tfHidden(i)) c.push(i);
           if (c.length) {
-            const p = posOf(H.ro[pick(c)]);
+            const hunt = H.st.gm === 5 && H.tf.s === 2 && aliveIdx(H.sp) && Math.random() < .7;   // 揭曉之後狼人有箭頭指著雙面人，多半會去找他
+            const p = posOf(H.ro[hunt ? H.sp : pick(c)]);
             if (p) { const tx = Math.floor(p.x / TILE), ty = Math.floor(p.y / TILE); if (!SOLID[tget(tx, ty)] && botGoTile(b, tx, ty)) { b.wait = 0; b.goalJ = -1; } }
           }
         }
@@ -5058,9 +5130,10 @@ const str = x => typeof x === 'string' ? x : '';
 function normG(h) {
   const st = h.st || {}, rs = h.rs, mt = h.mt;
   return {
-    gn: h.gn | 0, ph: h.ph | 0, sp: h.sp == null ? -1 : h.sp | 0, su: h.su ? 1 : 0, it: h.it == null ? -1 : h.it | 0, st: { w: st.w || 1, gm: clamp(st.gm | 0, 0, 4), hs: [10, 15, 20].includes(st.hs) ? st.hs : 15, ir: st.ir == null ? 1 : clamp(st.ir | 0, 0, 2), fn: st.fn === 4 ? 4 : 3, xr: st.xr == null ? 1 : clamp(st.xr | 0, 0, 2), sp: [80, 90, 100, 110, 120, 135, 150].includes(st.sp) ? st.sp : 100, tl: st.tl == null ? 2 : clamp(st.tl | 0, 0, 3), ts: st.ts == null ? 3 : clamp(st.ts | 0, 0, 5), ga: [8, 12, 15].includes(st.ga) ? st.ga : 8, kc: st.kc || 40, kr: st.kr == null ? 1 : clamp(st.kr | 0, 0, 2), bl: [0, 30, 45, 60, 90].includes(st.bl) ? st.bl : 45, an: [3, 4, 5].includes(st.an) ? st.an : 3, at: [30, 40, 50].includes(st.at) ? st.at : 40, mt: st.mt || 90, map: clamp(st.map | 0, 0, MAPS.length - 1) },
+    gn: h.gn | 0, ph: h.ph | 0, sp: h.sp == null ? -1 : h.sp | 0, su: h.su ? 1 : 0, it: h.it == null ? -1 : h.it | 0, st: { w: st.w || 1, gm: clamp(st.gm | 0, 0, 5), hs: [10, 15, 20].includes(st.hs) ? st.hs : 15, ir: st.ir == null ? 1 : clamp(st.ir | 0, 0, 2), fn: st.fn === 4 ? 4 : 3, xr: st.xr == null ? 1 : clamp(st.xr | 0, 0, 2), sp: [80, 90, 100, 110, 120, 135, 150].includes(st.sp) ? st.sp : 100, tl: st.tl == null ? 2 : clamp(st.tl | 0, 0, 3), ts: st.ts == null ? 3 : clamp(st.ts | 0, 0, 5), ga: [8, 12, 15].includes(st.ga) ? st.ga : 8, kc: st.kc || 40, kr: st.kr == null ? 1 : clamp(st.kr | 0, 0, 2), bl: [0, 30, 45, 60, 90].includes(st.bl) ? st.bl : 45, an: [3, 4, 5].includes(st.an) ? st.an : 3, at: [30, 40, 50].includes(st.at) ? st.at : 40, mt: st.mt || 90, map: clamp(st.map | 0, 0, MAPS.length - 1) },
     ro: arr(h.ro), wf: str(h.wf), dd: str(h.dd), lf: str(h.lf), ta: arr(h.ta), ga: arr(h.ga), lo: h.lo ? 1 : 0, al: h.al && typeof h.al === 'object' ? { a: arr(h.al.a).filter(Array.isArray), on: h.al.on ? 1 : 0, rem: h.al.rem | 0, lk: h.al.lk ? 1 : 0 } : { a: [], on: 0, rem: 0, lk: 1 }, bd: arr(h.bd),
-    mt: mt && typeof mt === 'object' ? { no: mt.no | 0, by: mt.by | 0, body: mt.body == null ? -1 : mt.body | 0 } : null,
+    mt: mt && typeof mt === 'object' ? { no: mt.no | 0, by: mt.by | 0, body: mt.body == null ? -1 : mt.body | 0, fk: mt.fk ? 1 : 0, tf: mt.tf ? 1 : 0 } : null,
+    tf: h.tf && typeof h.tf === 'object' ? { s: h.tf.s | 0, x: h.tf.x | 0, y: h.tf.y | 0, k: h.tf.k == null ? -1 : h.tf.k | 0 } : { s: 0, x: 0, y: 0, k: -1 },   // 第 61 版：雙面人的狀態
     rs: rs && typeof rs === 'object' ? { ej: rs.ej == null ? -1 : rs.ej | 0, tie: rs.tie | 0, sk: rs.sk | 0, vt: arr(rs.vt) } : null,
     hu: h.hu && typeof h.hu === 'object' ? { by: h.hu.by | 0, t: h.hu.t == null ? -2 : h.hu.t | 0 } : null,   // 獵人開槍：by 獵人、t 打中誰（-2 還在想、-1 不開槍）
     pg: Array.isArray(h.pg) ? h.pg : [0, 0], win: h.win | 0, why: h.why | 0, rem: h.rem | 0, tr: h.tr | 0   // tr（第 56 版）：捷運站的列車開到第幾班
@@ -5108,9 +5181,16 @@ function derive() {
   my.idx = idx;
   my.wolf = idx >= 0 && G.wf[idx] === '1';
   my.dead = idx >= 0 && (G.dd[idx] === '1' || G.lf[idx] === '1');
-  my.role = idx >= 0 && idx === G.sp && G.st.gm ? (G.st.gm === 2 ? (G.su ? 0 : 3) : G.st.gm === 1 ? 2 : G.st.gm === 4 ? 5 : 4) : 0;   // 5 獵人
+  my.role = idx >= 0 && idx === G.sp && G.st.gm ? (G.st.gm === 2 ? (G.su ? 0 : 3) : G.st.gm === 1 ? 2 : G.st.gm === 4 ? 5 : G.st.gm === 5 ? 6 : 4) : 0;   // 5 獵人、6 雙面人
   my.tasks = idx >= 0 ? parseTasks(G.ta[idx]) : [];
 }
+// ===== 第 61 版　雙面人 =====
+// 第一次被刀之後、下一次開會之前：只有狼人的畫面上他「死了」（看得到屍體、看不到他本人、生死簿打叉）。他自己和其他村民看到的都是真相
+function tfFake() { return !!(G && G.st.gm === 5 && G.sp >= 0 && G.tf && G.tf.s === 1 && my.wolf); }
+function vGone(i) { return G.dd[i] === '1' || G.lf[i] === '1' || (i === G.sp && tfFake()); }   // 在我的畫面上，這個人是不是已經不在了
+function vBodies() { return tfFake() ? G.bd.concat([[G.sp, G.tf.x, G.tf.y]]) : G.bd; }           // 我看得到的屍體（狼人多一具假的）
+// 揭曉之後（剩一條命、還活著）：所有人都看得到他頭上的裂面具；狼人多一個箭頭一直指著他
+function tfMarked(i) { return !!(G && G.st.gm === 5 && i === G.sp && G.tf && G.tf.s === 2 && G.dd[i] !== '1' && G.lf[i] !== '1'); }
 // 這個任務做到第幾步（-1 表示整個做完）
 function taskCur(tk) { for (let k = 0; k < tk.steps.length; k++) if (!(ME.td[1] >> (tk.off + k) & 1)) return k; return -1; }
 // 現在該去的工作點。狼人拿到的是假清單，所有地點都標出來方便裝忙。
@@ -5146,7 +5226,7 @@ function onStateChange() {
   if (!inRoom || !G) return;
   derive();
   if (G.ph >= 1 && G.gn !== seen.gn) {
-    seen.gn = G.gn; seen.dead = my.dead; my.cd = 24; my.bcd = 15; my.em = false; my.bellCd = BELL_CD_START; altarSet.on = false; seen.lo = 0; seen.al = 0; seen.it = G.it; seen.su = G.su;
+    seen.gn = G.gn; seen.dead = my.dead; my.cd = 24; my.bcd = 15; my.em = false; my.bellCd = BELL_CD_START; altarSet.on = false; seen.lo = 0; seen.al = 0; seen.it = G.it; seen.su = G.su; seen.tf = G.st.gm === 5 ? G.tf.s : 0;
     let mask = 0;
     try { const s = JSON.parse(store('lw_pg') || 'null'); if (s && s.c === code && s.g === G.gn) mask = s.m | 0; } catch (e) { }
     ME.td = [G.gn, mask]; ME.v = null; ME.ch = [];
@@ -5162,6 +5242,7 @@ function onStateChange() {
     if (G.ph === 2 && my.dead) toast('鬼魂自動完成了一步工作', 1800);
   }
   // 特殊玩法的提示：檢驗結果只有檢驗官看得到；白癡變回村民只有白癡自己看得到
+  tfOnChange();   // 第 61 版：雙面人
   if (G.it !== seen.it) { seen.it = G.it; if (G.it >= 0 && G.st.gm === 1 && my.idx === G.sp && G.ph === 2) { const w = G.wf[G.it] === '1'; showSlash(w ? 'wolf' : 'vill', nameIdx(G.it) + (w ? ' 是狼人！' : ' 是村民'), w ? '檢驗結果：他就是狼人' : '檢驗結果：他不是狼人', COLORS[colorIdx(G.it)][1]); } }
   if (G.su !== seen.su) { seen.su = G.su; if (G.su && G.st.gm === 2 && my.idx === G.sp && G.ph >= 2 && G.ph <= 4) showSlash('fool', '你變回普通村民了', '場上只剩 ' + G.st.fn + ' 個人，工作已經全部自動完成', COLORS[ME.c][1]); }
   // 祭壇啟動／解除、狼王降臨
@@ -5292,11 +5373,11 @@ function computeCtx() {
   // 小狗就在旁邊，而且沒有別的事可以做：可以摸摸牠
   if (!ctxA.use && DOG.on && dogPettable(DOG.st) && dist(ME.x, ME.y, DOG.rx, DOG.ry) < 64) ctxA.use = { k: 'dog' };
   let bb = REPORT_RANGE;
-  if (!G.al.on) for (const b of G.bd) { const d = dist(ME.x, ME.y, b[1], b[2]); if (d < bb && canSee(ME.x, ME.y, b[1], b[2])) { bb = d; ctxA.body = b; } }
+  if (!G.al.on) for (const b of vBodies()) { const d = dist(ME.x, ME.y, b[1], b[2]); if (d < bb && canSee(ME.x, ME.y, b[1], b[2])) { bb = d; ctxA.body = b; } }
   if (my.wolf && my.cd <= 0) {
     let bk = killRangeOf(G.st);
     for (let i = 0; i < G.ro.length; i++) {
-      if (i === my.idx || G.wf[i] === '1' || G.dd[i] === '1' || G.lf[i] === '1') continue;
+      if (i === my.idx || G.wf[i] === '1' || vGone(i)) continue;
       const p = players.get(G.ro[i]); if (!p || inSewer(p)) continue;
       const d = dist(ME.x, ME.y, p.rx, p.ry); if (d < bk && canSee(ME.x, ME.y, p.rx, p.ry)) { bk = d; ctxA.kill = p; }
     }
@@ -5566,8 +5647,8 @@ function render(now) {
   dyn.length = 0;
   const ghostView = playing && my.dead;
   if (playing) {
-    if (G.ph === 2) for (const b of G.bd) {
-      const key = G.gn + ':' + b[0]; let st = VFX.body.get(key); if (!st) { st = { t: now, done: false }; VFX.body.set(key, st); }
+    if (G.ph === 2) for (const b of vBodies()) {
+      const key = G.gn + ':' + b[0] + (b[0] === G.sp && G.st.gm === 5 ? ':' + G.tf.s : '');   /* 雙面人可能倒下兩次（一次假的、一次真的） */ let st = VFX.body.get(key); if (!st) { st = { t: now, done: false }; VFX.body.set(key, st); }
       if (!ghostView && (dist(ME.x, ME.y, b[1], b[2]) > vis || !canSee(ME.x, ME.y, b[1], b[2]))) continue;
       if (!st.done) { st.done = true; if (now - st.t < 900) { fxBlood(b[1], b[2] - 4); fxSlash(b[1], b[2]); if (!ghostView) camShake(dist(ME.x, ME.y, b[1], b[2]) < 90 ? 6 : 3.5, .4); } }   // 鬼魂看得到整張地圖，就不跟著晃了
       dyn.push({ y: b[2], k: 5, x: b[1], c: colorIdx(b[0]), t0: st.t });
@@ -5576,11 +5657,12 @@ function render(now) {
     for (let i = 0; i < G.ro.length; i++) {
       const id = G.ro[i], dead = G.dd[i] === '1' || G.lf[i] === '1';
       if (G.lf[i] === '1') continue;
-      if (id === ME.id) { if (sewerIn) continue; dyn.push({ y: ME.y, k: 4, x: ME.x, c: ME.c, f: ME.f, m: ME.m, ph: mePhase, ghost: dead, n: ME.n, me: true, wolf: my.wolf, id: 'me', zz: my.stun > 0 }); continue; }
+      if (id === ME.id) { if (sewerIn) continue; dyn.push({ y: ME.y, k: 4, x: ME.x, c: ME.c, f: ME.f, m: ME.m, ph: mePhase, ghost: dead, n: ME.n, me: true, wolf: my.wolf, id: 'me', zz: my.stun > 0, tf: tfMarked(i) }); continue; }
       const p = players.get(id); if (!p || inSewer(p)) continue;
+      if (i === G.sp && tfFake()) continue;   // 狼人看不到還沒揭曉的雙面人
       if (dead && !ghostView) continue;
       if (!ghostView && (dist(ME.x, ME.y, p.rx, p.ry) > vis || !canSee(ME.x, ME.y, p.rx, p.ry))) continue;
-      dyn.push({ y: p.ry, k: 4, x: p.rx, c: p.c, f: p.f, m: p.m, ph: p.phase, ghost: dead, n: p.n, wolf: my.wolf && G.wf[i] === '1', id, zz: p.zz && !dead });
+      dyn.push({ y: p.ry, k: 4, x: p.rx, c: p.c, f: p.f, m: p.m, ph: p.phase, ghost: dead, n: p.n, wolf: my.wolf && G.wf[i] === '1', id, zz: p.zz && !dead, tf: tfMarked(i) });
     }
     if (METRO && trainState(now) === 2) for (let k = 0; k < TRK.length; k++) dyn.push({ y: (TRK[k].y1 + 1) * TILE - 8, k: 8, tk: k });   // 第 56 版：列車
   } else if (inRoom) {
@@ -5604,6 +5686,7 @@ function render(now) {
     drawVillager(g, d.x, d.y, COLORS[d.c][1], { f: d.f, phase: d.ph, moving: d.m, ghost: d.ghost, id: d.id });
     if (d.n) drawName(g, d.x, d.y - charTop(d.c) - (d.ghost ? 9 : 0), d.n, d.wolf ? '#f08a7e' : d.me ? '#f2b84b' : '#ece5d3');
     if (d.zz) drawStun(g, d.x, d.y - charTop(d.c) - 14, now);
+    if (d.tf) drawCrackMask(g, d.x, d.y - charTop(d.c) - (d.n ? 21 : 8), 1, now);   // 雙面人掉了一命
   };
   for (let i = 0; i < STATIC.length; i++) {
     const s = STATIC[i];
@@ -5753,6 +5836,7 @@ function render(now) {
       }
     }
   }
+  if (playing) tfArrowDraw(g, now, cx, cy);   // 第 61 版：狼人指向雙面人的箭頭
 }
 
 let lastT = 0, uiAcc = 0;
@@ -5796,7 +5880,8 @@ const ROLE_FX = [
   { n: '檢驗官', c: '#7ed4e6', glow: 'rgba(110,200,225,.75)', flash: 'rgba(150,220,235,', line: '你有一次機會，查出一個人的真面目', tag: '靠近一位玩家・檢驗身分', ac: '#7ed4e6', bg: ['#16495a', '#0b2530'], ink: '#06212a' },
   { n: '白癡', c: '#e3a6ff', glow: 'rgba(200,130,240,.75)', flash: 'rgba(215,170,245,', line: '讓大家把你投出去，你就贏了', tag: '被投票放逐・就是你贏', ac: '#e3a6ff', bg: ['#4a2a66', '#231233'], ink: '#220c33' },
   { n: '義警', c: '#f0cf7a', glow: 'rgba(240,200,110,.75)', flash: 'rgba(245,220,150,', line: '你有一次處決的權力，別殺錯人', tag: '處決狼人・村民獲勝', ac: '#f0cf7a', bg: ['#3a4660', '#151c2c'], ink: '#1c1606' },
-  { n: '獵人', c: '#e6a85c', glow: 'rgba(230,168,92,.75)', flash: 'rgba(240,190,120,', line: '被投票放逐時，你可以開槍帶走一個人', tag: '被放逐時・開槍帶走一人', ac: '#e6a85c', bg: ['#4a3420', '#1e140a'], ink: '#1e1206' }
+  { n: '獵人', c: '#e6a85c', glow: 'rgba(230,168,92,.75)', flash: 'rgba(240,190,120,', line: '被投票放逐時，你可以開槍帶走一個人', tag: '被放逐時・開槍帶走一人', ac: '#e6a85c', bg: ['#4a3420', '#1e140a'], ink: '#1e1206' },
+  { n: '雙面人', c: '#f0a45c', glow: 'rgba(214,120,170,.78)', flash: 'rgba(236,160,150,', line: '你有兩條命，狼人的第一刀殺不死你', tag: '兩條命・第一刀殺不死你', ac: '#f0a45c', bg: ['#4a2450', '#1c0e24'], ink: '#200c24' }   // 第 61 版
 ];
 const smooth = x => x <= 0 ? 0 : x >= 1 ? 1 : x * x * (3 - 2 * x);
 const lerp = (a, b, p) => a + (b - a) * p;
@@ -5809,7 +5894,7 @@ function startIntro() {
   const mates = [];
   if (my.wolf && G) for (let i = 0; i < G.ro.length; i++) if (G.wf[i] === '1' && i !== my.idx) mates.push(nameIdx(i));
   intro.mates = mates.join('、');
-  sfx('whoosh', { at: INTRO_PRE - .5, vol: .35 }); sfx(['r_vill', 'r_wolf', 'r_seer', 'r_fool', 'r_vigil', 'r_hunt'][intro.role] || 'r_vill', { at: INTRO_PRE - .05 });   // 第 45 版：每種身分揭曉時有自己的音效
+  sfx('whoosh', { at: INTRO_PRE - .5, vol: .35 }); sfx(['r_vill', 'r_wolf', 'r_seer', 'r_fool', 'r_vigil', 'r_hunt', 'r_twin'][intro.role] || 'r_vill', { at: INTRO_PRE - .05 });   // 第 45 版：每種身分揭曉時有自己的音效
   $('introSr').textContent = '你是' + ROLE_FX[intro.role].n + '。' + ROLE_FX[intro.role].line + '。' + (my.wolf && mates.length ? '你的同伴：' + intro.mates + '。' : '');
 }
 
@@ -5865,7 +5950,7 @@ function hexMix(a, b, p) {
 }
 // ===== 身分卡（原創）：拱形窗裡是角色的半身像 =====
 const cardTex = [];
-const CARD_BG = [['#f2a654', '#f8e3a8', '#fff3c4', '#6f9a4e'], ['#2c0a10', '#a8281e', '#f4a27a', '#1a0608'], ['#0d2a4a', '#2a7f96', '#dff6ff', '#0b2a36'], ['#5a2f8a', '#f0a6c8', '#fff0fa', '#3f6a4a'], ['#141b30', '#566a94', '#e8eefc', '#0d1220'], ['#2a1c10', '#8a5a2c', '#f4dcb0', '#1a1008']];
+const CARD_BG = [['#f2a654', '#f8e3a8', '#fff3c4', '#6f9a4e'], ['#2c0a10', '#a8281e', '#f4a27a', '#1a0608'], ['#0d2a4a', '#2a7f96', '#dff6ff', '#0b2a36'], ['#5a2f8a', '#f0a6c8', '#fff0fa', '#3f6a4a'], ['#141b30', '#566a94', '#e8eefc', '#0d1220'], ['#2a1c10', '#8a5a2c', '#f4dcb0', '#1a1008'], ['#3a1c44', '#b0507a', '#f8d8b0', '#1c0e24']];
 // 使用者提供的身分牌圖：有圖的身分直接畫那張圖（不加任何東西），沒有圖的身分由下面的程式畫
 const ROLE_CARD = {};
 for (const k in ROLE_CARD_DEF) { const o = { ok: false, im: new Image(), w: ROLE_CARD_DEF[k].w, h: ROLE_CARD_DEF[k].h }; o.im.onload = () => { o.ok = true; onCardArtLoad(); }; o.im.src = ROLE_CARD_DEF[k].d; ROLE_CARD[k] = o; }
@@ -6001,7 +6086,9 @@ const ROLE_SCENE = {};
 for (const k in ROLE_SCENE_DEF) { const D = ROLE_SCENE_DEF[k], o = { ok: false, im: new Image(), w: D.w, h: D.h }; o.im.onload = () => { o.ok = true; }; o.im.src = D.d; ROLE_SCENE[k] = o; }
 function sceneArt(role) { const o = ROLE_SCENE[role | 0]; return o && o.ok ? o : null; }
 // 全螢幕顯示時，iPhone 比卡片寬，上下一定會裁掉一點：卡片左下角的名牌一定要完整，所以從下面量起
-const SCENE_KEEP_BOTTOM = [880, 861, 873, 886, 883, 875].map(y => y / 941);   // 每張卡片名牌（含花邊）的底在圖的這個高度：村民、狼人、檢驗官、白癡、義警、獵人
+const SCENE_KEEP_BOTTOM = [880, 861, 873, 886, 883, 875, 812].map(y => y / 941);   // 每張卡片名牌（含花邊）的底在圖的這個高度：村民、狼人、檢驗官、白癡、義警、獵人；雙面人的卡片沒有名牌，改成盡量留住上面的帽子和月亮
+// 第 61 版：雙面人的橫卡上沒有寫名字，所以名字由程式寫；說明字放在月亮下面比較暗的地方
+const SCENE_OWN_NAME = { 6: 1 }, SCENE_TEXT_AT = { 6: [.72, .62] };
 // 說明字的位置：卡片右邊、人物旁邊的空處（畫面寬、高的比例）
 const SCENE_TEXT_X = .63, SCENE_TEXT_Y = .4;
 // 瀏海和圓角的安全範圍（左右各多少）：用一個看不見的元素量一次，每秒最多更新一次
@@ -6064,16 +6151,18 @@ function drawIntro(now) {
   }
   // --- 右邊的白字介紹：說明分成兩行（一個字一個字出現）、狼人的同伴、遊戲即將開始。身分的名字卡片上已經有，不再寫一次 ---
   if (shown && art) {
-    const cx = clamp(W * SCENE_TEXT_X, sl + 140 * u, W - sr - 140 * u);
-    const bpx = Math.round(27 * u), spx = Math.round(15 * u);
+    const at = SCENE_TEXT_AT[role] || [SCENE_TEXT_X, SCENE_TEXT_Y], own = SCENE_OWN_NAME[role] ? 1 : 0;
+    const cx = clamp(W * at[0], sl + 140 * u, W - sr - 140 * u);
+    const bpx = Math.round(27 * u), spx = Math.round(15 * u), npx = Math.round(46 * u);
     const lines = RF.line.split('，');
-    const extra = wolf && intro.mates ? 1 : 0, blockH = lines.length * bpx * 1.5 + extra * spx * 2.1;
-    const cy0 = Hh * SCENE_TEXT_Y;
+    const extra = wolf && intro.mates ? 1 : 0, blockH = lines.length * bpx * 1.5 + extra * spx * 2.1 + own * npx * 1.45;
+    const cy0 = Hh * at[1];
     let y = cy0 - blockH / 2 + bpx * .75;
     // 字後面墊一層很淡的暗影，背景再亮也看得清楚
     const ba = smooth((ts - .3) / .6);
     if (ba > 0) { g.font = '700 ' + bpx + 'px ' + FONT_DISP; const tw = Math.max(...lines.map(l => g.measureText(l).width)), R = tw * .8 + 30 * u, gr = g.createRadialGradient(cx, cy0, 0, cx, cy0, R); gr.addColorStop(0, 'rgba(4,6,12,' + (.6 * ba).toFixed(3) + ')'); gr.addColorStop(.55, 'rgba(4,6,12,' + (.36 * ba).toFixed(3) + ')'); gr.addColorStop(1, 'rgba(4,6,12,0)'); g.save(); g.translate(cx, cy0); g.scale(1, Math.min(1, (blockH + 50 * u) / R)); g.translate(-cx, -cy0); g.fillStyle = gr; g.fillRect(cx - R, cy0 - R, R * 2, R * 2); g.restore(); }
     const txt = (s, yy, px, font, a, col) => { if (a <= 0 || !s) return; g.save(); g.globalAlpha = a; g.font = font + ' ' + px + 'px ' + (font === '700' ? FONT_DISP : FONT_BODY); g.textAlign = 'center'; g.textBaseline = 'middle'; g.lineJoin = 'round'; g.shadowColor = 'rgba(0,0,0,.9)'; g.shadowBlur = px * .5 * d; g.strokeStyle = 'rgba(6,8,14,.72)'; g.lineWidth = Math.max(2, px * .15); g.strokeText(s, cx, yy); g.shadowBlur = 0; g.fillStyle = col || '#ffffff'; g.fillText(s, cx, yy); g.restore(); };
+    if (own) { y += npx * .35; txt(RF.n, y, npx, '700', smooth((ts - .25) / .4), RF.c); y += npx * 1.1; }   // 卡片上沒有名字的身分：先寫名字
     let left = Math.floor((ts - .7) / .07);
     for (const ln of lines) { if (left > 0) txt(ln.slice(0, left), y, bpx, '700', 1); left -= ln.length; y += bpx * 1.5; }
     if (extra) { y += spx * .35; txt('你的同伴：' + intro.mates, y, spx, '600', smooth((ts - 2.6) / .5), '#f2f2f2'); y += spx * 1.75; }
@@ -6480,7 +6569,7 @@ function drawPinwheel(g, x, y, r, a) {
 // 音量都用 Web Audio 的 GainNode 控制（iPhone 的 <audio> 不能調音量）
 const SND_VOL = { music: .30, meet: .22, sfx: .58 };  // 背景音樂適中、開會時再小一點。音效那一路有壓縮限幅（會自動補一點音量），第 41 版整體比上一版大約 +3 dB
 const SND_XF = 1.6;                                   // 音樂循環接回開頭時，前後交疊淡化幾秒
-const SND_GAIN = { click: .3, ok: .5, done: .6, win: .8, lose: .8, r_vill: .8, r_wolf: .95, r_seer: .8, r_fool: .85, r_vigil: .9, r_hunt: .9, report: .85, wrong: .85, bell: .85, thud: .8, slash: .9, vote: .6, gong: .65,
+const SND_GAIN = { click: .3, ok: .5, done: .6, win: .8, lose: .8, r_vill: .8, r_wolf: .95, r_seer: .8, r_fool: .85, r_vigil: .9, r_hunt: .9, r_twin: .9, report: .85, wrong: .85, bell: .85, thud: .8, slash: .9, vote: .6, gong: .65,
   blow: .7, whoosh: .55, roar: 1, growl: .8, magic: .7, altar: .85, fire: .6, gun: 1, empty: .7, tense: 1, hit0: .8, hit1: .8, hit2: .8, hit3: .8, door: .9, glassbreak: .8, creak: .85, gasp: .8, jingle: .7, dawn: .8, tide: .8, crackle: .75, cowbell: .8, herd: .8, moo: .7, fuse: .75, fogcome: .75, toll: .85, hedge: .7 };
 const Snd = { ctx: null, out: null, mus: null, lp: null, fx: null, buf: {}, wait: {}, opt: { m: 1, s: 1 }, cur: null, want: null, pos: {}, on: false, log: [], lit: 0, hi: 0 };
 const HOME_N = Object.keys(SND_FILES).filter(k => /^h\d$/.test(k)).length;   // 第 45 版：主畫面的歌有幾首（輪流放）
@@ -7200,11 +7289,11 @@ function uiTick(now) {
 
 // ----- 大廳 -----
 // g = 放在哪一組：base 直接顯示在大廳；wolf、task 各有一個按鈕打開
-const MODES = ['經典', '檢驗官', '白癡', '義警', '獵人'];
-const modeNote = gm => ['只有狼人和村民，最原本的玩法。', '有一位村民是檢驗官，整局可以檢驗一位靠近的玩家，查出他是不是狼人（只能用一次）。', '有一位村民是白癡，自成一方。他被投票放逐就由他獲勝；場上只剩 ' + G.st.fn + ' 個人時，他會變回普通村民，工作自動完成。', '有一位村民是義警，整局可以處決一位玩家。處決到狼人，村民立刻獲勝；處決錯人，對方沒事，義警自己出局。', '有一位村民是獵人。他被投票放逐時，可以選擇開槍帶走場上一個人，也可以不開槍。被帶走的人不公布身分。'][gm] || '';
-const ROLE_NOTE = ['', '檢驗官一局只能檢驗一次，要走到對方身邊才檢驗得到。', '白癡被投票放逐就獲勝。場上的人數降到這個數字時，他會變回普通村民。', '義警一局只能處決一次，要走到對方身邊才處決得到。處決錯人的話，義警自己會出局。', '獵人被投票放逐後，有這麼多秒可以決定要不要開槍。時間到還沒決定就當作不開槍。'];
+const MODES = ['經典', '檢驗官', '白癡', '義警', '獵人', '雙面人'];
+const modeNote = gm => ['只有狼人和村民，最原本的玩法。', '有一位村民是檢驗官，整局可以檢驗一位靠近的玩家，查出他是不是狼人（只能用一次）。', '有一位村民是白癡，自成一方。他被投票放逐就由他獲勝；場上只剩 ' + G.st.fn + ' 個人時，他會變回普通村民，工作自動完成。', '有一位村民是義警，整局可以處決一位玩家。處決到狼人，村民立刻獲勝；處決錯人，對方沒事，義警自己出局。', '有一位村民是獵人。他被投票放逐時，可以選擇開槍帶走場上一個人，也可以不開槍。被帶走的人不公布身分。', '有一位村民是雙面人，有兩條命。狼人第一次襲擊他，只有狼人以為他死了，他自己和其他人都不會發現；下一次開會才揭曉他掉了一命，之後狼人會有箭頭指著他。被投票放逐一樣直接出局。'][gm] || '';
+const ROLE_NOTE = ['', '檢驗官一局只能檢驗一次，要走到對方身邊才檢驗得到。', '白癡被投票放逐就獲勝。場上的人數降到這個數字時，他會變回普通村民。', '義警一局只能處決一次，要走到對方身邊才處決得到。處決錯人的話，義警自己會出局。', '獵人被投票放逐後，有這麼多秒可以決定要不要開槍。時間到還沒決定就當作不開槍。', ''];
 const RNG = ['短', '中', '長'];
-const ROLE_NAME = ['村民', '狼人', '檢驗官', '白癡', '義警', '獵人'];
+const ROLE_NAME = ['村民', '狼人', '檢驗官', '白癡', '義警', '獵人', '雙面人'];
 const SETTINGS = [
   { g: 'role', m: 1, k: 'ir', label: '檢驗範圍', opts: [0, 1, 2], fmt: v => RNG[v] || '中' },
   { g: 'role', m: 2, k: 'fn', label: '剩幾人時變回村民', opts: [3, 4], fmt: v => v + ' 人' },
@@ -7318,7 +7407,7 @@ function renderLobby(mode) {
     if (showSet) {
       const v = k => { const d = SETTINGS.find(x => x.k === k); return d.fmt(settingVal(k)); };
       $('sumMode').textContent = MODES[G.st.gm] || '經典';
-      { const gm = G.st.gm, rb = $('btnSetRole'); rb.hidden = !gm; if (gm) { $('roleSetLbl').textContent = MODES[gm] + '設定'; $('sumRole').textContent = gm === 1 ? '檢驗範圍 ' + RNG[G.st.ir] : gm === 2 ? '剩 ' + G.st.fn + ' 人時變回村民' : gm === 4 ? '開槍考慮 ' + G.st.hs + ' 秒' : '處決範圍 ' + RNG[G.st.xr]; } }
+      { const gm = G.st.gm, rb = $('btnSetRole'); rb.hidden = !gm || gm === 5; if (gm && gm !== 5) { $('roleSetLbl').textContent = MODES[gm] + '設定'; $('sumRole').textContent = gm === 1 ? '檢驗範圍 ' + RNG[G.st.ir] : gm === 2 ? '剩 ' + G.st.fn + ' 人時變回村民' : gm === 4 ? '開槍考慮 ' + G.st.hs + ' 秒' : '處決範圍 ' + RNG[G.st.xr]; } }
       $('sumWolf').textContent = '襲擊 ' + v('kc') + '・吹燈 ' + v('bl') + '・祭壇 ' + v('an');
       $('sumTask').textContent = '速度 ' + v('sp') + '・長 ' + settingVal('tl') + '・短 ' + settingVal('ts');
     }
@@ -7369,7 +7458,7 @@ function closeCard() { cardOpen = false; document.body.classList.remove('card-op
 function renderHud() {
   if (!G || my.idx < 0) return;
   const chip = $('roleChip');
-  const role = (my.wolf ? '狼人' : ROLE_NAME[my.role] || '村民') + (my.dead ? '・鬼魂' : '');
+  const role = (my.wolf ? '狼人' : ROLE_NAME[my.role] || '村民') + (my.dead ? '・鬼魂' : my.role === 6 ? (G.tf.s >= 2 ? '・剩一條命' : '・兩條命') : '');   // 雙面人：揭曉之前自己也不知道被刀過
   if (changed('role', role)) { chip.textContent = role; chip.className = 'chip' + (my.dead ? ' ghost' : my.wolf ? ' wolf' : my.role ? ' sp' : ''); }
   const mask = ME.td[1];
   const ts = my.wolf + '|' + (G.ta[my.idx] || '') + '|' + curMap + '|' + mask + '|' + G.gn + '|' + my.dead + '|' + G.st.ga;
@@ -7464,13 +7553,14 @@ function closeTask() {
   taskState = null; document.body.classList.remove('task-open');
 }
 // 第 49 版：生死簿——每個人的頭像；死掉（或離開）的人頭像上打一個紅色的叉。開著的時候有人死了會馬上更新
-function ledgerSig() { return G ? G.gn + '|' + G.dd + '|' + G.lf + '|' + G.ro.length : ''; }
+function ledgerSig() { return G ? G.gn + '|' + G.dd + '|' + G.lf + '|' + G.ro.length + '|' + (G.st.gm === 5 ? G.tf.s + (my.wolf ? 'w' : '') : '') : ''; }
 function ledgerFill() {
   const box = $('taskBox'); box.textContent = '';
   const gridEl = el('div', 'ledger-grid'); let dead = 0;
   for (let i = 0; i < G.ro.length; i++) {
-    const gone = G.dd[i] === '1' || G.lf[i] === '1'; if (gone) dead++;
+    const gone = vGone(i); if (gone) dead++;   // 第 61 版：狼人的生死簿上，還沒揭曉的雙面人也打叉
     const c = el('div', 'ledger-cell' + (gone ? ' dead' : '') + (G.ro[i] === ME.id ? ' me' : ''));
+    if (tfMarked(i)) c.appendChild(crackMaskIcon());
     const av = el('div', 'ledger-av'); av.appendChild(avatarCanvas(colorIdx(i), false)); c.appendChild(av);
     c.appendChild(el('b', '', nameIdx(i)));
     gridEl.appendChild(c);
@@ -7746,17 +7836,19 @@ function doNoShoot() { if (!G || G.ph !== 6 || !G.hu || G.hu.t !== -2 || my.idx 
 function myVoted() { return G && G.mt && Array.isArray(ME.v) && ME.v[0] === G.mt.no; }
 function renderMeet() {
   const mt = G.mt; if (!mt) return;
-  const head = mt.no + '|' + mt.by + '|' + mt.body;
+  const head = mt.no + '|' + mt.by + '|' + mt.body + '|' + mt.fk + mt.tf;
   if (changed('mhead', head)) {
-    $('meetTitle').textContent = mt.body >= 0 ? '有人倒下了' : '緊急會議';
-    $('meetWhy').textContent = mt.by === -2 ? '義警處決了 ' + nameIdx(mt.body) + '，但他不是狼人。' : mt.body >= 0 ? nameIdx(mt.by) + ' 發現 ' + nameIdx(mt.body) + ' 倒在地上。' : nameIdx(mt.by) + ' 敲響了村鐘。';
+    $('meetTitle').textContent = mt.fk ? '他還活著！' : mt.body >= 0 ? '有人倒下了' : '緊急會議';
+    $('meetWhy').textContent = (mt.fk ? nameIdx(mt.by) + ' 說 ' + nameIdx(mt.body) + ' 倒在地上，可是 ' + nameIdx(mt.body) + ' 明明還活著。' : mt.by === -2 ? '義警處決了 ' + nameIdx(mt.body) + '，但他不是狼人。' : mt.body >= 0 ? nameIdx(mt.by) + ' 發現 ' + nameIdx(mt.body) + ' 倒在地上。' : nameIdx(mt.by) + ' 敲響了村鐘。')
+      + (mt.tf && G.sp >= 0 ? ' 雙面人 ' + nameIdx(G.sp) + ' 被狼人襲擊過，掉了一命。' : '');   // 第 61 版：雙面人在這場會議揭曉
+    if (mt.tf) { sfx('glassbreak', { vol: .55, at: .5 }); sfx('r_twin', { vol: .6, at: .6 }); }
   }
   $('meetTimer').textContent = Math.max(0, G.rem); $('meetTimer').classList.toggle('hurry', G.rem <= 10 && G.rem > 0);
   // 全村的工作進度只在開會時公布
   const pg = G.pg || [0, 0];
   if (changed('pg', pg[0] + '/' + pg[1])) { $('pgBar').style.width = (pg[1] ? Math.round(pg[0] / pg[1] * 100) : 0) + '%'; $('pgTxt').textContent = '全村工作進度 ' + pg[0] + ' / ' + pg[1]; }
   const voted = myVoted();
-  let s = mt.no + '|' + meetSel + '|' + voted + '|' + my.dead + '|';
+  let s = mt.no + '|' + meetSel + '|' + voted + '|' + my.dead + '|' + (G.st.gm === 5 ? G.tf.s : '') + '|';
   for (let i = 0; i < G.ro.length; i++) { const p = uiP(G.ro[i]); s += (G.dd[i] === '1' || G.lf[i] === '1' ? 'x' : 'a') + (p && Array.isArray(p.v) && p.v[0] === mt.no ? 'v' : '-') + (p ? p.n + p.c : '?') + ';'; }
   if (changed('meet', s)) {
     const gridEl = $('meetGrid'); gridEl.textContent = '';
@@ -7764,6 +7856,7 @@ function renderMeet() {
       const id = G.ro[i], p = uiP(id), dead = G.dd[i] === '1' || G.lf[i] === '1';
       const b = el('button', 'card' + (dead ? ' dead' : '') + (meetSel === id ? ' sel' : '') + (my.wolf && G.wf[i] === '1' && i !== my.idx ? ' mate' : ''));
       b.type = 'button'; b.appendChild(avatarCanvas(p ? p.c : 11, dead)); b.appendChild(el('span', 'nm', p ? p.n : '離線的人'));
+      if (tfMarked(i)) { b.classList.add('tf'); b.appendChild(crackMaskIcon()); }   // 雙面人掉了一命
       const hv = p && Array.isArray(p.v) && p.v[0] === mt.no;
       b.appendChild(el('span', 'tg' + (hv && !dead ? ' v' : ''), dead ? '出局' : id === ME.id ? (hv ? '你・已投' : '你') : hv ? '已投' : ''));
       b.disabled = dead || id === ME.id || voted || my.dead;
@@ -8026,7 +8119,7 @@ function main() {
   let hl = performance.now();
   setInterval(() => { const n = performance.now(), dt = Math.min(.3, (n - hl) / 1000); hl = n; if (isHost && inRoom && !window.__lwManual) { try { syncFromNet(n); hostTick(dt); } catch (e) { if (window.console) console.error(e); } } }, 100);
   requestAnimationFrame(frame);
-  window.__lw = { Snd, SND_FILES, get OUTSIDE() { return OUTSIDE; }, get OBJECTS() { return OBJECTS; }, TREES, ART_BLD, ART_PROPS, artGeom, BELL, COMIC, hostHunt, sendHunt, get EJ() { return { EJ_PANEL, EJ_STAND, EJ_VERD, EJ_BLACK, EJ_BOOM, EJ_BOARD, EJ_LEN, NONE_OUT, NONE_BOARD, NONE_LEN }; }, homeBg, sceneArt, SPR_ANI, killFx, startKillAnim, aniOf, drawCharFallen, ARTI, STATIC, drawTree, drawBuilding, get WORLD_W() { return WORLD_W; }, get WORLD_H() { return WORLD_H; }, VFX, fxBlood, fxTaskDone, fxSpark, fxDust, camShake, fxFlash, cardArt, cardW, openCard, closeCard, get cardOpen() { return cardOpen; }, SPR, NCHAR, turnChar, sprFlip, drawChar, drawCharFit, drawCharFallen, COLORS, get BUILDINGS() { return BUILDINGS; }, drawBuilding, BK, loadMap, buildGround,
+  window.__lw = { closeTask, tfFake, vGone, vBodies, tfMarked, tfHidden: i => tfHidden(i), ROLE_FX, ROLE_CARD, ROLE_SCENE, doKill, doReport, Snd, SND_FILES, get OUTSIDE() { return OUTSIDE; }, get OBJECTS() { return OBJECTS; }, TREES, ART_BLD, ART_PROPS, artGeom, BELL, COMIC, hostHunt, sendHunt, get EJ() { return { EJ_PANEL, EJ_STAND, EJ_VERD, EJ_BLACK, EJ_BOOM, EJ_BOARD, EJ_LEN, NONE_OUT, NONE_BOARD, NONE_LEN }; }, homeBg, sceneArt, SPR_ANI, killFx, startKillAnim, aniOf, drawCharFallen, ARTI, STATIC, drawTree, drawBuilding, get WORLD_W() { return WORLD_W; }, get WORLD_H() { return WORLD_H; }, VFX, fxBlood, fxTaskDone, fxSpark, fxDust, camShake, fxFlash, cardArt, cardW, openCard, closeCard, get cardOpen() { return cardOpen; }, SPR, NCHAR, turnChar, sprFlip, drawChar, drawCharFit, drawCharFallen, COLORS, get BUILDINGS() { return BUILDINGS; }, drawBuilding, BK, loadMap, buildGround,
     get G() { return G; }, get H() { return H; }, ME, my, players, get BOTS() { return BOTS; }, Net, get STATIONS() { return STATIONS; }, SPAWNS, grid, MAPS, loadMap, applyMap, canSee, paintMiniMap, tget, boxFree, get curMap() { return curMap; },
     findPath, TASK_SKIN, TG, TASK_SPR, tSprite, get CUT() { return CUT; }, get METRO() { return METRO; }, get EVK() { return EVK; }, EV_DEF, botGoTile, HERD, HERD_LEN, HERD_V, herdSpan, herdDir, herdBlocks, herdPush, herdAhead, get DYN_LIST() { return DYN_LIST; }, get dynMask() { return dynMask; }, evState, evLevel, evVision, dynClosed, smokeBlocks, BANG_SPOTS, get evT0() { return evT0; }, get MT() { return MT; }, mch, TRK, trainState, trainSpan, trainHitAt, trainLen, trainDur, escDir, get trainT0() { return trainT0; }, set trainT0(v) { trainT0 = v; }, get stun() { return my.stun; }, TRAIN_EVERY, TRAIN_WARN, TRAIN_STUN, get SEWERS() { return SEWERS; }, get LEDGER() { return LEDGER; }, sewerEnter, sewerGo, sewerExit, get sewerIn() { return sewerIn; }, openLedger, inSewer, hostSewer, computeCtx, solidAt, boxFree, moveCollide, input, updateMe, get LAMPS() { return LAMPS; }, get SUB() { return SUB; }, startPractice, createRoom, joinRoom, invite, inviteLink, intro, startIntro, hostStart, hostKill, hostReport, hostTick, setBotCount, castVote, sendChat, finishTask, openTask, leaveRoom, uiMode, parseTasks, dealTasks, taskCur, taskMarks, get CHAINS() { return CHAINS; }, get taskState() { return taskState; }, get hs() { return hs; }, get BUILDINGS() { return BUILDINGS; }, get OCC() { return OCC; }, BUILD, get view() { return view; }, get CANDLE() { return CANDLE; }, hostBlow, hostRelight, doBlow, canBlow, killRangeOf, guideMarks, openCandle, killFx, startKillAnim, COLORS, hostResolve, hostInspect, hostExecute, hostFool, hostPet, showSlash, DOG, DOG_ART, dogPettable, bldAt, occFor, get STATIC() { return STATIC; }, art: { drawObject, drawChar, drawCharFallen, drawFallen, avatarCanvas, drawVillager, wolfShape, wolfEyes, lantern, drawTree, drawDog, circ, ell }, openAltar, finishAltar, hostAltarPlace, hostAltarStart, hostAltarSolve, doAltarPlace, doAltarStart, altarWhyNot,
     get ctx() { return ctxA; }, get inRoom() { return inRoom; }, get isHost() { return isHost; }, get code() { return code; }
