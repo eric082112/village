@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>月光光心慌慌</title>
 <meta name="description" content="和朋友連線玩的狼人村：做完村裡的工作，找出混在裡面的狼人。">
-<meta name="lw-build" content="61">
+<meta name="lw-build" content="62">
 <meta name="theme-color" content="#0b151d">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -729,6 +729,25 @@ body.task-open #task .panel{max-width:500px}
 .card canvas.tfm{width:18px;height:20px;margin-left:-2px}
 .card.tf{border-color:#b0507a}
 .ledger-cell canvas.tfm{position:absolute;top:-5px;right:-3px;width:20px;height:22px;z-index:2;filter:drop-shadow(0 1px 2px rgba(0,0,0,.6))}
+
+/* 第 62 版　結算戰報：結束畫面上再疊一層，照時間列出這一局發生的事 */
+.report{position:fixed;inset:0;z-index:60;display:none;align-items:center;justify-content:center;background:rgba(6,11,18,.82);padding:calc(10px + env(safe-area-inset-top,0px)) calc(14px + env(safe-area-inset-right,0px)) calc(10px + env(safe-area-inset-bottom,0px)) calc(14px + env(safe-area-inset-left,0px))}
+body[data-mode="end"].rep-open .report{display:flex;animation:veilIn .26s ease-out both}
+.report .panel{width:100%;max-width:640px;max-height:100%;padding:14px 16px;gap:8px;animation:sheetUp .3s var(--ease-out) both}
+.report .sheet-head{align-items:center}
+.report .sheet-head span{margin-right:auto}
+.rep-x{flex:none;width:40px;height:40px;border-radius:50%;border:1px solid #35526a;background:#17293a;color:var(--ink);font-size:17px;line-height:1}
+.rep-list{list-style:none;margin:0;padding:0 2px 0 0;overflow-y:auto;-webkit-overflow-scrolling:touch;display:flex;flex-direction:column;gap:3px;font-size:14px;min-height:0}
+.rep-list li{display:grid;grid-template-columns:44px 24px 1fr;align-items:baseline;gap:4px;padding:5px 7px;border-radius:8px;background:rgba(255,255,255,.03)}
+.rep-list li.k{background:rgba(220,90,77,.11)}
+.rep-list li.v{background:rgba(242,184,75,.09)}
+.rep-list li.fin{background:rgba(127,184,87,.13);font-weight:700}
+.rep-list time{font-size:12px;color:var(--ink-dim);font-variant-numeric:tabular-nums}
+.rep-list .ic{text-align:center}
+.rep-list b{font-weight:700}
+.rep-list b i{font-style:normal;font-size:11px;margin-left:2px;padding:0 4px;border-radius:5px;background:rgba(220,90,77,.2);color:var(--wolf)}
+.rep-list small{display:block;font-size:12px;color:var(--ink-dim);margin-top:2px;line-height:1.5}
+.rep-list li.none{display:block;text-align:center;color:var(--ink-dim)}
 [hidden]{display:none !important}
 </style>
 </head>
@@ -910,11 +929,19 @@ body.task-open #task .panel{max-width:500px}
     <ul id="endRoster" class="roster"></ul>
     </div>
     <div class="end-col">
+    <button id="btnWarLog" class="btn" type="button">看戰報</button>
     <button id="btnAgain" class="btn primary" type="button">再玩一局</button>
     <button id="btnToLobby" class="btn" type="button">回到大廳</button>
     <p id="endWait" class="note">等房主開始下一局。</p>
     <button id="btnEndLeave" class="btn" type="button">離開房間</button>
     </div>
+  </div>
+</section>
+
+<section id="report" class="report">
+  <div class="panel">
+    <div class="sheet-head"><h3>戰報</h3><span id="repSum"></span><button id="btnRepClose" class="rep-x" type="button" aria-label="關閉">✕</button></div>
+    <ol id="repList" class="rep-list"></ol>
   </div>
 </section>
 
@@ -4445,6 +4472,19 @@ function pubOf(id) { return posOf(id); }
 function nameOfId(id) { const p = pubOf(id); return p ? p.n : '某人'; }
 
 // ===== 房主：遊戲規則 =====
+// 第 62 版　結算戰報：房主把這一局發生的事記下來，遊戲結束才一次公布（H.lg），進行中不會外流
+// 每筆是 [種類, 開始後第幾秒, ...]：k 襲擊、f 雙面人挨了第一刀、m 開會、v 投票結果、h 獵人、i 檢驗、x 處決、a 啟動祭壇、l 離線
+function logEv(k, ...a) { if (hs && hs.log && hs.log.length < 150) hs.log.push([k, Math.max(0, Math.round((performance.now() - hs.t0) / 1000))].concat(a)); }
+function hostReportCard() {
+  if (!hs.tl || hs.tlGn !== H.gn) { hs.tl = H.ta.map(parseTasks); hs.tlGn = H.gn; }
+  const tk = H.ro.map((id, i) => {
+    if (H.wf[i] === '1') return [0, 0];
+    const p = pubOf(id), td = p && p.td, mask = (Array.isArray(td) && td[0] === H.gn ? td[1] : 0) | (H.ga && H.ga[i]); let d = 0, t = 0;
+    for (const x of hs.tl[i] || []) { t++; const full = ((1 << x.steps.length) - 1) << x.off; if ((mask & full) === full) d++; }
+    return [d, t];
+  });
+  return { e: hs.log || [], n: hs.nm || [], c: hs.cl || [], tk, t: Math.max(0, Math.round((performance.now() - hs.t0) / 1000)) };
+}
 function hostCreate() {
   H = { gn: 0, ph: 0, st: { w: 1, gm: 0, ir: 1, fn: 3, xr: 1, hs: 15, sp: 100, tl: 2, ts: 3, ga: 8, kc: 40, kr: 1, bl: 45, an: 3, at: 40, mt: 90, map: Math.max(0, curMap) }, sp: -1, su: 0, it: -1, tf: { s: 0, x: 0, y: 0, k: -1 }, ro: [], wf: '', dd: '', lf: '', ta: [], ga: [], lo: 0, al: { a: [], on: 0, rem: 0, lk: 1 }, bd: [], mt: null, rs: null, pg: [0, 0], win: 0, why: 0, rem: 0 };
   hs = { lastSw: {}, lastK: {}, lastR: {}, lastB: {}, lastF: {}, lastA: {}, em: {}, meetNo: 0, acc: 0, absent: {}, alCd: 0 };
@@ -4473,7 +4513,7 @@ function hostStart() {
   if ((H.st.map | 0) !== curMap) applyMap(H.st.map | 0);   // 工作點要照選定的地圖來分配
   const w = Math.min(H.st.w, n >= 7 ? 2 : 1);
   const order = shuffle(ids.map((_, i) => i)), wolves = new Set(order.slice(0, w));
-  H.gn++; H.ro = ids;
+  H.gn++; H.ro = ids; H.lg = null; hs.log = []; hs.t0 = performance.now() + 11000; hs.nm = ids.map(nameOfId); hs.cl = ids.map(id => { const q = pubOf(id); return q ? q.c : 11; });
   H.wf = ids.map((_, i) => wolves.has(i) ? '1' : '0').join('');
   H.dd = '0'.repeat(n); H.lf = '0'.repeat(n);
   // 特殊玩法：從村民裡挑一位當檢驗官／白癡／義警
@@ -4495,7 +4535,7 @@ function hostStart() {
   }
   hostDirty = true; return true;
 }
-function hostToLobby() { if (!H) return; H.ph = 0; H.bd = []; H.mt = null; H.rs = null; H.win = 0; H.lo = 0; H.al = { a: [], on: 0, rem: 0, lk: 1 }; for (const b of BOTS) { b.m = 0; b.path = null; b.v = null; b.ch = []; } hostDirty = true; }
+function hostToLobby() { if (!H) return; H.ph = 0; H.lg = null; H.bd = []; H.mt = null; H.rs = null; H.win = 0; H.lo = 0; H.al = { a: [], on: 0, rem: 0, lk: 1 }; for (const b of BOTS) { b.m = 0; b.path = null; b.v = null; b.ch = []; } hostDirty = true; }
 
 function hostKill(kid, vid) {
   const ki = H.ro.indexOf(kid), vi = H.ro.indexOf(vid);
@@ -4506,12 +4546,12 @@ function hostKill(kid, vid) {
   if (H.st.gm === 5 && vi === H.sp) {   // 雙面人
     if (H.tf.s === 1) return false;   // 狼人以為他已經死了，不能再刀
     if (H.tf.s === 0) {   // 第一刀：其實沒死。只有狼人的畫面上他倒下；他自己和其他村民什麼都看不到，所以也沒有目擊者
-      H.tf = { s: 1, x: Math.round(vp.x), y: Math.round(vp.y), k: ki }; hostDirty = true; return true;
+      H.tf = { s: 1, x: Math.round(vp.x), y: Math.round(vp.y), k: ki }; logEv('f', ki, vi); hostDirty = true; return true;
     }
     H.tf = { s: 3, x: 0, y: 0, k: ki };   // 第二刀：真的死。動手的狼人，襲擊和吹燈的冷卻馬上歸零
     const kb = botById(kid); if (kb) kb.tfHit = 1;
   }
-  H.dd = setFlag(H.dd, vi); H.bd.push([vi, Math.round(vp.x), Math.round(vp.y)]);
+  H.dd = setFlag(H.dd, vi); H.bd.push([vi, Math.round(vp.x), Math.round(vp.y)]); logEv('k', ki, vi);
   for (const b of BOTS) {
     const bi = H.ro.indexOf(b.id);
     if (bi < 0 || bi === vi || bi === ki || !aliveIdx(bi) || H.wf[bi] === '1') continue;
@@ -4540,7 +4580,7 @@ function hostAltarPlace(id) {
 function hostAltarStart(id) {
   const i = H.ro.indexOf(id), al = H.al;
   if (H.ph !== 2 || i < 0 || H.wf[i] !== '1' || !aliveIdx(i) || al.on || al.lk || !al.a.length || H.lo) return false;
-  H.al = { a: al.a, on: 1, rem: H.st.at || 40, lk: 0 }; hs.alTake = {}; for (const b of BOTS) { b.alK = -1; b.alW = 0; }
+  H.al = { a: al.a, on: 1, rem: H.st.at || 40, lk: 0 }; logEv('a', i); hs.alTake = {}; for (const b of BOTS) { b.alK = -1; b.alW = 0; }
   hostDirty = true; return true;
 }
 function hostAltarSolve(id, k) {
@@ -4590,7 +4630,7 @@ function hostReport(rid, bid) {
   else { if (hs.em[rid] || performance.now() < (hs.bellAt || 0)) return false; hs.em[rid] = 1; }   // 敲鐘：一人一次，冷卻中不行
   const rv = H.st.gm === 5 && H.tf.s === 1 ? 1 : 0;   // 雙面人在這場會議揭曉：大家都看到他掉了一命
   if (rv) H.tf = { s: 2, x: 0, y: 0, k: H.tf.k };
-  hs.meetNo++; H.mt = { no: hs.meetNo, by: ri, body: bi, fk, tf: rv }; H.rem = H.st.mt; H.ph = 3; H.rs = null;
+  hs.meetNo++; logEv('m', ri, bi); H.mt = { no: hs.meetNo, by: ri, body: bi, fk, tf: rv }; H.rem = H.st.mt; H.ph = 3; H.rs = null;
   hostLightsOn();   // 開會時燈自動恢復
   botsMeetInit(); H.bd = []; hostDirty = true; return true;
 }
@@ -4612,7 +4652,7 @@ function hostHunt(id, tid) {
   if (H.ph !== 6 || !H.hu || H.hu.t !== -2 || H.ro.indexOf(id) !== H.hu.by) return false;
   let t = -1;
   if (tid && tid !== '-') { t = H.ro.indexOf(tid); if (t < 0 || t === H.hu.by || !aliveIdx(t)) return false; }
-  H.hu = { by: H.hu.by, t }; H.rem = HUNT_SHOW; hostDirty = true;
+  H.hu = { by: H.hu.by, t }; logEv('h', H.hu.by, t); H.rem = HUNT_SHOW; hostDirty = true;
   if (t >= 0) { H.dd = setFlag(H.dd, t); hs.huWolf = H.wf[t] === '1'; }
   return true;
 }
@@ -4641,7 +4681,7 @@ function hostResolve() {
   // 放逐的漫畫（最後是票數）大約 14 秒；沒人被放逐是另一組四格加票數，約 9 秒。播完直接進下一個階段：分出勝負就結算，沒有就繼續
   hs.foolOut = ej >= 0 && H.st.gm === 2 && ej === H.sp && !H.su;
   hs.hunt = ej >= 0 && H.st.gm === 4 && ej === H.sp;   // 獵人被放逐：漫畫播完之後輪到他決定要不要開槍
-  H.rs = { ej, tie: tie ? 1 : 0, sk: skip, vt }; H.ph = 4; H.rem = ej >= 0 ? EJ_HOST : NONE_HOST; hostDirty = true;
+  logEv('v', ej, tie ? 1 : 0, skip, vt); H.rs = { ej, tie: tie ? 1 : 0, sk: skip, vt }; H.ph = 4; H.rem = ej >= 0 ? EJ_HOST : NONE_HOST; hostDirty = true;
 }
 // ===== 特殊玩法 =====
 // 檢驗官：一局一次，靠近一位玩家查出他是不是狼人（結果只有檢驗官自己看得到）
@@ -4650,7 +4690,7 @@ function hostInspect(id, tid) {
   if (inSewer(posOf(tid))) return false;
   if (H.ph !== 2 || H.st.gm !== 1 || i < 0 || i !== H.sp || H.su || ti < 0 || ti === i || !aliveIdx(i) || !aliveIdx(ti)) return false;
   const a = posOf(id), b = posOf(tid); if (!a || !b || dist(a.x, a.y, b.x, b.y) > inspRangeOf(H.st) * 1.8) return false;
-  H.su = 1; H.it = ti; hostDirty = true;
+  H.su = 1; H.it = ti; logEv('i', i, ti); hostDirty = true;
   const bot = BOTS.find(x => x.id === id); if (bot && H.wf[ti] === '1') bot.know = tid;
   return true;
 }
@@ -4660,7 +4700,7 @@ function hostExecute(id, tid) {
   if (inSewer(posOf(tid))) return false;
   if (H.ph !== 2 || H.st.gm !== 3 || i < 0 || i !== H.sp || H.su || ti < 0 || ti === i || !aliveIdx(i) || !aliveIdx(ti) || H.al.on) return false;
   const a = posOf(id), b = posOf(tid); if (!a || !b || dist(a.x, a.y, b.x, b.y) > execRangeOf(H.st) * 2.6) return false;
-  H.su = 1; H.it = ti; hostDirty = true;
+  H.su = 1; H.it = ti; logEv('x', i, ti); hostDirty = true;
   if (H.wf[ti] === '1') { H.dd = setFlag(H.dd, ti); H.win = 1; H.why = 6; H.ph = 5; return true; }
   H.dd = setFlag(H.dd, i); H.bd.push([i, Math.round(a.x), Math.round(a.y)]);   // 處決錯人：義警自己倒在原地（別人可以發現、舉報）
   hostWin(); return true;
@@ -4809,7 +4849,7 @@ function hostLeaves() {
   for (let i = 0; i < H.ro.length; i++) {
     const id = H.ro[i]; if (id === ME.id || isBotId(id) || H.lf[i] === '1') continue;
     if (players.has(id)) hs.absent[id] = 0;
-    else { hs.absent[id] = (hs.absent[id] || 0) + 1; if (hs.absent[id] >= 25) { H.lf = setFlag(H.lf, i); hostDirty = true; } }
+    else { hs.absent[id] = (hs.absent[id] || 0) + 1; if (hs.absent[id] >= 25) { H.lf = setFlag(H.lf, i); logEv('l', i); hostDirty = true; } }
   }
 }
 function hostIntents() {
@@ -4833,7 +4873,7 @@ function hostIntents() {
   }
 }
 // 只把有變動的部分送出去，省流量
-const H_KEYS = ['gn', 'ph', 'st', 'ro', 'wf', 'sp', 'su', 'it', 'tf', 'dd', 'lf', 'ta', 'ga', 'lo', 'al', 'bd', 'mt', 'rs', 'hu', 'pg', 'win', 'why', 'rem', 'tr'];
+const H_KEYS = ['gn', 'ph', 'st', 'ro', 'wf', 'sp', 'su', 'it', 'tf', 'dd', 'lf', 'ta', 'ga', 'lo', 'al', 'bd', 'mt', 'rs', 'hu', 'pg', 'win', 'why', 'rem', 'tr', 'lg'];
 let pubTick = 0;
 function hostPublish() {
   if (!Net.on || !H) return;
@@ -4889,6 +4929,7 @@ function hostTick(dt) {
       if (H.hu.t === -2 && H.rem <= 0) hostHunt(hid, '-');   // 時間到：當作不開槍
     } else if (H.rem <= 0) { if (!hostWin()) hostBackToPlay(now); hs.huWolf = false; hostDirty = true; }
   }
+  if (H.ph === 5 && !H.lg) H.lg = hostReportCard();   // 第 62 版：分出勝負的那一刻，把戰報跟結果一起送出去
   hostDirty = false;
   hostPublish();
 }
@@ -5136,7 +5177,7 @@ function normG(h) {
     tf: h.tf && typeof h.tf === 'object' ? { s: h.tf.s | 0, x: h.tf.x | 0, y: h.tf.y | 0, k: h.tf.k == null ? -1 : h.tf.k | 0 } : { s: 0, x: 0, y: 0, k: -1 },   // 第 61 版：雙面人的狀態
     rs: rs && typeof rs === 'object' ? { ej: rs.ej == null ? -1 : rs.ej | 0, tie: rs.tie | 0, sk: rs.sk | 0, vt: arr(rs.vt) } : null,
     hu: h.hu && typeof h.hu === 'object' ? { by: h.hu.by | 0, t: h.hu.t == null ? -2 : h.hu.t | 0 } : null,   // 獵人開槍：by 獵人、t 打中誰（-2 還在想、-1 不開槍）
-    pg: Array.isArray(h.pg) ? h.pg : [0, 0], win: h.win | 0, why: h.why | 0, rem: h.rem | 0, tr: h.tr | 0   // tr（第 56 版）：捷運站的列車開到第幾班
+    pg: Array.isArray(h.pg) ? h.pg : [0, 0], win: h.win | 0, why: h.why | 0, rem: h.rem | 0, tr: h.tr | 0, lg: h.lg && typeof h.lg === 'object' ? { e: arr(h.lg.e).filter(Array.isArray), n: arr(h.lg.n), c: arr(h.lg.c), tk: arr(h.lg.tk), t: h.lg.t | 0 } : null   // tr（第 56 版）：捷運站的列車開到第幾班
   };
 }
 function mergeBots(b, bp) {
@@ -7273,6 +7314,7 @@ function uiTick(now) {
     const w = $('wipe'); if (w) { w.classList.remove('go'); void w.offsetWidth; w.classList.add('go'); }
   }
   // 第 49 版：生死簿開著的時候有人死了就重畫；離開遊戲畫面、或狼人變成鬼魂時，把生死簿／下水道的面板關掉
+  if (mode !== 'end' && document.body.classList.contains('rep-open')) closeReport();
   if (taskState && taskState.ledger) { if (mode !== 'play') closeTask(); else if (taskState.sig !== ledgerSig()) ledgerFill(); }
   sewerNav(mode);
   if (mode === 'home') return;
@@ -7951,14 +7993,57 @@ function renderEnd() {
   $('endTitle').textContent = G.win === 1 ? '村民獲勝' : G.win === 3 ? '白癡獲勝' : '狼人獲勝';
   $('endWhy').textContent = G.why === 7 ? '獵人開槍帶走了最後一隻狼人。' : G.why === 1 ? '全村的工作都做完了，天亮了。' : G.why === 2 ? '狼人全都被放逐了。' : G.why === 5 ? '白癡被大家投票放逐，正合他的意。' : G.why === 6 ? '義警處決了狼人' + (G.it >= 0 ? ' ' + nameIdx(G.it) : '') + '。' : G.why === 4 ? '祭壇沒有在時間內解除，狼王降臨了。' : '剩下的村民已經擋不住狼人。';
   const ul = $('endRoster'); ul.textContent = '';
+  const lg = G.lg, kills = {}; if (lg) for (const e of lg.e) if (e[0] === 'k') kills[e[2]] = (kills[e[2]] | 0) + 1;
   for (let i = 0; i < G.ro.length; i++) {
     const li = el('li'), w = G.wf[i] === '1', out = G.dd[i] === '1' || G.lf[i] === '1';
     li.appendChild(avatarCanvas(colorIdx(i), out)); li.appendChild(el('span', '', nameIdx(i) + (G.ro[i] === ME.id ? '（你）' : '')));
-    li.appendChild(el('span', 'r' + (w ? ' w' : ''), (w ? '狼人' : i === G.sp && G.st.gm ? MODES[G.st.gm] : '村民') + (G.lf[i] === '1' ? '・離線' : out ? '・出局' : '')));
+    // 第 62 版：名單上順便寫每個人的成績——狼人襲擊了幾次、村民做完幾項工作
+    const tk = lg && Array.isArray(lg.tk[i]) ? lg.tk[i] : null, st = !lg ? '' : w ? '・襲擊 ' + (kills[i] | 0) + ' 次' : tk && tk[1] ? '・工作 ' + (tk[0] | 0) + '/' + (tk[1] | 0) : '';
+    li.appendChild(el('span', 'r' + (w ? ' w' : ''), (w ? '狼人' : i === G.sp && G.st.gm ? MODES[G.st.gm] : '村民') + st + (G.lf[i] === '1' ? '・離線' : out ? '・出局' : '')));
     ul.appendChild(li);
   }
+  $('btnWarLog').hidden = !lg; sig.endlg = endSig();
+  if (document.body.classList.contains('rep-open')) reportFill();
 }
-function renderEndButtons() { $('btnAgain').hidden = !isHost; $('btnToLobby').hidden = !isHost; $('endWait').hidden = isHost; }
+function endSig() { return G.gn + '|' + (G.lg ? G.lg.e.length + ':' + G.lg.t : '-'); }
+function renderEndButtons() { $('btnAgain').hidden = !isHost; $('btnToLobby').hidden = !isHost; $('endWait').hidden = isHost; if (sig.endlg !== endSig()) renderEnd(); }
+// ----- 第 62 版　結算戰報：照時間列出誰襲擊了誰、誰召集開會、每一輪大家投給誰 -----
+function repTime(t) { t = Math.max(0, t | 0); return Math.floor(t / 60) + ':' + String(t % 60).padStart(2, '0'); }
+function reportFill() {
+  const lg = G && G.lg, ol = $('repList'); ol.textContent = ''; if (!lg) return;
+  const nm = i => { const c = lg.c[i], b = el('b', '', typeof lg.n[i] === 'string' ? lg.n[i] : nameIdx(i)); b.style.color = (COLORS[c] || COLORS[colorIdx(i)] || COLORS[11])[1]; if (G.wf[i] === '1') b.appendChild(el('i', '', '狼')); return b; };
+  const row = (cls, t, ic, parts, sub) => {
+    const li = el('li', cls), bd = el('div'); li.appendChild(el('time', '', t == null ? '' : repTime(t))); li.appendChild(el('span', 'ic', ic));
+    for (const x of parts) bd.appendChild(typeof x === 'number' ? nm(x) : document.createTextNode(x));
+    if (sub) bd.appendChild(sub); li.appendChild(bd); ol.appendChild(li);
+  };
+  let meets = 0, kills = 0;
+  for (const e of lg.e) {
+    const k = e[0], t = e[1], a = e[2] | 0, b = e[3] == null ? -1 : e[3] | 0;
+    if (k === 'k') { kills++; row('k', t, '🔪', [a, ' 襲擊了 ', b]); }
+    else if (k === 'f') row('k', t, '🎭', [a, ' 襲擊了雙面人 ', b, '，但他還有一條命']);
+    else if (k === 'm') { meets++; row('', t, '🔔', b >= 0 ? [a, ' 發現 ', b, ' 倒下，召集開會'] : [a, ' 敲鐘召集開會']); }
+    else if (k === 'v') {
+      const ej = e[2] == null ? -1 : e[2] | 0, by = {}, sk = [];
+      for (const v of arr(e[5])) { if (!Array.isArray(v)) continue; if (v[1] >= 0) (by[v[1]] || (by[v[1]] = [])).push(v[0]); else sk.push(v[0]); }
+      const sub = el('small'), names = l => l.map(i => typeof lg.n[i] === 'string' ? lg.n[i] : nameIdx(i)).join('、');
+      Object.keys(by).sort((x, y) => by[y].length - by[x].length).forEach(i => sub.appendChild(el('div', '', '投給 ' + names([+i]) + '（' + by[i].length + ' 票）：' + names(by[i]))));
+      if (sk.length) sub.appendChild(el('div', '', '棄票（' + sk.length + ' 票）：' + names(sk)));
+      if (!sub.childNodes.length) sub.appendChild(el('div', '', '沒有人投票'));
+      row('v', t, '🗳️', ej >= 0 ? [ej, ' 被投票放逐'] : ['沒有人被放逐（' + (e[3] ? '最高票平手' : '票數不夠') + '）'], sub);
+    }
+    else if (k === 'h') row('k', t, '🔫', b >= 0 ? ['獵人 ', a, ' 開槍帶走了 ', b] : ['獵人 ', a, ' 沒有開槍']);
+    else if (k === 'i') row('', t, '🔍', ['檢驗官 ', a, ' 檢驗了 ', b, G.wf[b] === '1' ? '：是狼人' : '：不是狼人']);
+    else if (k === 'x') row('k', t, '⚔️', G.wf[b] === '1' ? ['義警 ', a, ' 處決了 ', b] : ['義警 ', a, ' 處決錯了人（', b, '），自己倒下']);
+    else if (k === 'a') row('', t, '🔮', [a, ' 啟動了祭壇']);
+    else if (k === 'l') row('', t, '📴', [a, ' 離線了']);
+  }
+  if (!lg.e.length) ol.appendChild(el('li', 'none', '這一局還沒發生什麼事就結束了。'));
+  row('fin', lg.t, '🏁', [$('endTitle').textContent + '：' + $('endWhy').textContent]);
+  $('repSum').textContent = '全長 ' + repTime(lg.t) + '・開會 ' + meets + ' 次・襲擊 ' + kills + ' 次';
+}
+function openReport() { if (!G || !G.lg) return; reportFill(); document.body.classList.add('rep-open'); $('repList').scrollTop = 0; sfx('click'); }
+function closeReport() { document.body.classList.remove('rep-open'); }
 
 // 地圖上的記號：任務／蠟燭／祭壇（狼人放好但還沒啟動的祭壇，只有狼人看得到）
 // box = 小地圖目前顯示的範圍；目標在範圍外時，記號會貼在邊緣當作方向提示
@@ -8031,6 +8116,8 @@ function bindUI() {
   $('btnStart').addEventListener('click', () => { if (isHost) hostStart(); });
   $('btnLeave').addEventListener('click', () => { sig.lhint = ''; leaveRoom(); });
   $('btnEndLeave').addEventListener('click', () => leaveRoom());
+  $('btnWarLog').addEventListener('click', openReport); $('btnRepClose').addEventListener('click', closeReport);
+  $('report').addEventListener('click', e => { if (e.target === $('report')) closeReport(); });
   $('btnMenuLeave').addEventListener('click', () => leaveRoom());
   $('btnAgain').addEventListener('click', () => { if (isHost && !hostStart()) hostToLobby(); });
   $('btnToLobby').addEventListener('click', () => { if (isHost) hostToLobby(); });
